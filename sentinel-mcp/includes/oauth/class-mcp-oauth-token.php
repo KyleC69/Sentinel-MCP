@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OAuth 2.1 Token Endpoint.
  *
@@ -10,19 +11,21 @@
  * @copyright  2026 José Conti
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
- */
-
  * @author     Kyle L Crowder
  * @copyright  2026 Kyle L Crowder
  * @link       https://github.com/KyleC69/Sentinel-MCP
-defined( 'ABSPATH' ) || exit;
+ **/
 
-if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
+
+defined('ABSPATH') || exit;
+
+if (! class_exists('SENTINEL_OAuth_Token')) {
 
 	/**
 	 * Token endpoint handler for the OAuth 2.1 subsystem.
 	 */
-	class MCPCOMAL_OAuth_Token {
+	class SENTINEL_OAuth_Token
+	{
 
 		/**
 		 * Main dispatcher -- routes by grant_type.
@@ -30,16 +33,17 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 		 * @param WP_REST_Request $request The incoming REST request.
 		 * @return WP_REST_Response|WP_Error
 		 */
-		public static function handle( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-			$grant_type = sanitize_text_field( $request->get_param( 'grant_type' ) ?? '' );
+		public static function handle(WP_REST_Request $request): WP_REST_Response|WP_Error
+		{
+			$grant_type = sanitize_text_field($request->get_param('grant_type') ?? '');
 
 			// Opportunistic cleanup.
-			MCPCOMAL_OAuth_DB::cleanup_expired_codes();
+			SENTINEL_OAuth_DB::cleanup_expired_codes();
 
-			return match ( $grant_type ) {
-				'authorization_code' => self::handle_authorization_code( $request ),
-				'refresh_token'      => self::handle_refresh_token( $request ),
-				default              => self::oauth_error( 'unsupported_grant_type', 'grant_type must be "authorization_code" or "refresh_token".' ),
+			return match ($grant_type) {
+				'authorization_code' => self::handle_authorization_code($request),
+				'refresh_token'      => self::handle_refresh_token($request),
+				default              => self::oauth_error('unsupported_grant_type', 'grant_type must be "authorization_code" or "refresh_token".'),
 			};
 		}
 
@@ -49,56 +53,57 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 		 * @param WP_REST_Request $request The incoming REST request.
 		 * @return WP_REST_Response|WP_Error
 		 */
-		private static function handle_authorization_code( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-			$code          = sanitize_text_field( $request->get_param( 'code' ) ?? '' );
-			$redirect_uri  = esc_url_raw( $request->get_param( 'redirect_uri' ) ?? '' );
-			$client_id     = sanitize_text_field( $request->get_param( 'client_id' ) ?? '' );
-			$code_verifier = sanitize_text_field( $request->get_param( 'code_verifier' ) ?? '' );
+		private static function handle_authorization_code(WP_REST_Request $request): WP_REST_Response|WP_Error
+		{
+			$code          = sanitize_text_field($request->get_param('code') ?? '');
+			$redirect_uri  = esc_url_raw($request->get_param('redirect_uri') ?? '');
+			$client_id     = sanitize_text_field($request->get_param('client_id') ?? '');
+			$code_verifier = sanitize_text_field($request->get_param('code_verifier') ?? '');
 
-			if ( empty( $code ) || empty( $client_id ) || empty( $code_verifier ) ) {
-				return self::oauth_error( 'invalid_request', 'Missing required parameters: code, client_id, code_verifier.' );
+			if (empty($code) || empty($client_id) || empty($code_verifier)) {
+				return self::oauth_error('invalid_request', 'Missing required parameters: code, client_id, code_verifier.');
 			}
 
 			// Generic error message per RFC 6749 to prevent state enumeration.
 			$grant_error = 'The provided authorization grant is invalid, expired, or revoked.';
 
 			// 1. Look up the authorization code.
-			$code_row = MCPCOMAL_OAuth_DB::get_code( $code );
-			if ( ! $code_row ) {
-				return self::oauth_error( 'invalid_grant', $grant_error );
+			$code_row = SENTINEL_OAuth_DB::get_code($code);
+			if (! $code_row) {
+				return self::oauth_error('invalid_grant', $grant_error);
 			}
 
 			// 2. If already used -- revoke all tokens for this client (RFC 6749 Section 4.1.2).
-			if ( 1 === (int) $code_row['used'] ) {
-				MCPCOMAL_OAuth_DB::revoke_all_for_client( $code_row['client_id'] );
-				return self::oauth_error( 'invalid_grant', $grant_error );
+			if (1 === (int) $code_row['used']) {
+				SENTINEL_OAuth_DB::revoke_all_for_client($code_row['client_id']);
+				return self::oauth_error('invalid_grant', $grant_error);
 			}
 
 			// 3. Check expiration BEFORE marking as used.
-			if ( strtotime( $code_row['expires_at'] ) < time() ) {
-				return self::oauth_error( 'invalid_grant', $grant_error );
+			if (strtotime($code_row['expires_at']) < time()) {
+				return self::oauth_error('invalid_grant', $grant_error);
 			}
 
 			// 4. Mark as used IMMEDIATELY (single-use enforcement).
-			MCPCOMAL_OAuth_DB::mark_code_used( $code );
+			SENTINEL_OAuth_DB::mark_code_used($code);
 
 			// 5. Verify client_id matches (timing-safe comparison).
-			if ( ! hash_equals( $code_row['client_id'], $client_id ) ) {
-				return self::oauth_error( 'invalid_grant', $grant_error );
+			if (! hash_equals($code_row['client_id'], $client_id)) {
+				return self::oauth_error('invalid_grant', $grant_error);
 			}
 
 			// 6. Verify redirect_uri matches (timing-safe comparison).
-			if ( ! hash_equals( $code_row['redirect_uri'], $redirect_uri ) ) {
-				return self::oauth_error( 'invalid_grant', $grant_error );
+			if (! hash_equals($code_row['redirect_uri'], $redirect_uri)) {
+				return self::oauth_error('invalid_grant', $grant_error);
 			}
 
 			// 7. PKCE verification (already timing-safe via hash_equals internally).
-			if ( ! self::verify_pkce( $code_verifier, $code_row['code_challenge'], $code_row['code_challenge_method'] ) ) {
-				return self::oauth_error( 'invalid_grant', $grant_error );
+			if (! self::verify_pkce($code_verifier, $code_row['code_challenge'], $code_row['code_challenge_method'])) {
+				return self::oauth_error('invalid_grant', $grant_error);
 			}
 
 			// 8. Generate tokens.
-			$token_data = MCPCOMAL_OAuth_DB::insert_token(
+			$token_data = SENTINEL_OAuth_DB::insert_token(
 				array(
 					'client_id' => $client_id,
 					'user_id'   => (int) $code_row['user_id'],
@@ -106,8 +111,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 				)
 			);
 
-			if ( ! $token_data ) {
-				return self::oauth_error( 'server_error', 'Could not generate tokens.', 500 );
+			if (! $token_data) {
+				return self::oauth_error('server_error', 'Could not generate tokens.', 500);
 			}
 
 			return new WP_REST_Response(
@@ -128,31 +133,32 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 		 * @param WP_REST_Request $request The incoming REST request.
 		 * @return WP_REST_Response|WP_Error
 		 */
-		private static function handle_refresh_token( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-			$refresh_token = sanitize_text_field( $request->get_param( 'refresh_token' ) ?? '' );
-			$client_id     = sanitize_text_field( $request->get_param( 'client_id' ) ?? '' );
+		private static function handle_refresh_token(WP_REST_Request $request): WP_REST_Response|WP_Error
+		{
+			$refresh_token = sanitize_text_field($request->get_param('refresh_token') ?? '');
+			$client_id     = sanitize_text_field($request->get_param('client_id') ?? '');
 
-			if ( empty( $refresh_token ) || empty( $client_id ) ) {
-				return self::oauth_error( 'invalid_request', 'Missing required parameters: refresh_token, client_id.' );
+			if (empty($refresh_token) || empty($client_id)) {
+				return self::oauth_error('invalid_request', 'Missing required parameters: refresh_token, client_id.');
 			}
 
-			$refresh_hash = MCPCOMAL_OAuth_DB::hash_token( $refresh_token );
-			$token_row    = MCPCOMAL_OAuth_DB::get_token_by_refresh_hash( $refresh_hash );
+			$refresh_hash = SENTINEL_OAuth_DB::hash_token($refresh_token);
+			$token_row    = SENTINEL_OAuth_DB::get_token_by_refresh_hash($refresh_hash);
 
-			if ( ! $token_row ) {
-				return self::oauth_error( 'invalid_grant', 'The provided refresh token is invalid, expired, or revoked.' );
+			if (! $token_row) {
+				return self::oauth_error('invalid_grant', 'The provided refresh token is invalid, expired, or revoked.');
 			}
 
 			// Timing-safe comparison to prevent side-channel attacks.
-			if ( ! hash_equals( $token_row['client_id'], $client_id ) ) {
-				return self::oauth_error( 'invalid_grant', 'The provided refresh token is invalid, expired, or revoked.' );
+			if (! hash_equals($token_row['client_id'], $client_id)) {
+				return self::oauth_error('invalid_grant', 'The provided refresh token is invalid, expired, or revoked.');
 			}
 
 			// Revoke old token pair (rotation).
-			MCPCOMAL_OAuth_DB::revoke_token_by_refresh_hash( $refresh_hash );
+			SENTINEL_OAuth_DB::revoke_token_by_refresh_hash($refresh_hash);
 
 			// Issue new token pair.
-			$new_tokens = MCPCOMAL_OAuth_DB::insert_token(
+			$new_tokens = SENTINEL_OAuth_DB::insert_token(
 				array(
 					'client_id' => $client_id,
 					'user_id'   => (int) $token_row['user_id'],
@@ -160,8 +166,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 				)
 			);
 
-			if ( ! $new_tokens ) {
-				return self::oauth_error( 'server_error', 'Could not generate tokens.', 500 );
+			if (! $new_tokens) {
+				return self::oauth_error('server_error', 'Could not generate tokens.', 500);
 			}
 
 			return new WP_REST_Response(
@@ -182,28 +188,29 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 		 * @param WP_REST_Request $request The incoming REST request.
 		 * @return WP_REST_Response
 		 */
-		public static function handle_revoke( WP_REST_Request $request ): WP_REST_Response {
-			$token      = sanitize_text_field( $request->get_param( 'token' ) ?? '' );
-			$token_hint = sanitize_text_field( $request->get_param( 'token_type_hint' ) ?? '' );
+		public static function handle_revoke(WP_REST_Request $request): WP_REST_Response
+		{
+			$token      = sanitize_text_field($request->get_param('token') ?? '');
+			$token_hint = sanitize_text_field($request->get_param('token_type_hint') ?? '');
 
-			if ( empty( $token ) ) {
+			if (empty($token)) {
 				// RFC 7009: always return 200 even for invalid/empty tokens.
-				return new WP_REST_Response( null, 200 );
+				return new WP_REST_Response(null, 200);
 			}
 
-			$hash = MCPCOMAL_OAuth_DB::hash_token( $token );
+			$hash = SENTINEL_OAuth_DB::hash_token($token);
 
-			if ( 'refresh_token' === $token_hint ) {
-				MCPCOMAL_OAuth_DB::revoke_token_by_refresh_hash( $hash );
+			if ('refresh_token' === $token_hint) {
+				SENTINEL_OAuth_DB::revoke_token_by_refresh_hash($hash);
 			} else {
 				// Try access token first, then refresh.
-				$revoked = MCPCOMAL_OAuth_DB::revoke_token_by_access_hash( $hash );
-				if ( ! $revoked ) {
-					MCPCOMAL_OAuth_DB::revoke_token_by_refresh_hash( $hash );
+				$revoked = SENTINEL_OAuth_DB::revoke_token_by_access_hash($hash);
+				if (! $revoked) {
+					SENTINEL_OAuth_DB::revoke_token_by_refresh_hash($hash);
 				}
 			}
 
-			return new WP_REST_Response( null, 200 );
+			return new WP_REST_Response(null, 200);
 		}
 
 		/**
@@ -217,22 +224,23 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 		 * @param string $method           The code challenge method (must be S256).
 		 * @return bool
 		 */
-		public static function verify_pkce( string $code_verifier, string $stored_challenge, string $method ): bool {
-			if ( 'S256' !== $method ) {
+		public static function verify_pkce(string $code_verifier, string $stored_challenge, string $method): bool
+		{
+			if ('S256' !== $method) {
 				return false;
 			}
 
 			$computed_challenge = rtrim(
 				strtr(
-				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Required for PKCE S256 challenge computation per RFC 7636.
-					base64_encode( hash( 'sha256', $code_verifier, true ) ),
+					// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Required for PKCE S256 challenge computation per RFC 7636.
+					base64_encode(hash('sha256', $code_verifier, true)),
 					'+/',
 					'-_'
 				),
 				'='
 			);
 
-			return hash_equals( $stored_challenge, $computed_challenge );
+			return hash_equals($stored_challenge, $computed_challenge);
 		}
 
 		/**
@@ -243,9 +251,9 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Token' ) ) {
 		 * @param int    $status      The HTTP status code.
 		 * @return WP_Error
 		 */
-		private static function oauth_error( string $code, string $description, int $status = 400 ): WP_Error {
-			return new WP_Error( $code, $description, array( 'status' => $status ) );
+		private static function oauth_error(string $code, string $description, int $status = 400): WP_Error
+		{
+			return new WP_Error($code, $description, array('status' => $status));
 		}
 	}
-
 }

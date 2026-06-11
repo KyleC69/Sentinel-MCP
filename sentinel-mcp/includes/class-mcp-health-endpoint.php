@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Public /health REST endpoint (Sprint 3.3).
  *
@@ -12,33 +13,36 @@
  * @link       https://mcpwp.com/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'SENTINEL_Health_Endpoint' ) ) {
+if (! class_exists('SENTINEL_Health_Endpoint')) {
 
 	/**
 	 * Registers /sentinel/v1/health.
 	 */
-	class SENTINEL_Health_Endpoint {
+	class SENTINEL_Health_Endpoint
+	{
 
 		/**
 		 * Wire up the rest_api_init hook.
 		 */
-		public static function init(): void {
-			add_action( 'rest_api_init', array( __CLASS__, 'register_routes' ) );
+		public static function init(): void
+		{
+			add_action('rest_api_init', array(__CLASS__, 'register_routes'));
 		}
 
 		/**
 		 * Register the /health route.
 		 */
-		public static function register_routes(): void {
+		public static function register_routes(): void
+		{
 			register_rest_route(
 				'sentinel/v1',
 				'/health',
 				array(
 					'methods'             => 'GET',
 					'permission_callback' => '__return_true',
-					'callback'            => array( __CLASS__, 'handle' ),
+					'callback'            => array(__CLASS__, 'handle'),
 				)
 			);
 		}
@@ -46,27 +50,28 @@ if ( ! class_exists( 'SENTINEL_Health_Endpoint' ) ) {
 		/**
 		 * Build the health payload.
 		 */
-		public static function handle(): WP_REST_Response {
+		public static function handle(): WP_REST_Response
+		{
 			global $wp_version, $wpdb;
 
-			$mcp_loaded = class_exists( '\WP\MCP\Core\McpAdapter' );
+			$mcp_loaded = class_exists('\WP\MCP\Core\McpAdapter');
 
 			$oauth_tables_present = false;
-			if ( isset( $wpdb ) ) {
-				$table = $wpdb->prefix . 'mcpcomal_oauth_clients';
-				$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-				$oauth_tables_present = ( $found === $table );
+			if (isset($wpdb)) {
+				$table = $wpdb->prefix . 'sentinel_oauth_clients';
+				$found = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$oauth_tables_present = ($found === $table);
 			}
 
 			$abilities = 0;
-			if ( function_exists( 'wp_get_abilities' ) ) {
+			if (function_exists('wp_get_abilities')) {
 				$all = wp_get_abilities();
-				if ( is_array( $all ) ) {
+				if (is_array($all)) {
 					$abilities = count(
 						array_filter(
-							array_keys( $all ),
-							function ( $slug ) {
-								return 0 === strpos( (string) $slug, 'sentinel/' );
+							array_keys($all),
+							function ($slug) {
+								return 0 === strpos((string) $slug, 'sentinel/');
 							}
 						)
 					);
@@ -76,7 +81,7 @@ if ( ! class_exists( 'SENTINEL_Health_Endpoint' ) ) {
 			return new WP_REST_Response(
 				array(
 					'status'               => 'ok',
-					'plugin_version'       => defined( 'SENTINEL_VERSION' ) ? SENTINEL_VERSION : '',
+					'plugin_version'       => defined('SENTINEL_VERSION') ? SENTINEL_VERSION : '',
 					'wp_version'           => (string) $wp_version,
 					'php_version'          => PHP_VERSION,
 					'mcp_adapter_loaded'   => $mcp_loaded,

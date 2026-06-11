@@ -5,11 +5,11 @@
  * Creates tables and provides CRUD operations for
  * OAuth clients, authorization codes, and tokens.
  *
- * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @package    SENTINEL-MCP
+ * @author     Kyle L Crowder
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://plugins.joseconti.com/product/sentinel-mcp/
+ * @link       https://github.com/kylec69/sentinel-mcp/
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -21,7 +21,7 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 	 */
 	class MCPCOMAL_OAuth_DB {
 
-		const DB_VERSION     = '1.1.0';
+		const DB_VERSION     = '1.0.0';
 		const OPT_DB_VERSION = 'mcpcomal_oauth_db_version';
 
 		/**

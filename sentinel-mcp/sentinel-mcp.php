@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Sentinel-MCP
  * Plugin URI:  https://wordpress.org/plugins/sentinel-mcp/
@@ -21,7 +22,7 @@
  * @link       https://github.com/KyleC69/Sentinel-MCP
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Coexistence check: if Premium is active, Lite yields completely.
@@ -30,54 +31,53 @@ defined( 'ABSPATH' ) || exit;
  * loads BEFORE Premium (sentinel-mcp). At this point the
  * MCM_IS_PREMIUM constant won't be defined yet, so we check active_plugins directly.
  */
-$mcpcomal_active_plugins = (array) get_option( 'active_plugins', array() );
+$mcpcomal_active_plugins = (array) get_option('active_plugins', array());
 $mcpcomal_premium_files  = array(
 	'sentinel-mcp/sentinel-mcp.php',
 	'mcp-content-manager-for-wp/mcp-content-manager-for-wp.php',
 );
 $mcpcomal_premium_active = false;
-foreach ( $mcpcomal_premium_files as $mcpcomal_premium_file ) {
-	if ( in_array( $mcpcomal_premium_file, $mcpcomal_active_plugins, true ) ) {
+foreach ($mcpcomal_premium_files as $mcpcomal_premium_file) {
+	if (in_array($mcpcomal_premium_file, $mcpcomal_active_plugins, true)) {
 		$mcpcomal_premium_active = true;
 		break;
 	}
 }
 
-if ( $mcpcomal_premium_active || ( defined( 'MCM_IS_PREMIUM' ) && MCM_IS_PREMIUM ) ) {
-	unset( $mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active );
+if ($mcpcomal_premium_active || (defined('MCM_IS_PREMIUM') && MCM_IS_PREMIUM)) {
+	unset($mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active);
 	add_action(
 		'admin_notices',
 		function () {
 			printf(
 				'<div class="notice notice-info is-dismissible" style="display:flex;align-items:center;gap:10px;padding:12px 16px;">'
-				. '<span class="dashicons dashicons-info" style="font-size:24px;color:#2271b1;"></span>'
-				. '<p style="margin:0;"><strong>Sentinel-MCP:</strong> %s</p>'
-				. '</div>',
-				esc_html__( 'The Premium version is active. You can safely deactivate the Lite version.', 'mcp-sentinel' )
+					. '<span class="dashicons dashicons-info" style="font-size:24px;color:#2271b1;"></span>'
+					. '<p style="margin:0;"><strong>Sentinel-MCP:</strong> %s</p>'
+					. '</div>',
+				esc_html__('The Premium version is active. You can safely deactivate the Lite version.', 'mcp-sentinel')
 			);
 		}
 	);
-	return;
 }
-unset( $mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active );
+unset($mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active);
 
 /**
  * Constants.
  */
-if ( ! defined( 'SENTINEL_VERSION' ) ) {
-	define( 'SENTINEL_VERSION', '1.1.0' );
+if (! defined('SENTINEL_VERSION')) {
+	define('SENTINEL_VERSION', '1.1.0');
 }
-if ( ! defined( 'SENTINEL_PATH' ) ) {
-	define( 'SENTINEL_PATH', plugin_dir_path( __FILE__ ) );
+if (! defined('SENTINEL_PATH')) {
+	define('SENTINEL_PATH', plugin_dir_path(__FILE__));
 }
-if ( ! defined( 'SENTINEL_URL' ) ) {
-	define( 'SENTINEL_URL', plugin_dir_url( __FILE__ ) );
+if (! defined('SENTINEL_URL')) {
+	define('SENTINEL_URL', plugin_dir_url(__FILE__));
 }
-if ( ! defined( 'SENTINEL_ITEM_NAME' ) ) {
-	define( 'SENTINEL_ITEM_NAME', 'sentinel-mcp' );
+if (! defined('SENTINEL_ITEM_NAME')) {
+	define('SENTINEL_ITEM_NAME', 'sentinel-mcp');
 }
-if ( ! defined( 'SENTINEL_PREFIX' ) ) {
-	define( 'SENTINEL_PREFIX', 'sentinel' );
+if (! defined('SENTINEL_PREFIX')) {
+	define('SENTINEL_PREFIX', 'sentinel');
 }
 
 /**
@@ -90,12 +90,12 @@ add_action(
 		load_plugin_textdomain(
 			'mcp-sentinel',
 			false,
-			dirname( plugin_basename( __FILE__ ) ) . '/languages/'
+			dirname(plugin_basename(__FILE__)) . '/languages/'
 		);
 	}
 );
 
-if ( ! function_exists( 'mcpcomal_debug_log' ) ) {
+if (! function_exists('mcpcomal_debug_log')) {
 	/**
 	 * Debug logging helper.
 	 *
@@ -104,15 +104,16 @@ if ( ! function_exists( 'mcpcomal_debug_log' ) ) {
 	 *
 	 * @param string $message The debug message (will be prefixed with [SENTINEL-DEBUG]).
 	 */
-	function mcpcomal_debug_log( string $message ): void {
+	function mcpcomal_debug_log(string $message): void
+	{
 		static $enabled = null;
 
-		if ( null === $enabled ) {
-			$enabled = (bool) get_option( 'mcpcomal_debug_logging', false );
+		if (null === $enabled) {
+			$enabled = (bool) get_option('mcpcomal_debug_logging', false);
 		}
 
-		if ( $enabled ) {
-			error_log( '[SENTINEL-DEBUG] ' . $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+		if ($enabled) {
+			error_log('[SENTINEL-DEBUG] ' . $message); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
 	}
 }
@@ -120,9 +121,9 @@ if ( ! function_exists( 'mcpcomal_debug_log' ) ) {
 /**
  * Autoloader.
  */
-if ( file_exists( SENTINEL_PATH . 'vendor/autoload_packages.php' ) ) {
+if (file_exists(SENTINEL_PATH . 'vendor/autoload_packages.php')) {
 	require_once SENTINEL_PATH . 'vendor/autoload_packages.php';
-} elseif ( file_exists( SENTINEL_PATH . 'vendor/autoload.php' ) ) {
+} elseif (file_exists(SENTINEL_PATH . 'vendor/autoload.php')) {
 	require_once SENTINEL_PATH . 'vendor/autoload.php';
 }
 
@@ -139,25 +140,25 @@ if ( file_exists( SENTINEL_PATH . 'vendor/autoload_packages.php' ) ) {
  * copy regardless of whether the standalone exists on disk but is inactive.
  */
 
-if ( ! defined( 'WP_MCP_DIR' ) ) {
+if (! defined('WP_MCP_DIR')) {
 	$_mcp_bundled_adapter = SENTINEL_PATH . 'vendor/wordpress/mcp-adapter/mcp-adapter.php';
-	if ( file_exists( $_mcp_bundled_adapter ) ) {
+	if (file_exists($_mcp_bundled_adapter)) {
 		// The bundled adapter ships as a Composer sub-package, so its WP\MCP\*
 		// classes are already registered in this plugin's parent autoloader
 		// (loaded above). Telling the adapter to skip its own autoloader
 		// lookup avoids the "Composer autoloader was not found" admin notice
 		// it would otherwise raise when looking for vendor/autoload.php
 		// inside the sub-package directory (which doesn't exist).
-		if ( ! defined( 'WP_MCP_AUTOLOAD' ) ) {
-			define( 'WP_MCP_AUTOLOAD', false );
+		if (! defined('WP_MCP_AUTOLOAD')) {
+			define('WP_MCP_AUTOLOAD', false);
 		}
 		require_once $_mcp_bundled_adapter;
 	}
-	unset( $_mcp_bundled_adapter );
+	unset($_mcp_bundled_adapter);
 }
 
 // Silent guard: if no source loaded the adapter, stop here without notices.
-if ( ! defined( 'WP_MCP_DIR' ) ) {
+if (! defined('WP_MCP_DIR')) {
 	return;
 }
 
@@ -277,8 +278,8 @@ require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-authorize.php';
 require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-token.php';
 require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-interceptor.php';
 require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-permissions.php';
-	// New streamlined OAuth manager.
-	require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-manager.php';
+// New streamlined OAuth manager.
+require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-manager.php';
 
 /**
  * Sprint 2.1 — Activity Log for MCP calls.
@@ -302,19 +303,19 @@ SENTINEL_Health_Endpoint::init();
 register_activation_hook(
 	__FILE__,
 	function () {
-		if ( version_compare( PHP_VERSION, '8.3', '<' ) ) {
-			deactivate_plugins( plugin_basename( __FILE__ ) );
+		if (version_compare(PHP_VERSION, '8.3', '<')) {
+			deactivate_plugins(plugin_basename(__FILE__));
 			wp_die(
 				esc_html(
 					sprintf(
 						/* translators: 1: required PHP version, 2: current PHP version */
-						__( 'Sentinel-MCP requires PHP %1$s or higher. Your server is running PHP %2$s. Please upgrade PHP and try again.', 'mcp-sentinel' ),
+						__('Sentinel-MCP requires PHP %1$s or higher. Your server is running PHP %2$s. Please upgrade PHP and try again.', 'mcp-sentinel'),
 						'8.3',
 						PHP_VERSION
 					)
 				),
-				esc_html__( 'Plugin activation error', 'mcp-sentinel' ),
-				array( 'back_link' => true )
+				esc_html__('Plugin activation error', 'mcp-sentinel'),
+				array('back_link' => true)
 			);
 		}
 
@@ -335,20 +336,20 @@ register_activation_hook(
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		$ts = wp_next_scheduled( 'mcpcomal_activity_log_purge' );
-		if ( $ts ) {
-			wp_unschedule_event( $ts, 'mcpcomal_activity_log_purge' );
+		$ts = wp_next_scheduled('mcpcomal_activity_log_purge');
+		if ($ts) {
+			wp_unschedule_event($ts, 'mcpcomal_activity_log_purge');
 		}
 	}
 );
 
-add_action( 'plugins_loaded', array( 'SENTINEL_OAuth_DB', 'maybe_upgrade' ) );
-add_action( 'plugins_loaded', array( 'SENTINEL_Chat_DB', 'maybe_upgrade' ) );
-add_action( 'plugins_loaded', array( 'SENTINEL_Activity_Log', 'maybe_upgrade' ) );
+add_action('plugins_loaded', array('SENTINEL_OAuth_DB', 'maybe_upgrade'));
+add_action('plugins_loaded', array('SENTINEL_Chat_DB', 'maybe_upgrade'));
+add_action('plugins_loaded', array('SENTINEL_Activity_Log', 'maybe_upgrade'));
 
 /**
  * Admin.
  */
-if ( is_admin() ) {
+if (is_admin()) {
 	new SENTINEL_Admin();
 }

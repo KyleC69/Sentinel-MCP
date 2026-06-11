@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OAuth 2.1 MCP Request Interceptor.
  *
@@ -13,14 +14,15 @@
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
+if (! class_exists('SENTINEL_OAuth_Interceptor')) {
 
 	/**
 	 * Validates Bearer tokens on incoming MCP REST API requests.
 	 */
-	class MCPCOMAL_OAuth_Interceptor {
+	class SENTINEL_OAuth_Interceptor
+	{
 
 		/**
 		 * Resolved OAuth context for the current REST request.
@@ -34,8 +36,9 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 		 *
 		 * @return void
 		 */
-		public static function init(): void {
-			add_filter( 'rest_authentication_errors', array( __CLASS__, 'authenticate' ), 5 );
+		public static function init(): void
+		{
+			add_filter('rest_authentication_errors', array(__CLASS__, 'authenticate'), 5);
 		}
 
 		/**
@@ -43,8 +46,9 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 		 *
 		 * Empty string when the request is not authenticated via OAuth (e.g. cookie or app password).
 		 */
-		public static function get_current_client_id(): string {
-			return isset( self::$current['client_id'] ) ? (string) self::$current['client_id'] : '';
+		public static function get_current_client_id(): string
+		{
+			return isset(self::$current['client_id']) ? (string) self::$current['client_id'] : '';
 		}
 
 		/**
@@ -52,7 +56,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 		 *
 		 * @return array{client_id?:string,user_id?:int,token_id?:int}
 		 */
-		public static function get_current_context(): array {
+		public static function get_current_context(): array
+		{
 			return self::$current;
 		}
 
@@ -62,23 +67,24 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 		 * @param WP_Error|null|true $result Existing authentication result.
 		 * @return WP_Error|null|true
 		 */
-		public static function authenticate( $result ) {
+		public static function authenticate($result)
+		{
 			// Another auth mechanism already resolved — do not interfere.
-			if ( null !== $result ) {
+			if (null !== $result) {
 				return $result;
 			}
 
-			$request_uri = isset( $_SERVER['REQUEST_URI'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
-			: '';
+			$request_uri = isset($_SERVER['REQUEST_URI'])
+				? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']))
+				: '';
 
 			// Only intercept MCP adapter namespace requests.
-			if ( false === strpos( $request_uri, '/mcp/' ) ) {
+			if (false === strpos($request_uri, '/mcp/')) {
 				return $result;
 			}
 
 			// Do NOT intercept our own OAuth endpoints.
-			if ( false !== strpos( $request_uri, '/sentinel-auth/' ) ) {
+			if (false !== strpos($request_uri, '/sentinel-auth/')) {
 				return $result;
 			}
 
@@ -86,45 +92,45 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 
 			// No Authorization header — check if user is already authenticated
 			// via other mechanisms (Application Passwords, cookie auth, etc.).
-			if ( empty( $auth_header ) ) {
-				if ( is_user_logged_in() ) {
+			if (empty($auth_header)) {
+				if (is_user_logged_in()) {
 					// User authenticated via another method (e.g., Application Passwords).
-					MCPCOMAL_OAuth_Server::send_cors_headers();
+					SENTINEL_OAuth_Server::send_cors_headers();
 					return $result;
 				}
 
-				MCPCOMAL_OAuth_Server::send_cors_headers();
+				SENTINEL_OAuth_Server::send_cors_headers();
 				header(
 					sprintf(
 						'WWW-Authenticate: Bearer resource_metadata="%s"',
-						esc_url( home_url( '/.well-known/oauth-protected-resource' ) )
+						esc_url(home_url('/.well-known/oauth-protected-resource'))
 					)
 				);
 				return new WP_Error(
 					'rest_not_logged_in',
 					'Authentication required. Use OAuth 2.1 Bearer token.',
-					array( 'status' => 401 )
+					array('status' => 401)
 				);
 			}
 
 			// Must be Bearer scheme.
-			if ( 0 !== strpos( $auth_header, 'Bearer ' ) ) {
+			if (0 !== strpos($auth_header, 'Bearer ')) {
 				return new WP_Error(
 					'rest_invalid_auth',
 					'Authorization header must use Bearer scheme.',
-					array( 'status' => 401 )
+					array('status' => 401)
 				);
 			}
 
-			$token      = substr( $auth_header, 7 );
-			$token_hash = MCPCOMAL_OAuth_DB::hash_token( $token );
-			$token_row  = MCPCOMAL_OAuth_DB::get_token_by_access_hash( $token_hash );
+			$token      = substr($auth_header, 7);
+			$token_hash = SENTINEL_OAuth_DB::hash_token($token);
+			$token_row  = SENTINEL_OAuth_DB::get_token_by_access_hash($token_hash);
 
-			if ( ! $token_row ) {
+			if (! $token_row) {
 				return new WP_Error(
 					'rest_invalid_token',
 					'Invalid or expired access token.',
-					array( 'status' => 401 )
+					array('status' => 401)
 				);
 			}
 
@@ -132,20 +138,20 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 			// wp_set_current_user() is required here to authenticate API requests
 			// via OAuth 2.1 Bearer tokens -- this is the same pattern WordPress core
 			// uses for Application Passwords (see wp-includes/user.php). The token
-			// has been validated above via MCPCOMAL_OAuth_DB. This does NOT create
+			// has been validated above via SENTINEL_OAuth_DB. This does NOT create
 			// or log in users -- it maps a validated token to its owner.
-			wp_set_current_user( (int) $token_row['user_id'] );
+			wp_set_current_user((int) $token_row['user_id']);
 
 			self::$current = array(
-				'client_id' => isset( $token_row['client_id'] ) ? (string) $token_row['client_id'] : '',
+				'client_id' => isset($token_row['client_id']) ? (string) $token_row['client_id'] : '',
 				'user_id'   => (int) $token_row['user_id'],
-				'token_id'  => isset( $token_row['id'] ) ? (int) $token_row['id'] : 0,
+				'token_id'  => isset($token_row['id']) ? (int) $token_row['id'] : 0,
 			);
 
 			// Send CORS headers early, before the MCP Adapter processes the request.
 			// This ensures headers are present even if the adapter sends its own
 			// response (e.g., SSE streams) that bypasses rest_pre_serve_request.
-			MCPCOMAL_OAuth_Server::send_cors_headers();
+			SENTINEL_OAuth_Server::send_cors_headers();
 
 			return true;
 		}
@@ -156,23 +162,24 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 		 * Different server configurations (Apache mod_php, mod_cgi, nginx)
 		 * expose the header in different $_SERVER keys.
 		 */
-		private static function get_authorization_header(): string {
-			if ( ! empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
-				return sanitize_text_field( wp_unslash( $_SERVER['HTTP_AUTHORIZATION'] ) );
+		private static function get_authorization_header(): string
+		{
+			if (! empty($_SERVER['HTTP_AUTHORIZATION'])) {
+				return sanitize_text_field(wp_unslash($_SERVER['HTTP_AUTHORIZATION']));
 			}
 
 			// Apache mod_rewrite may strip the header into this variable.
-			if ( ! empty( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ) {
-				return sanitize_text_field( wp_unslash( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) );
+			if (! empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+				return sanitize_text_field(wp_unslash($_SERVER['REDIRECT_HTTP_AUTHORIZATION']));
 			}
 
 			// Apache mod_cgi fallback.
-			if ( function_exists( 'apache_request_headers' ) ) {
+			if (function_exists('apache_request_headers')) {
 				$headers = apache_request_headers();
-				if ( is_array( $headers ) ) {
-					foreach ( $headers as $key => $value ) {
-						if ( 'authorization' === strtolower( $key ) ) {
-							return sanitize_text_field( $value );
+				if (is_array($headers)) {
+					foreach ($headers as $key => $value) {
+						if ('authorization' === strtolower($key)) {
+							return sanitize_text_field($value);
 						}
 					}
 				}
@@ -181,5 +188,4 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_Interceptor' ) ) {
 			return '';
 		}
 	}
-
 }
