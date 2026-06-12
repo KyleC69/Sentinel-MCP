@@ -36,7 +36,7 @@ if (! function_exists('mcpcomal_wc_redact_email')) {
 
 if (! function_exists('mcpcomal_wc_redact_name')) {
 	/**
-	 * Redact a person name to initials: "Jose Conti" → "J. C.".
+	 * Redact a person name to initials: "Kyle L Crowder" → "J. C.".
 	 *
 	 * @param string $name Full name.
 	 * @return string

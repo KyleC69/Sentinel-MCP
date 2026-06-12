@@ -8,8 +8,8 @@
  * function_exists() checks to prevent fatal errors.
  *
  * @package    SENTINEL
- * @author     Jose Conti <kcrowdergoog@gmail.com>
- * @copyright  2026 Jose Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @since      1.1.0
  *
@@ -43,9 +43,10 @@ add_action(
 					'logo_url'       => SENTINEL_URL . 'assets/images/ollama-black.webp',
 					'type'           => 'ai_provider',
 					'authentication' => array(
-						'method'               => 'api_key',
-						'credentials_location' => 'database',
-						'setting_name'         => 'connectors_ai_ollama_api_key',
+						'method'        => 'api_key',
+						'setting_name'  => 'connectors_ai_ollama_api_key',
+						'env_var_name'  => 'OLLAMA_API_KEY',
+						'constant_name' => 'OLLAMA_API_KEY',
 					),
 					'plugin'         => 'mcp-sentinel',
 				)

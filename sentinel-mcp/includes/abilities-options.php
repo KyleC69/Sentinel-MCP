@@ -9,7 +9,7 @@
  * @author     Kyle L Crowder
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- @link  ??  ??  ??
+ * @link       http://github.com/KyleC69/Sentinel-MCP
  */
 
 defined( 'ABSPATH' ) || exit;

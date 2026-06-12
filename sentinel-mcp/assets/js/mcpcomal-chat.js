@@ -254,6 +254,8 @@
 			el.chatPicker      = document.getElementById( 'sentinel-chat-picker' );
 			el.usage           = document.querySelector( '.sentinel-chat-usage' );
 			el.footer          = document.querySelector( '.sentinel-chat-sidebar-footer' );
+			el.providerDebug   = document.getElementById( 'sentinel-provider-debug' );
+			el.debugToggle     = document.getElementById( 'sentinel-debug-toggle' );
 
 			var def = getDefaultModel();
 			state.selectedProvider = def.provider;
@@ -350,6 +352,10 @@
 							'</div>' +
 							'<span class="sentinel-chat-usage"></span>' +
 						'</div>' +
+						'<button class="sentinel-provider-debug-toggle" id="sentinel-debug-toggle" type="button" title="Toggle provider debug">' +
+							'<span class="dashicons dashicons-admin-generic"></span>' +
+						'</button>' +
+						'<div class="sentinel-provider-debug hidden" id="sentinel-provider-debug"></div>' +
 						'<div class="sentinel-chat-messages"></div>' +
 						'<div class="sentinel-chat-input">' +
 							'<div class="sentinel-chat-input-wrap">' +
@@ -562,6 +568,48 @@
 			}
 		},
 
+		renderProviderDebug: function () {
+			if ( ! el.providerDebug ) {
+				return;
+			}
+			var providers = config.providers || {};
+			var html = '<h4>Provider Debug</h4>';
+
+			Object.keys( providers ).forEach( function ( pid ) {
+				var p = providers[ pid ];
+				var hasKey = p.has_key;
+				var statusDot = hasKey ? '<span class="status-dot ok"></span>' : '<span class="status-dot missing"></span>';
+				var source = p.key_source || 'none';
+
+				html += '<div class="sentinel-provider-debug-row">' +
+					'<span class="sentinel-provider-debug-label">' + esc( p.label || pid ) + '</span>' +
+					'<span class="sentinel-provider-debug-value">' + statusDot + esc( source ) + '</span>' +
+					'</div>';
+
+				if ( hasKey ) {
+					var models = p.models || {};
+					var modelKeys = Object.keys( models );
+					if ( modelKeys.length ) {
+						html += '<div class="sentinel-provider-debug-models">' +
+							'<span class="sentinel-provider-debug-label">Models (' + modelKeys.length + ')</span>' +
+							'<ul>';
+						modelKeys.forEach( function ( mid ) {
+							html += '<li>' + esc( models[ mid ] ) + '</li>';
+						} );
+						html += '</ul></div>';
+					}
+				}
+			} );
+
+			var def = getDefaultModel();
+			html += '<div class="sentinel-provider-debug-row" style="margin-top:6px;padding-top:6px;border-top:1px solid var(--sentinel-chat-hover);">' +
+				'<span class="sentinel-provider-debug-label">Default</span>' +
+				'<span class="sentinel-provider-debug-value">' + esc( def.providerLabel + ' / ' + def.modelLabel ) + '</span>' +
+				'</div>';
+
+			el.providerDebug.innerHTML = html;
+		},
+
 		openSidebar: function () {
 			if ( el.sidebar ) {
 				el.sidebar.classList.add( 'open' );
@@ -694,6 +742,18 @@
 			var overlay = document.querySelector( '.sentinel-chat-sidebar-overlay' );
 			if ( overlay ) {
 				overlay.addEventListener( 'click', ui.closeSidebar );
+			}
+
+			if ( el.debugToggle ) {
+				el.debugToggle.addEventListener( 'click', function ( e ) {
+					e.stopPropagation();
+					if ( el.providerDebug ) {
+						el.providerDebug.classList.toggle( 'hidden' );
+						if ( ! el.providerDebug.classList.contains( 'hidden' ) ) {
+							ui.renderProviderDebug();
+						}
+					}
+				} );
 			}
 
 			if ( el.footer ) {

@@ -146,13 +146,13 @@ class SENTINEL_Admin_Chat
 		// Enqueue chat app.
 		wp_enqueue_style(
 			'sentinel-chat',
-			SENTINEL_URL . 'assets/css/sentinel-chat.css',
+			SENTINEL_URL . 'assets/css/mcpcomal-chat.css',
 			array(),
 			SENTINEL_VERSION
 		);
 		wp_enqueue_script(
 			'sentinel-chat',
-			SENTINEL_URL . 'assets/js/sentinel-chat.js',
+			SENTINEL_URL . 'assets/js/mcpcomal-chat.js',
 			array('sentinel-marked', 'sentinel-dompurify', 'sentinel-highlight'),
 			SENTINEL_VERSION,
 			true

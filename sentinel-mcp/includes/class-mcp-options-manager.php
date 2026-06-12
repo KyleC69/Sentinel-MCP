@@ -10,7 +10,7 @@
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://plugins.joseconti.com/product/sentinel-mcp/
+ * @link       https://github.com/kyleC69/sentinel-mcp/
  */
 
 defined('ABSPATH') || exit;

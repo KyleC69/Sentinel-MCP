@@ -148,7 +148,7 @@ class SENTINEL_Chat_Engine
 		'openai'     => 0,  // Discovery mode: use meta-tools.
 		'gemini'     => 0,  // Discovery mode: use meta-tools.
 		'openrouter' => 0,  // Discovery mode: use meta-tools.
-		'ollama'     => 0,  // Discovery mode: use meta-tools.
+		'ollama'     => 115,  // Discovery mode: use meta-tools.
 	);
 
 	/**
@@ -188,11 +188,18 @@ class SENTINEL_Chat_Engine
 	/**
 	 * Check if an API key is configured for a provider.
 	 *
+	 * Uses the WordPress AI plugin's has_connector_authentication() when
+	 * available (avoids external API requests). Falls back to local lookup.
+	 *
 	 * @param string $provider Provider slug.
 	 * @return bool
 	 */
 	public static function has_api_key(string $provider): bool
 	{
+		if (function_exists('has_connector_authentication')) {
+			return has_connector_authentication($provider);
+		}
+
 		return ! empty(self::get_api_key($provider));
 	}
 
@@ -251,11 +258,29 @@ class SENTINEL_Chat_Engine
 	/**
 	 * Get the source of the API key for a provider.
 	 *
+	 * Uses the WordPress AI plugin's get_connector_api_key_source() when
+	 * available. Falls back to local lookup.
+	 *
 	 * @param string $provider Provider slug.
 	 * @return string 'env_var', 'constant', 'connectors_api', or 'none'.
 	 */
 	public static function get_api_key_source(string $provider): string
 	{
+		if (function_exists('wp_get_connector') && function_exists('get_connector_api_key_source')) {
+			$connector = wp_get_connector($provider);
+			if (is_array($connector) && isset($connector['authentication']['setting_name'])) {
+				$auth = $connector['authentication'];
+				$source = get_connector_api_key_source(
+					$auth['setting_name'] ?? '',
+					$auth['env_var_name'] ?? '',
+					$auth['constant_name'] ?? ''
+				);
+				if ('none' !== $source) {
+					return $source;
+				}
+			}
+		}
+
 		$map = self::WP_CONNECTOR_MAP[$provider] ?? null;
 
 		if ($map) {
