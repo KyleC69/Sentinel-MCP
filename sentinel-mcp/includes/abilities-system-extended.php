@@ -1,4 +1,5 @@
 <?php
+
 /**
  * System / cron read abilities (Sprint 1.8).
  *
@@ -6,13 +7,13 @@
  * Cancellation and scheduling of cron events are reserved for Premium.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://mcpwp.com/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 add_action(
 	'wp_abilities_api_init',
@@ -45,29 +46,29 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$overdue_only = ! empty( $input['overdue_only'] );
+				'execute_callback'    => function ($input = null) {
+					$overdue_only = ! empty($input['overdue_only']);
 					$crons        = _get_cron_array();
 					$now          = time();
 					$events       = array();
 
-					if ( is_array( $crons ) ) {
-						foreach ( $crons as $timestamp => $hooks ) {
+					if (is_array($crons)) {
+						foreach ($crons as $timestamp => $hooks) {
 							$ts = (int) $timestamp;
-							if ( $overdue_only && $ts > $now ) {
+							if ($overdue_only && $ts > $now) {
 								continue;
 							}
-							foreach ( (array) $hooks as $hook => $signatures ) {
-								foreach ( (array) $signatures as $sig => $event ) {
+							foreach ((array) $hooks as $hook => $signatures) {
+								foreach ((array) $signatures as $sig => $event) {
 									$events[] = array(
 										'hook'        => (string) $hook,
 										'next_run_ts' => $ts,
-										'next_run'    => date_i18n( 'Y-m-d H:i:s', $ts ),
+										'next_run'    => date_i18n('Y-m-d H:i:s', $ts),
 										'time_to_run' => $ts - $now,
 										'is_overdue'  => $ts < $now,
-										'schedule'    => isset( $event['schedule'] ) ? (string) $event['schedule'] : '',
-										'interval'    => isset( $event['interval'] ) ? (int) $event['interval'] : 0,
-										'args_count'  => isset( $event['args'] ) && is_array( $event['args'] ) ? count( $event['args'] ) : 0,
+										'schedule'    => isset($event['schedule']) ? (string) $event['schedule'] : '',
+										'interval'    => isset($event['interval']) ? (int) $event['interval'] : 0,
+										'args_count'  => isset($event['args']) && is_array($event['args']) ? count($event['args']) : 0,
 									);
 								}
 							}
@@ -75,13 +76,13 @@ add_action(
 					}
 
 					return array(
-						'count'  => count( $events ),
+						'count'  => count($events),
 						'events' => $events,
 					);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_options' );
+					return current_user_can('manage_options');
 				},
 
 				'meta'                => array(
@@ -124,33 +125,33 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$include_caps = ! empty( $input['include_capabilities'] );
+				'execute_callback'    => function ($input = null) {
+					$include_caps = ! empty($input['include_capabilities']);
 					$roles_obj    = wp_roles();
-					$roles        = is_object( $roles_obj ) && isset( $roles_obj->roles ) ? (array) $roles_obj->roles : array();
+					$roles        = is_object($roles_obj) && isset($roles_obj->roles) ? (array) $roles_obj->roles : array();
 
 					$result = array();
-					foreach ( $roles as $key => $role ) {
-						$caps = isset( $role['capabilities'] ) && is_array( $role['capabilities'] ) ? $role['capabilities'] : array();
+					foreach ($roles as $key => $role) {
+						$caps = isset($role['capabilities']) && is_array($role['capabilities']) ? $role['capabilities'] : array();
 						$entry = array(
 							'key'         => (string) $key,
-							'name'        => isset( $role['name'] ) ? (string) $role['name'] : (string) $key,
-							'cap_count'   => count( $caps ),
+							'name'        => isset($role['name']) ? (string) $role['name'] : (string) $key,
+							'cap_count'   => count($caps),
 						);
-						if ( $include_caps ) {
-							$entry['capabilities'] = array_keys( $caps );
+						if ($include_caps) {
+							$entry['capabilities'] = array_keys($caps);
 						}
 						$result[] = $entry;
 					}
 
 					return array(
-						'count' => count( $result ),
+						'count' => count($result),
 						'roles' => $result,
 					);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'list_users' );
+					return current_user_can('list_users');
 				},
 
 				'meta'                => array(

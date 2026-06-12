@@ -34,10 +34,6 @@ if (! class_exists('SENTINEL_Admin')) {
 				error_log('[SENTINEL-DEBUG] SENTINEL_Admin instantiated'); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 
-			// Add a temporary admin notice to verify the class runs.
-			add_action('admin_notices', function () {
-				printf('<div class="notice notice-success is-dismissible"><p>%s</p></div>', esc_html__('SENTINEL_Admin active', 'mcp-sentinel'));
-			});
 		}
 
 		/**
@@ -57,10 +53,6 @@ if (! class_exists('SENTINEL_Admin')) {
 				array($this, 'render_page')
 			);
 
-			// Temporary admin notice to confirm the menu was added.
-			add_action('admin_notices', function () {
-				printf('\u003cdiv class="notice notice-success is-dismissible"\u003e\u003cp\u003e%s\u003c/p\u003e\u003c/div\u003e', esc_html__('SENTINEL_Admin menu added', 'mcp-sentinel'));
-			});
 
 			// Chat AI page (hidden from menu, accessed via admin bar button).
 			add_submenu_page(
@@ -431,16 +423,7 @@ if (! class_exists('SENTINEL_Admin')) {
 			<!-- Detected integrations -->
 			<?php $this->render_detected_integrations(); ?>
 
-			<!-- Upsell banner -->
-			<div class="card" style="max-width:700px;margin-bottom:20px;padding:15px;border-left:4px solid #d63638;">
-				<p style="margin:0;">
-					<strong><?php esc_html_e('Need more power?', 'mcp-sentinel'); ?></strong>
-					<?php esc_html_e('Unlock WooCommerce, SEO, Time Machine, Gemini AI and 27+ modules with', 'mcp-sentinel'); ?>
-					<a href="<?php echo esc_url(SENTINEL_PREMIUM_PRODUCT_URL); ?>" target="_blank" rel="noopener noreferrer" style="font-weight:bold;">
-						<?php esc_html_e('MCP Content Manager Premium', 'mcp-sentinel'); ?> &rarr;
-					</a>
-				</p>
-			</div>
+
 		<?php
 		}
 
@@ -977,6 +960,7 @@ if (! class_exists('SENTINEL_Admin')) {
 		{
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only navigation parameter.
 			$selected = isset($_GET['client']) ? sanitize_key((string) $_GET['client']) : 'claude_desktop';
+			$rest_nonce = wp_create_nonce('wp_rest');
 			$clients  = SENTINEL_Config_Exporter::clients();
 			if (! array_key_exists($selected, $clients)) {
 				$selected = 'claude_desktop';
@@ -985,7 +969,7 @@ if (! class_exists('SENTINEL_Admin')) {
 			$config = SENTINEL_Config_Exporter::for_client($selected);
 
 		?>
-			<div class="card" style="max-width:900px;margin-bottom:20px;padding:15px;">
+			<div class="card" style="max-width:1100px;margin-bottom:20px;padding:15px;">
 				<h2 style="margin-top:0;">Connect your AI assistant</h2>
 				<p><strong>Endpoint URL:</strong></p>
 				<div style="background:#f0f6fc;border:1px solid #2271b1;border-radius:4px;padding:10px;margin-bottom:15px;">
@@ -1007,6 +991,97 @@ if (! class_exists('SENTINEL_Admin')) {
 				<p><?php echo esc_html($config['instructions']); ?></p>
 				<textarea readonly rows="10" style="width:100%;font-family:monospace;font-size:13px;" onclick="this.select()"><?php echo esc_textarea($config['content']); ?></textarea>
 			</div>
+
+			<div class="card" style="max-width:1100px;margin-bottom:20px;padding:15px;">
+				<h2 style="margin-top:0;">Quick OAuth Troubleshooter</h2>
+				<p>Use this lightweight probe to send a manual request to the OAuth or MCP endpoint while you are debugging the auth flow. It does not modify anything on the server.</p>
+				<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start;">
+					<div>
+						<label for="oauth-probe-endpoint"><strong>Endpoint URL</strong></label>
+						<input id="oauth-probe-endpoint" type="text" value="<?php echo esc_attr(rest_url('sentinel-auth/v1/register')); ?>" style="width:100%;margin-top:6px;">
+						<label for="oauth-probe-method" style="display:block;margin-top:10px;"><strong>Method</strong></label>
+						<select id="oauth-probe-method" style="width:100%;margin-top:6px;">
+							<option value="POST">POST</option>
+							<option value="GET">GET</option>
+						</select>
+						<label for="oauth-probe-body" style="display:block;margin-top:10px;"><strong>Request body (JSON)</strong></label>
+						<textarea id="oauth-probe-body" rows="8" style="width:100%;font-family:monospace;font-size:12px;">{"client_name":"debug-probe","redirect_uris":["https://example.com/callback"],"grant_types":["authorization_code","refresh_token"],"response_types":["code"],"token_endpoint_auth_method":"none"}</textarea>
+						<button type="button" id="oauth-probe-run" class="button button-primary" style="margin-top:10px;">Run probe</button>
+						<p id="oauth-probe-status" class="description" style="margin-top:8px;">Ready to send a manual request for troubleshooting.</p>
+					</div>
+					<div>
+						<label for="oauth-probe-headers"><strong>Response headers</strong></label>
+						<textarea id="oauth-probe-headers" readonly rows="8" style="width:100%;font-family:monospace;font-size:12px;">No response yet.</textarea>
+						<label for="oauth-probe-response" style="display:block;margin-top:10px;"><strong>Response body</strong></label>
+						<textarea id="oauth-probe-response" readonly rows="12" style="width:100%;font-family:monospace;font-size:12px;">No response yet.</textarea>
+					</div>
+				</div>
+			</div>
+
+			<script>
+				(function() {
+					const runButton = document.getElementById('oauth-probe-run');
+					const endpointInput = document.getElementById('oauth-probe-endpoint');
+					const methodSelect = document.getElementById('oauth-probe-method');
+					const bodyInput = document.getElementById('oauth-probe-body');
+					const statusBox = document.getElementById('oauth-probe-status');
+					const headersBox = document.getElementById('oauth-probe-headers');
+					const responseBox = document.getElementById('oauth-probe-response');
+					if (!runButton || !endpointInput || !methodSelect || !bodyInput || !statusBox || !headersBox || !responseBox) {
+						return;
+					}
+					runButton.addEventListener('click', function() {
+						const endpoint = endpointInput.value.trim();
+						if (!endpoint) {
+							statusBox.textContent = 'Please enter an endpoint URL before running the probe.';
+							return;
+						}
+
+						statusBox.textContent = 'Sending request…';
+						headersBox.value = 'Loading…';
+						responseBox.value = 'Loading…';
+
+						fetch('<?php echo esc_js(rest_url('sentinel-auth/v1/debug-probe')); ?>', {
+							method: 'POST',
+							credentials: 'same-origin',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-WP-Nonce': '<?php echo esc_js($rest_nonce); ?>'
+							},
+							body: JSON.stringify({
+								endpoint: endpoint,
+								method: methodSelect.value,
+								body: bodyInput.value,
+								headers: {
+									'Content-Type': 'application/json',
+									'Accept': '*/*'
+								}
+							})
+						}).then(function(res) {
+							return res.json().then(function(data) {
+								return {
+									ok: res.ok,
+									status: res.status,
+									data: data
+								};
+							});
+						}).then(function(result) {
+							if (!result.ok) {
+								statusBox.textContent = 'Probe request failed: ' + (result.data.message || 'Unknown error');
+								return;
+							}
+
+							statusBox.textContent = 'HTTP ' + result.data.status + ' received.';
+							headersBox.value = JSON.stringify(result.data.headers || {}, null, 2);
+							responseBox.value = result.data.body || '(empty body)';
+						}).catch(function(error) {
+							statusBox.textContent = 'Probe request failed: ' + error.message;
+							headersBox.value = 'Error';
+							responseBox.value = error.message;
+						});
+					});
+				})();
+			</script>
 		<?php
 		}
 
@@ -1335,10 +1410,7 @@ if (! class_exists('SENTINEL_Admin')) {
 					</div>
 				<?php endif; ?>
 
-				<p style="margin-top:15px;color:#666;font-size:13px;">
-					Need before/after diffs, rollback, full-text search and CSV export?
-					<a href="<?php echo esc_url(SENTINEL_PREMIUM_PRODUCT_URL); ?>" target="_blank" rel="noopener">See Premium</a>.
-				</p>
+
 			</div>
 		<?php
 		}
@@ -1506,7 +1578,7 @@ if (! class_exists('SENTINEL_Admin')) {
 				<p style="text-align:center;margin:16px 0 8px;">
 					<a href="<?php echo esc_url($premium_url); ?>" target="_blank" rel="noopener noreferrer"
 						class="button button-primary button-hero" style="font-size:16px;padding:8px 32px;">
-						<?php esc_html_e('Get MCP Content Manager Premium', 'mcp-sentinel'); ?> &rarr;
+						<?php esc_html_e('Get Sentinel-MCP Pro', 'mcp-sentinel'); ?> &rarr;
 					</a>
 				</p>
 
@@ -1579,7 +1651,7 @@ if (! class_exists('SENTINEL_Admin')) {
 				<p style="text-align:center;margin:20px 0 8px;">
 					<a href="<?php echo esc_url($premium_url); ?>" target="_blank" rel="noopener noreferrer"
 						class="button button-primary button-hero" style="font-size:16px;padding:8px 32px;">
-						<?php esc_html_e('Get MCP Content Manager Premium', 'mcp-sentinel'); ?> &rarr;
+						<?php esc_html_e('Get Sentinel-MCP Pro', 'mcp-sentinel'); ?> &rarr;
 					</a>
 				</p>
 				<p style="text-align:center;color:#50575e;font-size:13px;">

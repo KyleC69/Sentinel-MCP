@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MCP client configuration exporter (Sprint 3.2).
  *
@@ -7,20 +8,21 @@
  * plus a curl debugging snippet.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://mcpwp.com/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
+if (! class_exists('SENTINEL_Config_Exporter')) {
 
 	/**
 	 * Builds client-specific config snippets pointing at this site's MCP server.
 	 */
-	class SENTINEL_Config_Exporter {
+	class SENTINEL_Config_Exporter
+	{
 
 		/**
 		 * Server name used in client configs.
@@ -30,8 +32,9 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * URL of this site's MCP endpoint.
 		 */
-		public static function endpoint_url(): string {
-			return (string) rest_url( 'mcp/mcp-adapter-default-server' );
+		public static function endpoint_url(): string
+		{
+			return (string) rest_url('mcp/mcp-adapter-default-server');
 		}
 
 		/**
@@ -39,7 +42,8 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		 *
 		 * @return array<string,string> Map of slug => display label.
 		 */
-		public static function clients(): array {
+		public static function clients(): array
+		{
 			return array(
 				'claude_desktop' => 'Claude Desktop',
 				'chatgpt'        => 'ChatGPT',
@@ -57,8 +61,9 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		 * @param string $client Slug from clients().
 		 * @return array{format:string,content:string,instructions:string}
 		 */
-		public static function for_client( string $client ): array {
-			switch ( $client ) {
+		public static function for_client(string $client): array
+		{
+			switch ($client) {
 				case 'claude_desktop':
 					return self::for_claude_desktop();
 				case 'chatgpt':
@@ -85,7 +90,8 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * Claude Desktop / Claude Code remote MCP server config.
 		 */
-		public static function for_claude_desktop(): array {
+		public static function for_claude_desktop(): array
+		{
 			$payload = array(
 				'mcpServers' => array(
 					self::SERVER_NAME => array(
@@ -95,7 +101,7 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 			);
 			return array(
 				'format'       => 'json',
-				'content'      => self::pretty_json( $payload ),
+				'content'      => self::pretty_json($payload),
 				'instructions' => 'In Claude Desktop, open Settings > MCP Servers > Edit config. Paste this object inside the existing "mcpServers" block. Authenticate via the OAuth browser flow on first connect.',
 			);
 		}
@@ -103,14 +109,15 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * ChatGPT remote MCP server config.
 		 */
-		public static function for_chatgpt(): array {
+		public static function for_chatgpt(): array
+		{
 			$payload = array(
 				'name' => self::SERVER_NAME,
 				'url'  => self::endpoint_url(),
 			);
 			return array(
 				'format'       => 'json',
-				'content'      => self::pretty_json( $payload ),
+				'content'      => self::pretty_json($payload),
 				'instructions' => 'Enable Developer Mode in ChatGPT. In Settings > MCP Servers, add a new remote server and paste this URL. ChatGPT handles OAuth registration automatically.',
 			);
 		}
@@ -118,7 +125,8 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * Cursor remote MCP server config.
 		 */
-		public static function for_cursor(): array {
+		public static function for_cursor(): array
+		{
 			$payload = array(
 				'mcpServers' => array(
 					self::SERVER_NAME => array(
@@ -128,7 +136,7 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 			);
 			return array(
 				'format'       => 'json',
-				'content'      => self::pretty_json( $payload ),
+				'content'      => self::pretty_json($payload),
 				'instructions' => 'In Cursor, open Settings > MCP > Edit config and paste this object. Authenticate via the OAuth browser flow on first connect.',
 			);
 		}
@@ -136,7 +144,8 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * Windsurf remote MCP server config.
 		 */
-		public static function for_windsurf(): array {
+		public static function for_windsurf(): array
+		{
 			$payload = array(
 				'mcpServers' => array(
 					self::SERVER_NAME => array(
@@ -146,7 +155,7 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 			);
 			return array(
 				'format'       => 'json',
-				'content'      => self::pretty_json( $payload ),
+				'content'      => self::pretty_json($payload),
 				'instructions' => 'In Windsurf, open Settings > MCP and paste this object. Authenticate via the OAuth browser flow on first connect.',
 			);
 		}
@@ -154,7 +163,8 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * Continue (continue.dev) MCP server config (YAML).
 		 */
-		public static function for_continue(): array {
+		public static function for_continue(): array
+		{
 			$yaml  = "mcpServers:\n";
 			$yaml .= '  - name: ' . self::SERVER_NAME . "\n";
 			$yaml .= '    url: ' . self::endpoint_url() . "\n";
@@ -168,14 +178,15 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * JetBrains AI MCP server config.
 		 */
-		public static function for_jetbrains(): array {
+		public static function for_jetbrains(): array
+		{
 			$payload = array(
 				'name' => self::SERVER_NAME,
 				'url'  => self::endpoint_url(),
 			);
 			return array(
 				'format'       => 'json',
-				'content'      => self::pretty_json( $payload ),
+				'content'      => self::pretty_json($payload),
 				'instructions' => 'In JetBrains AI Assistant settings, add a new remote MCP server and paste this URL. Authenticate via the OAuth browser flow on first connect.',
 			);
 		}
@@ -183,10 +194,11 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		/**
 		 * curl one-liner for debugging.
 		 */
-		public static function for_curl(): array {
+		public static function for_curl(): array
+		{
 			$cmd = sprintf(
 				'curl -i -X POST -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_ACCESS_TOKEN" %s -d \'{"jsonrpc":"2.0","id":1,"method":"tools/list"}\'',
-				escapeshellarg( self::endpoint_url() )
+				escapeshellarg(self::endpoint_url())
 			);
 			return array(
 				'format'       => 'shell',
@@ -200,9 +212,10 @@ if ( ! class_exists( 'SENTINEL_Config_Exporter' ) ) {
 		 *
 		 * @param mixed $value Value to encode.
 		 */
-		protected static function pretty_json( $value ): string {
-			$encoded = wp_json_encode( $value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-			return is_string( $encoded ) ? $encoded : '';
+		protected static function pretty_json($value): string
+		{
+			$encoded = wp_json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+			return is_string($encoded) ? $encoded : '';
 		}
 	}
 }

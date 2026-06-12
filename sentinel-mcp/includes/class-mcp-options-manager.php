@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Options Manager for MCP Content Manager.
  *
@@ -6,20 +7,21 @@
  * through a hardcoded whitelist of allowed option names.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'SENTINEL_Options_Manager' ) ) {
+if (! class_exists('SENTINEL_Options_Manager')) {
 
 	/**
 	 * WordPress options manager with security whitelist.
 	 */
-	class SENTINEL_Options_Manager {
+	class SENTINEL_Options_Manager
+	{
 
 		/**
 		 * Options that can be read.
@@ -329,31 +331,32 @@ if ( ! class_exists( 'SENTINEL_Options_Manager' ) ) {
 		 * @param array $input Ability input parameters.
 		 * @return array
 		 */
-		public static function get_option( array $input ): array {
-			$name = sanitize_text_field( $input['name'] ?? '' );
+		public static function get_option(array $input): array
+		{
+			$name = sanitize_text_field($input['name'] ?? '');
 
 			// Return a specific option.
-			if ( ! empty( $name ) ) {
-				if ( ! in_array( $name, self::READABLE_OPTIONS, true ) ) {
+			if (! empty($name)) {
+				if (! in_array($name, self::READABLE_OPTIONS, true)) {
 					return array(
 						'success'           => false,
-						'message'           => sprintf( 'Option "%s" is not in the readable whitelist.', $name ),
+						'message'           => sprintf('Option "%s" is not in the readable whitelist.', $name),
 						'available_options' => self::READABLE_OPTIONS,
 					);
 				}
 
 				return array(
 					'success' => true,
-					'options' => array( $name => get_option( $name ) ),
+					'options' => array($name => get_option($name)),
 				);
 			}
 
 			// Return all whitelisted options.
 			$options = array();
-			foreach ( self::READABLE_OPTIONS as $option_name ) {
-				$value = get_option( $option_name, '__SENTINEL_NOT_SET__' );
-				if ( '__SENTINEL_NOT_SET__' !== $value ) {
-					$options[ $option_name ] = $value;
+			foreach (self::READABLE_OPTIONS as $option_name) {
+				$value = get_option($option_name, '__SENTINEL_NOT_SET__');
+				if ('__SENTINEL_NOT_SET__' !== $value) {
+					$options[$option_name] = $value;
 				}
 			}
 
@@ -369,49 +372,50 @@ if ( ! class_exists( 'SENTINEL_Options_Manager' ) ) {
 		 * @param array $input Ability input parameters.
 		 * @return array
 		 */
-		public static function update_option( array $input ): array {
-			$name = sanitize_text_field( $input['name'] ?? '' );
+		public static function update_option(array $input): array
+		{
+			$name = sanitize_text_field($input['name'] ?? '');
 
-			if ( empty( $name ) ) {
+			if (empty($name)) {
 				return array(
 					'success' => false,
 					'message' => 'Option name is required.',
 				);
 			}
 
-			if ( ! in_array( $name, self::WRITABLE_OPTIONS, true ) ) {
-				$reason = in_array( $name, self::READABLE_OPTIONS, true )
-				? 'This option is read-only for safety (changing it could break the site).'
-				: 'This option is not in the whitelist.';
+			if (! in_array($name, self::WRITABLE_OPTIONS, true)) {
+				$reason = in_array($name, self::READABLE_OPTIONS, true)
+					? 'This option is read-only for safety (changing it could break the site).'
+					: 'This option is not in the whitelist.';
 
 				return array(
 					'success'          => false,
-					'message'          => sprintf( 'Cannot write option "%s". %s', $name, $reason ),
+					'message'          => sprintf('Cannot write option "%s". %s', $name, $reason),
 					'writable_options' => self::WRITABLE_OPTIONS,
 				);
 			}
 
-			if ( ! array_key_exists( 'value', $input ) ) {
+			if (! array_key_exists('value', $input)) {
 				return array(
 					'success' => false,
 					'message' => 'Option value is required.',
 				);
 			}
 
-			$old_value = get_option( $name );
+			$old_value = get_option($name);
 			$new_value = $input['value'];
 
 			// Sanitize based on expected type.
-			if ( is_string( $new_value ) ) {
-				$new_value = sanitize_text_field( $new_value );
-			} elseif ( is_numeric( $new_value ) ) {
-				$new_value = is_int( $new_value ) ? (int) $new_value : (float) $new_value;
+			if (is_string($new_value)) {
+				$new_value = sanitize_text_field($new_value);
+			} elseif (is_numeric($new_value)) {
+				$new_value = is_int($new_value) ? (int) $new_value : (float) $new_value;
 			}
 
-			update_option( $name, $new_value );
+			update_option($name, $new_value);
 
 			// Flush rewrite rules when permalink structure changes.
-			if ( 'permalink_structure' === $name ) {
+			if ('permalink_structure' === $name) {
 				flush_rewrite_rules();
 			}
 
@@ -420,9 +424,8 @@ if ( ! class_exists( 'SENTINEL_Options_Manager' ) ) {
 				'name'      => $name,
 				'old_value' => $old_value,
 				'new_value' => $new_value,
-				'message'   => sprintf( 'Option "%s" updated.', $name ),
+				'message'   => sprintf('Option "%s" updated.', $name),
 			);
 		}
 	}
-
 }

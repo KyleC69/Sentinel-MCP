@@ -7,8 +7,8 @@
  * token revocation, and PKCE verification.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  * @author     Kyle L Crowder
@@ -56,7 +56,7 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 		private static function handle_authorization_code(WP_REST_Request $request): WP_REST_Response|WP_Error
 		{
 			$code          = sanitize_text_field($request->get_param('code') ?? '');
-			$redirect_uri  = esc_url_raw($request->get_param('redirect_uri') ?? '');
+			$redirect_uri  = SENTINEL_OAuth_Server::sanitize_redirect_uri($request->get_param('redirect_uri') ?? '');
 			$client_id     = sanitize_text_field($request->get_param('client_id') ?? '');
 			$code_verifier = sanitize_text_field($request->get_param('code_verifier') ?? '');
 
@@ -87,8 +87,11 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 			// 4. Mark as used IMMEDIATELY (single-use enforcement).
 			SENTINEL_OAuth_DB::mark_code_used($code);
 
+			$resolved_code_client_id = SENTINEL_OAuth_DB::get_client_by_id_or_name($code_row['client_id'])['client_id'] ?? $code_row['client_id'];
+			$resolved_request_client_id = SENTINEL_OAuth_DB::get_client_by_id_or_name($client_id)['client_id'] ?? $client_id;
+
 			// 5. Verify client_id matches (timing-safe comparison).
-			if (! hash_equals($code_row['client_id'], $client_id)) {
+			if (! hash_equals($resolved_code_client_id, $resolved_request_client_id)) {
 				return self::oauth_error('invalid_grant', $grant_error);
 			}
 

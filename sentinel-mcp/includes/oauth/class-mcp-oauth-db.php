@@ -1,4 +1,5 @@
 <?php
+
 /**
  * OAuth 2.1 Database layer.
  *
@@ -12,26 +13,28 @@
  * @link       https://github.com/kylec69/sentinel-mcp/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
+if (! class_exists('SENTINEL_OAuth_DB')) {
 
 	/**
 	 * Database operations for the OAuth 2.1 subsystem.
 	 */
-	class MCPCOMAL_OAuth_DB {
+	class SENTINEL_OAuth_DB
+	{
 
 		const DB_VERSION     = '1.0.0';
-		const OPT_DB_VERSION = 'mcpcomal_oauth_db_version';
+		const OPT_DB_VERSION = 'sentinel_oauth_db_version';
 
 		/**
 		 * Get the clients table name.
 		 *
 		 * @return string
 		 */
-		public static function table_clients(): string {
+		public static function table_clients(): string
+		{
 			global $wpdb;
-			return $wpdb->prefix . 'mcpcomal_oauth_clients';
+			return $wpdb->prefix . 'sentinel_oauth_clients';
 		}
 
 		/**
@@ -39,9 +42,10 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return string
 		 */
-		public static function table_codes(): string {
+		public static function table_codes(): string
+		{
 			global $wpdb;
-			return $wpdb->prefix . 'mcpcomal_oauth_codes';
+			return $wpdb->prefix . 'sentinel_oauth_codes';
 		}
 
 		/**
@@ -49,9 +53,10 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return string
 		 */
-		public static function table_tokens(): string {
+		public static function table_tokens(): string
+		{
 			global $wpdb;
-			return $wpdb->prefix . 'mcpcomal_oauth_tokens';
+			return $wpdb->prefix . 'sentinel_oauth_tokens';
 		}
 
 		/**
@@ -59,7 +64,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return void
 		 */
-		public static function create_tables(): void {
+		public static function create_tables(): void
+		{
 			global $wpdb;
 
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -117,11 +123,11 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 			KEY user_id (user_id)
 		) {$charset_collate};";
 
-			dbDelta( $sql_clients );
-			dbDelta( $sql_codes );
-			dbDelta( $sql_tokens );
+			dbDelta($sql_clients);
+			dbDelta($sql_codes);
+			dbDelta($sql_tokens);
 
-			update_option( self::OPT_DB_VERSION, self::DB_VERSION );
+			update_option(self::OPT_DB_VERSION, self::DB_VERSION);
 		}
 
 		/**
@@ -129,8 +135,9 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return void
 		 */
-		public static function maybe_upgrade(): void {
-			if ( get_option( self::OPT_DB_VERSION ) !== self::DB_VERSION ) {
+		public static function maybe_upgrade(): void
+		{
+			if (get_option(self::OPT_DB_VERSION) !== self::DB_VERSION) {
 				self::create_tables();
 			}
 		}
@@ -140,16 +147,17 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return void
 		 */
-		public static function drop_tables(): void {
+		public static function drop_tables(): void
+		{
 			global $wpdb;
 
 			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- DDL commands for uninstall, intentional schema removal.
-			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_oauth_tokens" );
-			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_oauth_codes" );
-			$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_oauth_clients" );
+			$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}sentinel_oauth_tokens");
+			$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}sentinel_oauth_codes");
+			$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}sentinel_oauth_clients");
 			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 
-			delete_option( self::OPT_DB_VERSION );
+			delete_option(self::OPT_DB_VERSION);
 		}
 
 		/**
@@ -158,15 +166,16 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param array $data Client registration data.
 		 * @return array|false Client data on success, false on failure.
 		 */
-		public static function insert_client( array $data ): array|false {
+		public static function insert_client(array $data): array|false
+		{
 			global $wpdb;
 
-			$client_id = bin2hex( random_bytes( 16 ) );
+			$client_id = bin2hex(random_bytes(16));
 
 			$client_secret = null;
-			$auth_method   = sanitize_text_field( $data['token_endpoint_auth_method'] ?? 'none' );
-			if ( 'none' !== $auth_method ) {
-				$client_secret = bin2hex( random_bytes( 32 ) );
+			$auth_method   = sanitize_text_field($data['token_endpoint_auth_method'] ?? 'none');
+			if ('none' !== $auth_method) {
+				$client_secret = bin2hex(random_bytes(32));
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
@@ -175,15 +184,15 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 				array(
 					'client_id'                  => $client_id,
 					'client_secret'              => $client_secret,
-					'client_name'                => sanitize_text_field( $data['client_name'] ),
-					'redirect_uris'              => wp_json_encode( $data['redirect_uris'] ),
-					'grant_types'                => wp_json_encode( $data['grant_types'] ?? array( 'authorization_code', 'refresh_token' ) ),
+					'client_name'                => sanitize_text_field($data['client_name']),
+					'redirect_uris'              => wp_json_encode($data['redirect_uris']),
+					'grant_types'                => wp_json_encode($data['grant_types'] ?? array('authorization_code', 'refresh_token')),
 					'token_endpoint_auth_method' => $auth_method,
 				),
-				array( '%s', '%s', '%s', '%s', '%s', '%s' )
+				array('%s', '%s', '%s', '%s', '%s', '%s')
 			);
 
-			if ( ! $inserted ) {
+			if (! $inserted) {
 				return false;
 			}
 
@@ -192,7 +201,7 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 				'client_secret'              => $client_secret,
 				'client_name'                => $data['client_name'],
 				'redirect_uris'              => $data['redirect_uris'],
-				'grant_types'                => $data['grant_types'] ?? array( 'authorization_code', 'refresh_token' ),
+				'grant_types'                => $data['grant_types'] ?? array('authorization_code', 'refresh_token'),
 				'token_endpoint_auth_method' => $auth_method,
 			);
 		}
@@ -203,7 +212,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $client_id The OAuth client ID.
 		 * @return array|null Client row or null if not found.
 		 */
-		public static function get_client_by_id( string $client_id ): array|null {
+		public static function get_client_by_id(string $client_id): array|null
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
@@ -216,14 +226,63 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 				ARRAY_A
 			);
 
-			if ( ! $row ) {
+			if (! $row) {
 				return null;
 			}
 
-			$row['redirect_uris'] = json_decode( $row['redirect_uris'], true ) ? json_decode( $row['redirect_uris'], true ) : array();
-			$row['grant_types']   = json_decode( $row['grant_types'], true ) ? json_decode( $row['grant_types'], true ) : array();
+			$row['redirect_uris'] = json_decode($row['redirect_uris'], true) ? json_decode($row['redirect_uris'], true) : array();
+			$row['grant_types']   = json_decode($row['grant_types'], true) ? json_decode($row['grant_types'], true) : array();
 
 			return $row;
+		}
+
+		/**
+		 * Get a client by its client_name.
+		 *
+		 * This supports legacy stored values that may contain the server name
+		 * rather than the generated client_id returned by registration.
+		 *
+		 * @param string $client_name The client name or legacy stored value.
+		 * @return array|null Client row or null if not found.
+		 */
+		public static function get_client_by_name(string $client_name): array|null
+		{
+			global $wpdb;
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
+			$row = $wpdb->get_row(
+				$wpdb->prepare(
+					'SELECT * FROM %i WHERE client_name = %s',
+					self::table_clients(),
+					$client_name
+				),
+				ARRAY_A
+			);
+
+			if (! $row) {
+				return null;
+			}
+
+			$row['redirect_uris'] = json_decode($row['redirect_uris'], true) ? json_decode($row['redirect_uris'], true) : array();
+			$row['grant_types']   = json_decode($row['grant_types'], true) ? json_decode($row['grant_types'], true) : array();
+
+			return $row;
+		}
+
+		/**
+		 * Resolve a client by ID or by legacy client_name.
+		 *
+		 * @param string $client_id_or_name The submitted client identifier.
+		 * @return array|null Client row or null if not found.
+		 */
+		public static function get_client_by_id_or_name(string $client_id_or_name): array|null
+		{
+			$client = self::get_client_by_id($client_id_or_name);
+			if ($client) {
+				return $client;
+			}
+
+			return self::get_client_by_name($client_id_or_name);
 		}
 
 		/**
@@ -232,14 +291,15 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $client_id The OAuth client ID.
 		 * @return bool True on success, false on failure.
 		 */
-		public static function delete_client( string $client_id ): bool {
+		public static function delete_client(string $client_id): bool
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$deleted = $wpdb->delete(
 				self::table_clients(),
-				array( 'client_id' => $client_id ),
-				array( '%s' )
+				array('client_id' => $client_id),
+				array('%s')
 			);
 
 			return false !== $deleted;
@@ -250,22 +310,23 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return array List of client rows.
 		 */
-		public static function get_all_clients(): array {
+		public static function get_all_clients(): array
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$rows = $wpdb->get_results(
-				$wpdb->prepare( 'SELECT * FROM %i ORDER BY created_at DESC', self::table_clients() ),
+				$wpdb->prepare('SELECT * FROM %i ORDER BY created_at DESC', self::table_clients()),
 				ARRAY_A
 			);
 
-			if ( ! $rows ) {
+			if (! $rows) {
 				return array();
 			}
 
-			foreach ( $rows as &$row ) {
-				$row['redirect_uris'] = json_decode( $row['redirect_uris'], true ) ? json_decode( $row['redirect_uris'], true ) : array();
-				$row['grant_types']   = json_decode( $row['grant_types'], true ) ? json_decode( $row['grant_types'], true ) : array();
+			foreach ($rows as &$row) {
+				$row['redirect_uris'] = json_decode($row['redirect_uris'], true) ? json_decode($row['redirect_uris'], true) : array();
+				$row['grant_types']   = json_decode($row['grant_types'], true) ? json_decode($row['grant_types'], true) : array();
 			}
 
 			return $rows;
@@ -277,11 +338,12 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param array $data Authorization code data.
 		 * @return string|false The code string on success, false on failure.
 		 */
-		public static function insert_code( array $data ): string|false {
+		public static function insert_code(array $data): string|false
+		{
 			global $wpdb;
 
-			$code       = bin2hex( random_bytes( 32 ) );
-			$expires_at = gmdate( 'Y-m-d H:i:s', time() + 60 );
+			$code       = bin2hex(random_bytes(32));
+			$expires_at = gmdate('Y-m-d H:i:s', time() + 60);
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$inserted = $wpdb->insert(
@@ -296,7 +358,7 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 					'code_challenge_method' => $data['code_challenge_method'] ?? 'S256',
 					'expires_at'            => $expires_at,
 				),
-				array( '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
+				array('%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s')
 			);
 
 			return $inserted ? $code : false;
@@ -308,7 +370,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $code The authorization code.
 		 * @return array|null Code row or null if not found.
 		 */
-		public static function get_code( string $code ): array|null {
+		public static function get_code(string $code): array|null
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
@@ -330,16 +393,17 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $code The authorization code.
 		 * @return bool True on success, false on failure.
 		 */
-		public static function mark_code_used( string $code ): bool {
+		public static function mark_code_used(string $code): bool
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$updated = $wpdb->update(
 				self::table_codes(),
-				array( 'used' => 1 ),
-				array( 'code' => $code ),
-				array( '%d' ),
-				array( '%s' )
+				array('used' => 1),
+				array('code' => $code),
+				array('%d'),
+				array('%s')
 			);
 
 			return false !== $updated;
@@ -350,10 +414,11 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return int Number of deleted rows.
 		 */
-		public static function cleanup_expired_codes(): int {
+		public static function cleanup_expired_codes(): int
+		{
 			global $wpdb;
 
-			$now = gmdate( 'Y-m-d H:i:s' );
+			$now = gmdate('Y-m-d H:i:s');
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$deleted = $wpdb->query(
@@ -374,8 +439,9 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $token The raw token string.
 		 * @return string The hashed token.
 		 */
-		public static function hash_token( string $token ): string {
-			return hash( 'sha256', $token );
+		public static function hash_token(string $token): string
+		{
+			return hash('sha256', $token);
 		}
 
 		/**
@@ -384,17 +450,18 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param array $data Token data including client_id, user_id, scope.
 		 * @return array|false Token data on success, false on failure.
 		 */
-		public static function insert_token( array $data ): array|false {
+		public static function insert_token(array $data): array|false
+		{
 			global $wpdb;
 
-			$access_token  = bin2hex( random_bytes( 32 ) );
-			$refresh_token = bin2hex( random_bytes( 32 ) );
+			$access_token  = bin2hex(random_bytes(32));
+			$refresh_token = bin2hex(random_bytes(32));
 
-			$access_hash  = self::hash_token( $access_token );
-			$refresh_hash = self::hash_token( $refresh_token );
+			$access_hash  = self::hash_token($access_token);
+			$refresh_hash = self::hash_token($refresh_token);
 
-			$access_expires_at  = gmdate( 'Y-m-d H:i:s', time() + 3600 );
-			$refresh_expires_at = gmdate( 'Y-m-d H:i:s', time() + ( 30 * DAY_IN_SECONDS ) );
+			$access_expires_at  = gmdate('Y-m-d H:i:s', time() + 3600);
+			$refresh_expires_at = gmdate('Y-m-d H:i:s', time() + (30 * DAY_IN_SECONDS));
 
 			$scope = $data['scope'] ?? 'mcp:tools';
 
@@ -410,10 +477,10 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 					'access_expires_at'  => $access_expires_at,
 					'refresh_expires_at' => $refresh_expires_at,
 				),
-				array( '%s', '%s', '%s', '%d', '%s', '%s', '%s' )
+				array('%s', '%s', '%s', '%d', '%s', '%s', '%s')
 			);
 
-			if ( ! $inserted ) {
+			if (! $inserted) {
 				return false;
 			}
 
@@ -431,10 +498,11 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $access_hash The hashed access token.
 		 * @return array|null Token row or null if not found/expired/revoked.
 		 */
-		public static function get_token_by_access_hash( string $access_hash ): array|null {
+		public static function get_token_by_access_hash(string $access_hash): array|null
+		{
 			global $wpdb;
 
-			$now = gmdate( 'Y-m-d H:i:s' );
+			$now = gmdate('Y-m-d H:i:s');
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$row = $wpdb->get_row(
@@ -456,10 +524,11 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $refresh_hash The hashed refresh token.
 		 * @return array|null Token row or null if not found/expired/revoked.
 		 */
-		public static function get_token_by_refresh_hash( string $refresh_hash ): array|null {
+		public static function get_token_by_refresh_hash(string $refresh_hash): array|null
+		{
 			global $wpdb;
 
-			$now = gmdate( 'Y-m-d H:i:s' );
+			$now = gmdate('Y-m-d H:i:s');
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$row = $wpdb->get_row(
@@ -481,16 +550,17 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $access_hash The hashed access token.
 		 * @return bool True if a token was revoked.
 		 */
-		public static function revoke_token_by_access_hash( string $access_hash ): bool {
+		public static function revoke_token_by_access_hash(string $access_hash): bool
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$updated = $wpdb->update(
 				self::table_tokens(),
-				array( 'revoked' => 1 ),
-				array( 'access_token_hash' => $access_hash ),
-				array( '%d' ),
-				array( '%s' )
+				array('revoked' => 1),
+				array('access_token_hash' => $access_hash),
+				array('%d'),
+				array('%s')
 			);
 
 			return $updated > 0;
@@ -502,16 +572,17 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $refresh_hash The hashed refresh token.
 		 * @return bool True if a token was revoked.
 		 */
-		public static function revoke_token_by_refresh_hash( string $refresh_hash ): bool {
+		public static function revoke_token_by_refresh_hash(string $refresh_hash): bool
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$updated = $wpdb->update(
 				self::table_tokens(),
-				array( 'revoked' => 1 ),
-				array( 'refresh_token_hash' => $refresh_hash ),
-				array( '%d' ),
-				array( '%s' )
+				array('revoked' => 1),
+				array('refresh_token_hash' => $refresh_hash),
+				array('%d'),
+				array('%s')
 			);
 
 			return $updated > 0;
@@ -523,16 +594,17 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param int $id The token row ID.
 		 * @return bool True if a token was revoked.
 		 */
-		public static function revoke_token_by_id( int $id ): bool {
+		public static function revoke_token_by_id(int $id): bool
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$updated = $wpdb->update(
 				self::table_tokens(),
-				array( 'revoked' => 1 ),
-				array( 'id' => $id ),
-				array( '%d' ),
-				array( '%d' )
+				array('revoked' => 1),
+				array('id' => $id),
+				array('%d'),
+				array('%d')
 			);
 
 			return $updated > 0;
@@ -544,7 +616,8 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 * @param string $client_id The OAuth client ID.
 		 * @return int Number of tokens revoked.
 		 */
-		public static function revoke_all_for_client( string $client_id ): int {
+		public static function revoke_all_for_client(string $client_id): int
+		{
 			global $wpdb;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
@@ -564,10 +637,11 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return array List of active token rows.
 		 */
-		public static function get_active_tokens(): array {
+		public static function get_active_tokens(): array
+		{
 			global $wpdb;
 
-			$now       = gmdate( 'Y-m-d H:i:s' );
+			$now       = gmdate('Y-m-d H:i:s');
 			$t_tokens  = self::table_tokens();
 			$t_clients = self::table_clients();
 
@@ -594,17 +668,18 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 		 *
 		 * @return int Number of deleted rows.
 		 */
-		public static function cleanup_expired_tokens(): int {
+		public static function cleanup_expired_tokens(): int
+		{
 			global $wpdb;
 
-			$now = gmdate( 'Y-m-d H:i:s' );
+			$now = gmdate('Y-m-d H:i:s');
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom OAuth tables, no WP cache API applicable.
 			$deleted = $wpdb->query(
 				$wpdb->prepare(
 					'DELETE FROM %i WHERE (revoked = 1 AND created_at < %s) OR (access_expires_at < %s AND refresh_expires_at < %s)',
 					self::table_tokens(),
-					gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ),
+					gmdate('Y-m-d H:i:s', time() - DAY_IN_SECONDS),
 					$now,
 					$now
 				)
@@ -613,5 +688,4 @@ if ( ! class_exists( 'MCPCOMAL_OAuth_DB' ) ) {
 			return (int) $deleted;
 		}
 	}
-
 }

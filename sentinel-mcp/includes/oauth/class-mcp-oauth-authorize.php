@@ -8,8 +8,8 @@
  * authorization codes.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
@@ -43,8 +43,8 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 				);
 			}
 
-			// Validate client exists.
-			$client = SENTINEL_OAuth_DB::get_client_by_id($params['client_id']);
+			// Validate client exists, accepting legacy stored client names if needed.
+			$client = SENTINEL_OAuth_DB::get_client_by_id_or_name($params['client_id']);
 			if (! $client) {
 				return new WP_Error(
 					'invalid_client',
@@ -52,6 +52,9 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 					array('status' => 400)
 				);
 			}
+
+			// Canonicalize legacy values to the real registered client ID.
+			$params['client_id'] = $client['client_id'];
 
 			// Validate redirect_uri matches registered URIs.
 			if (! in_array($params['redirect_uri'], $client['redirect_uris'], true)) {
@@ -121,14 +124,14 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 
 			$action                = sanitize_text_field($request->get_param('action') ?? '');
 			$client_id             = sanitize_text_field($request->get_param('client_id') ?? '');
-			$redirect_uri          = esc_url_raw($request->get_param('redirect_uri') ?? '');
+			$redirect_uri          = SENTINEL_OAuth_Server::sanitize_redirect_uri($request->get_param('redirect_uri') ?? '');
 			$scope                 = sanitize_text_field($request->get_param('scope') ?? '');
 			$state                 = sanitize_text_field($request->get_param('state') ?? '');
 			$code_challenge        = sanitize_text_field($request->get_param('code_challenge') ?? '');
 			$code_challenge_method = sanitize_text_field($request->get_param('code_challenge_method') ?? '');
 
 			// Re-validate client and redirect_uri (defense in depth).
-			$client = SENTINEL_OAuth_DB::get_client_by_id($client_id);
+			$client = SENTINEL_OAuth_DB::get_client_by_id_or_name($client_id);
 			if (! $client || ! in_array($redirect_uri, $client['redirect_uris'], true)) {
 				return new WP_Error(
 					'invalid_client',
@@ -136,6 +139,8 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 					array('status' => 400)
 				);
 			}
+
+			$client_id = $client['client_id'];
 
 			// User denied authorization.
 			if ('authorize' !== $action) {
@@ -226,7 +231,7 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 			return array(
 				'response_type'         => sanitize_text_field($request->get_param('response_type') ?? ''),
 				'client_id'             => sanitize_text_field($request->get_param('client_id') ?? ''),
-				'redirect_uri'          => esc_url_raw($request->get_param('redirect_uri') ?? ''),
+				'redirect_uri'          => SENTINEL_OAuth_Server::sanitize_redirect_uri($request->get_param('redirect_uri') ?? ''),
 				'scope'                 => sanitize_text_field($request->get_param('scope') ?? 'mcp:tools'),
 				'state'                 => sanitize_text_field($request->get_param('state') ?? ''),
 				'code_challenge'        => sanitize_text_field($request->get_param('code_challenge') ?? ''),

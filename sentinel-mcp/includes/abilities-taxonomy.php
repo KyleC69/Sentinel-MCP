@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Taxonomy CRUD Abilities.
  *
@@ -6,13 +7,13 @@
  * Complements the existing sentinel/list-terms ability in abilities-discovery.php.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 add_action(
 	'wp_abilities_api_init',
@@ -28,14 +29,14 @@ add_action(
 				'label'               => 'Create taxonomy term',
 				'category'            => 'sentinel-discovery',
 				'description'         => 'Required: taxonomy (string), name (string). '
-								. 'Creates a new term in any taxonomy (categories, tags, product_cat, etc.). '
-								. 'Call sentinel/list-terms first to see existing terms and avoid duplicates. '
-								. 'For hierarchical taxonomies, set parent to nest terms.',
+					. 'Creates a new term in any taxonomy (categories, tags, product_cat, etc.). '
+					. 'Call sentinel/list-terms first to see existing terms and avoid duplicates. '
+					. 'For hierarchical taxonomies, set parent to nest terms.',
 
 				'input_schema'        => array(
 					'type'       => 'object',
 					'default'    => array(),
-					'required'   => array( 'taxonomy', 'name' ),
+					'required'   => array('taxonomy', 'name'),
 					'properties' => array(
 						'taxonomy'    => array(
 							'type'        => 'string',
@@ -61,7 +62,7 @@ add_action(
 						'meta'        => array(
 							'type'                 => 'object',
 							'description'          => 'Term meta key-value pairs.',
-							'additionalProperties' => array( 'type' => 'string' ),
+							'additionalProperties' => array('type' => 'string'),
 						),
 					),
 				),
@@ -69,52 +70,52 @@ add_action(
 				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'success'  => array( 'type' => 'boolean' ),
-						'term_id'  => array( 'type' => 'integer' ),
-						'name'     => array( 'type' => 'string' ),
-						'slug'     => array( 'type' => 'string' ),
-						'taxonomy' => array( 'type' => 'string' ),
-						'message'  => array( 'type' => 'string' ),
+						'success'  => array('type' => 'boolean'),
+						'term_id'  => array('type' => 'integer'),
+						'name'     => array('type' => 'string'),
+						'slug'     => array('type' => 'string'),
+						'taxonomy' => array('type' => 'string'),
+						'message'  => array('type' => 'string'),
 					),
 				),
 
-				'execute_callback'    => function ( $input ) {
-					$taxonomy = sanitize_text_field( $input['taxonomy'] );
-					$name     = sanitize_text_field( $input['name'] );
+				'execute_callback'    => function ($input) {
+					$taxonomy = sanitize_text_field($input['taxonomy']);
+					$name     = sanitize_text_field($input['name']);
 
-					if ( ! taxonomy_exists( $taxonomy ) ) {
+					if (! taxonomy_exists($taxonomy)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Taxonomy "%s" not found.', $taxonomy ),
+							'message' => sprintf('Taxonomy "%s" not found.', $taxonomy),
 						);
 					}
 
 					$args = array();
-					if ( ! empty( $input['slug'] ) ) {
-						$args['slug'] = sanitize_title( $input['slug'] );
+					if (! empty($input['slug'])) {
+						$args['slug'] = sanitize_title($input['slug']);
 					}
-					if ( ! empty( $input['description'] ) ) {
-						$args['description'] = sanitize_text_field( $input['description'] );
+					if (! empty($input['description'])) {
+						$args['description'] = sanitize_text_field($input['description']);
 					}
-					if ( ! empty( $input['parent'] ) ) {
-						$args['parent'] = absint( $input['parent'] );
+					if (! empty($input['parent'])) {
+						$args['parent'] = absint($input['parent']);
 					}
 
-					$result = wp_insert_term( $name, $taxonomy, $args );
+					$result = wp_insert_term($name, $taxonomy, $args);
 
-					if ( is_wp_error( $result ) ) {
+					if (is_wp_error($result)) {
 						return array(
 							'success' => false,
 							'message' => $result->get_error_message(),
 						);
 					}
 
-					$term = get_term( $result['term_id'], $taxonomy );
+					$term = get_term($result['term_id'], $taxonomy);
 
 					// Set meta if provided.
-					if ( ! empty( $input['meta'] ) && is_array( $input['meta'] ) ) {
-						foreach ( $input['meta'] as $key => $value ) {
-							update_term_meta( $term->term_id, sanitize_text_field( $key ), sanitize_text_field( $value ) );
+					if (! empty($input['meta']) && is_array($input['meta'])) {
+						foreach ($input['meta'] as $key => $value) {
+							update_term_meta($term->term_id, sanitize_text_field($key), sanitize_text_field($value));
 						}
 					}
 
@@ -124,12 +125,12 @@ add_action(
 						'name'     => $term->name,
 						'slug'     => $term->slug,
 						'taxonomy' => $taxonomy,
-						'message'  => sprintf( 'Term "%s" created in "%s" (ID: %d).', $term->name, $taxonomy, $term->term_id ),
+						'message'  => sprintf('Term "%s" created in "%s" (ID: %d).', $term->name, $taxonomy, $term->term_id),
 					);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_categories' );
+					return current_user_can('manage_categories');
 				},
 
 				'meta'                => array(
@@ -157,14 +158,14 @@ add_action(
 				'label'               => 'Update taxonomy term',
 				'category'            => 'sentinel-discovery',
 				'description'         => 'Required: term_id (integer), taxonomy (string). '
-								. 'Updates an existing term: name, slug, description, or parent. '
-								. 'Only the provided fields are modified. '
-								. 'Alias: id is also accepted instead of term_id.',
+					. 'Updates an existing term: name, slug, description, or parent. '
+					. 'Only the provided fields are modified. '
+					. 'Alias: id is also accepted instead of term_id.',
 
 				'input_schema'        => array(
 					'type'       => 'object',
 					'default'    => array(),
-					'required'   => array( 'taxonomy' ),
+					'required'   => array('taxonomy'),
 					'properties' => array(
 						'term_id'     => array(
 							'type'        => 'integer',
@@ -197,7 +198,7 @@ add_action(
 						'meta'        => array(
 							'type'                 => 'object',
 							'description'          => 'Term meta key-value pairs to update.',
-							'additionalProperties' => array( 'type' => 'string' ),
+							'additionalProperties' => array('type' => 'string'),
 						),
 					),
 				),
@@ -205,54 +206,54 @@ add_action(
 				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'success' => array( 'type' => 'boolean' ),
-						'term_id' => array( 'type' => 'integer' ),
-						'message' => array( 'type' => 'string' ),
+						'success' => array('type' => 'boolean'),
+						'term_id' => array('type' => 'integer'),
+						'message' => array('type' => 'string'),
 					),
 				),
 
-				'execute_callback'    => function ( $input ) {
-					$term_id  = absint( $input['term_id'] ?? $input['id'] ?? 0 );
-					$taxonomy = sanitize_text_field( $input['taxonomy'] );
+				'execute_callback'    => function ($input) {
+					$term_id  = absint($input['term_id'] ?? $input['id'] ?? 0);
+					$taxonomy = sanitize_text_field($input['taxonomy']);
 
-					if ( ! taxonomy_exists( $taxonomy ) ) {
+					if (! taxonomy_exists($taxonomy)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Taxonomy "%s" not found.', $taxonomy ),
+							'message' => sprintf('Taxonomy "%s" not found.', $taxonomy),
 						);
 					}
 
-					$term = get_term( $term_id, $taxonomy );
-					if ( ! $term || is_wp_error( $term ) ) {
+					$term = get_term($term_id, $taxonomy);
+					if (! $term || is_wp_error($term)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Term #%d not found in "%s".', $term_id, $taxonomy ),
+							'message' => sprintf('Term #%d not found in "%s".', $term_id, $taxonomy),
 						);
 					}
 
 					$args    = array();
 					$updated = array();
 
-					if ( ! empty( $input['name'] ) ) {
-						$args['name'] = sanitize_text_field( $input['name'] );
+					if (! empty($input['name'])) {
+						$args['name'] = sanitize_text_field($input['name']);
 						$updated[]    = 'name';
 					}
-					if ( ! empty( $input['slug'] ) ) {
-						$args['slug'] = sanitize_title( $input['slug'] );
+					if (! empty($input['slug'])) {
+						$args['slug'] = sanitize_title($input['slug']);
 						$updated[]    = 'slug';
 					}
-					if ( isset( $input['description'] ) ) {
-						$args['description'] = sanitize_text_field( $input['description'] );
+					if (isset($input['description'])) {
+						$args['description'] = sanitize_text_field($input['description']);
 						$updated[]           = 'description';
 					}
-					if ( isset( $input['parent'] ) ) {
-						$args['parent'] = absint( $input['parent'] );
+					if (isset($input['parent'])) {
+						$args['parent'] = absint($input['parent']);
 						$updated[]      = 'parent';
 					}
 
-					if ( ! empty( $args ) ) {
-						$result = wp_update_term( $term_id, $taxonomy, $args );
-						if ( is_wp_error( $result ) ) {
+					if (! empty($args)) {
+						$result = wp_update_term($term_id, $taxonomy, $args);
+						if (is_wp_error($result)) {
 							return array(
 								'success' => false,
 								'message' => $result->get_error_message(),
@@ -261,14 +262,14 @@ add_action(
 					}
 
 					// Update meta if provided.
-					if ( ! empty( $input['meta'] ) && is_array( $input['meta'] ) ) {
-						foreach ( $input['meta'] as $key => $value ) {
-							update_term_meta( $term_id, sanitize_text_field( $key ), sanitize_text_field( $value ) );
+					if (! empty($input['meta']) && is_array($input['meta'])) {
+						foreach ($input['meta'] as $key => $value) {
+							update_term_meta($term_id, sanitize_text_field($key), sanitize_text_field($value));
 						}
 						$updated[] = 'meta';
 					}
 
-					if ( empty( $updated ) ) {
+					if (empty($updated)) {
 						return array(
 							'success' => false,
 							'message' => 'No fields to update.',
@@ -278,12 +279,12 @@ add_action(
 					return array(
 						'success' => true,
 						'term_id' => $term_id,
-						'message' => sprintf( 'Term #%d updated: %s.', $term_id, implode( ', ', $updated ) ),
+						'message' => sprintf('Term #%d updated: %s.', $term_id, implode(', ', $updated)),
 					);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_categories' );
+					return current_user_can('manage_categories');
 				},
 
 				'meta'                => array(
@@ -311,14 +312,14 @@ add_action(
 				'label'               => 'Delete taxonomy term',
 				'category'            => 'sentinel-discovery',
 				'description'         => 'Required: term_id (integer), taxonomy (string). '
-								. 'Permanently deletes a term from a taxonomy. Posts assigned to this term '
-								. 'will have the term removed (they are NOT deleted). '
-								. 'Alias: id is also accepted instead of term_id.',
+					. 'Permanently deletes a term from a taxonomy. Posts assigned to this term '
+					. 'will have the term removed (they are NOT deleted). '
+					. 'Alias: id is also accepted instead of term_id.',
 
 				'input_schema'        => array(
 					'type'       => 'object',
 					'default'    => array(),
-					'required'   => array( 'taxonomy' ),
+					'required'   => array('taxonomy'),
 					'properties' => array(
 						'term_id'  => array(
 							'type'        => 'integer',
@@ -338,41 +339,41 @@ add_action(
 				'output_schema'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'success' => array( 'type' => 'boolean' ),
-						'message' => array( 'type' => 'string' ),
+						'success' => array('type' => 'boolean'),
+						'message' => array('type' => 'string'),
 					),
 				),
 
-				'execute_callback'    => function ( $input ) {
-					$term_id  = absint( $input['term_id'] ?? $input['id'] ?? 0 );
-					$taxonomy = sanitize_text_field( $input['taxonomy'] );
+				'execute_callback'    => function ($input) {
+					$term_id  = absint($input['term_id'] ?? $input['id'] ?? 0);
+					$taxonomy = sanitize_text_field($input['taxonomy']);
 
-					if ( ! taxonomy_exists( $taxonomy ) ) {
+					if (! taxonomy_exists($taxonomy)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Taxonomy "%s" not found.', $taxonomy ),
+							'message' => sprintf('Taxonomy "%s" not found.', $taxonomy),
 						);
 					}
 
-					$term = get_term( $term_id, $taxonomy );
-					if ( ! $term || is_wp_error( $term ) ) {
+					$term = get_term($term_id, $taxonomy);
+					if (! $term || is_wp_error($term)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Term #%d not found in "%s".', $term_id, $taxonomy ),
+							'message' => sprintf('Term #%d not found in "%s".', $term_id, $taxonomy),
 						);
 					}
 
 					$name   = $term->name;
-					$result = wp_delete_term( $term_id, $taxonomy );
+					$result = wp_delete_term($term_id, $taxonomy);
 
-					if ( is_wp_error( $result ) ) {
+					if (is_wp_error($result)) {
 						return array(
 							'success' => false,
 							'message' => $result->get_error_message(),
 						);
 					}
 
-					if ( false === $result ) {
+					if (false === $result) {
 						return array(
 							'success' => false,
 							'message' => 'Cannot delete the default term.',
@@ -381,12 +382,12 @@ add_action(
 
 					return array(
 						'success' => true,
-						'message' => sprintf( 'Term "%s" (ID: %d) deleted from "%s".', $name, $term_id, $taxonomy ),
+						'message' => sprintf('Term "%s" (ID: %d) deleted from "%s".', $name, $term_id, $taxonomy),
 					);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_categories' );
+					return current_user_can('manage_categories');
 				},
 
 				'meta'                => array(

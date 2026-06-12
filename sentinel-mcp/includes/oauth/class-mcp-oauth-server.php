@@ -7,8 +7,8 @@
  * CORS handling, and initialises the Bearer token interceptor.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
@@ -84,7 +84,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 			self::send_cors_headers();
 			wp_send_json(
 				array(
-					'resource'                 => home_url(),
+					'resource'                 => rest_url('mcp/mcp-adapter-default-server'),
 					'authorization_servers'    => array(home_url()),
 					'bearer_methods_supported' => array('header'),
 					'scopes_supported'         => array('mcp:tools', 'mcp:read', 'mcp:write'),
@@ -193,6 +193,84 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 					'permission_callback' => '__return_true', // Public per RFC 7009.
 				)
 			);
+
+			register_rest_route(
+				$namespace,
+				'/debug-probe',
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array(__CLASS__, 'handle_debug_probe'),
+					'permission_callback' => function (): bool {
+						return current_user_can('manage_options');
+					},
+				)
+			);
+		}
+
+		/**
+		 * Run a one-off HTTP probe against a target OAuth endpoint for troubleshooting.
+		 *
+		 * @param WP_REST_Request $request The incoming REST request.
+		 * @return WP_REST_Response|WP_Error
+		 */
+		public static function handle_debug_probe(WP_REST_Request $request): WP_REST_Response|WP_Error
+		{
+			$endpoint = esc_url_raw($request->get_param('endpoint') ?? '');
+			$method   = strtoupper(sanitize_text_field($request->get_param('method') ?? 'POST'));
+			$body     = $request->get_param('body');
+			$headers  = $request->get_param('headers') ?? array();
+
+			if ('' === $endpoint) {
+				return new WP_Error('invalid_request', 'An endpoint URL is required.', array('status' => 400));
+			}
+
+			if (! is_array($headers)) {
+				$headers = array();
+			}
+
+			$probe_headers = array(
+				'Accept'       => '*/*',
+				'Content-Type' => 'application/json',
+			);
+			foreach ($headers as $name => $value) {
+				if (is_string($name) && is_string($value) && '' !== trim($value)) {
+					$probe_headers[$name] = $value;
+				}
+			}
+
+			$args = array(
+				'method'    => in_array($method, array('GET', 'POST', 'PUT', 'PATCH', 'DELETE'), true) ? $method : 'POST',
+				'timeout'   => 30,
+				'sslverify' => true,
+				'headers'   => $probe_headers,
+			);
+
+			if (is_string($body) && '' !== trim($body)) {
+				$args['body'] = $body;
+			}
+
+			$response = wp_remote_request($endpoint, $args);
+			if (is_wp_error($response)) {
+				return new WP_Error('probe_failed', $response->get_error_message(), array('status' => 500));
+			}
+
+			$response_code = (int) wp_remote_retrieve_response_code($response);
+			$response_body = wp_remote_retrieve_body($response);
+			$response_headers = wp_remote_retrieve_headers($response);
+
+			return new WP_REST_Response(
+				array(
+					'status'   => $response_code,
+					'body'     => $response_body,
+					'headers'  => is_array($response_headers) ? $response_headers : array(),
+					'request'  => array(
+						'endpoint' => $endpoint,
+						'method'   => $args['method'],
+						'body'     => $args['body'] ?? '',
+					),
+				),
+				200
+			);
 		}
 
 		/**
@@ -222,7 +300,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 
 			// Validate redirect_uris are valid URLs. Allow HTTPS, HTTP (for localhost), and vscode scheme.
 			foreach ($redirect_uris as $uri) {
-				$uri = esc_url_raw($uri);
+				$uri = self::sanitize_redirect_uri($uri);
 				if (empty($uri)) {
 					return new WP_Error(
 						'invalid_redirect_uri',
@@ -253,7 +331,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 			}
 
 			// Sanitize redirect_uris.
-			$redirect_uris = array_map('esc_url_raw', $redirect_uris);
+			$redirect_uris = array_map(array(__CLASS__, 'sanitize_redirect_uri'), $redirect_uris);
 
 			// Validate auth method.
 			if (! in_array($auth_method, array('none', 'client_secret_post'), true)) {
@@ -379,6 +457,27 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				10,
 				4
 			);
+		}
+
+		/**
+		 * Sanitize a URL while preserving the vscode: scheme.
+		 *
+		 * WordPress esc_url_raw strips non-standard schemes. This helper
+		 * keeps vscode: intact so VS Code redirect URIs survive validation.
+		 *
+		 * @param string $url Raw URL.
+		 * @return string Sanitized URL.
+		 */
+		public static function sanitize_redirect_uri(string $url): string
+		{
+			$url = trim($url);
+			if (0 === stripos($url, 'vscode://')) {
+				// Only allow alphanum, dot, slash, hyphen, underscore in the path.
+				$path = substr($url, strlen('vscode://'));
+				$path = preg_replace('|[^a-zA-Z0-9._\-/]|', '', $path);
+				return 'vscode://' . $path;
+			}
+			return esc_url_raw($url);
 		}
 	}
 }

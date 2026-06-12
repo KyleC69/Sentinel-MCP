@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Inspector de esquemas de WordPress.
  *
@@ -13,24 +14,25 @@
  * del sitio sin que el usuario tenga que configurar nada.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
+if (! class_exists('SENTINEL_Schema_Inspector')) {
 
-	if ( class_exists( 'SENTINEL_Schema_Inspector' ) ) {
+	if (class_exists('SENTINEL_Schema_Inspector')) {
 		return;
 	}
 
 	/**
 	 * Dynamic schema inspector for WordPress post types, taxonomies, and meta fields.
 	 */
-	class SENTINEL_Schema_Inspector {
+	class SENTINEL_Schema_Inspector
+	{
 
 		/**
 		 * Get all public post types with full detail.
@@ -38,24 +40,25 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 		 * @param bool $include_builtin Incluir post y page.
 		 * @return array
 		 */
-		public static function get_post_types( bool $include_builtin = true ): array {
-			$post_types = get_post_types( array( 'public' => true ), 'objects' );
+		public static function get_post_types(bool $include_builtin = true): array
+		{
+			$post_types = get_post_types(array('public' => true), 'objects');
 			$result     = array();
 
-			foreach ( $post_types as $pt ) {
+			foreach ($post_types as $pt) {
 				// Exclude attachment.
-				if ( 'attachment' === $pt->name ) {
+				if ('attachment' === $pt->name) {
 					continue;
 				}
-				if ( ! $include_builtin && in_array( $pt->name, array( 'post', 'page' ), true ) ) {
+				if (! $include_builtin && in_array($pt->name, array('post', 'page'), true)) {
 					continue;
 				}
 
 				// Defensive: wrap taxonomy/meta inspection so one bad CPT doesn't break the whole list.
 				try {
-					$taxonomies  = self::get_taxonomies_for_post_type( $pt->name );
-					$meta_fields = self::get_meta_fields_for_post_type( $pt->name );
-				} catch ( \Throwable $e ) {
+					$taxonomies  = self::get_taxonomies_for_post_type($pt->name);
+					$meta_fields = self::get_meta_fields_for_post_type($pt->name);
+				} catch (\Throwable $e) {
 					$taxonomies  = array();
 					$meta_fields = array();
 				}
@@ -66,7 +69,7 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 					'description'  => $pt->description ? $pt->description : '',
 					'hierarchical' => $pt->hierarchical,
 					'has_archive'  => (bool) $pt->has_archive,
-					'supports'     => get_all_post_type_supports( $pt->name ),
+					'supports'     => get_all_post_type_supports($pt->name),
 					'taxonomies'   => $taxonomies,
 					'meta_fields'  => $meta_fields,
 					'rest_base'    => $pt->rest_base ? $pt->rest_base : $pt->name,
@@ -88,11 +91,12 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 		 * @param string $post_type Post type slug to inspect.
 		 * @return array
 		 */
-		public static function get_taxonomies_for_post_type( string $post_type ): array {
-			$taxonomies = get_object_taxonomies( $post_type, 'objects' );
+		public static function get_taxonomies_for_post_type(string $post_type): array
+		{
+			$taxonomies = get_object_taxonomies($post_type, 'objects');
 			$result     = array();
 
-			foreach ( $taxonomies as $tax ) {
+			foreach ($taxonomies as $tax) {
 				$terms = get_terms(
 					array(
 						'taxonomy'   => $tax->name,
@@ -102,8 +106,8 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 				);
 
 				$term_list = array();
-				if ( ! is_wp_error( $terms ) ) {
-					foreach ( $terms as $term ) {
+				if (! is_wp_error($terms)) {
+					foreach ($terms as $term) {
 						$term_list[] = array(
 							'id'     => $term->term_id,
 							'name'   => $term->name,
@@ -136,17 +140,18 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 		 * @param string $post_type Post type slug to get meta fields for.
 		 * @return array
 		 */
-		public static function get_meta_fields_for_post_type( string $post_type ): array {
+		public static function get_meta_fields_for_post_type(string $post_type): array
+		{
 			$fields = array();
 
 			// 1. Campos registrados con register_meta.
-			$registered = get_registered_meta_keys( 'post', $post_type );
-			foreach ( $registered as $key => $schema ) {
+			$registered = get_registered_meta_keys('post', $post_type);
+			foreach ($registered as $key => $schema) {
 				// Ignorar campos internos de WP.
-				if ( str_starts_with( $key, '_' ) && ! str_starts_with( $key, '_mcpcomal_' ) ) {
+				if (str_starts_with($key, '_') && ! str_starts_with($key, '_mcpcomal_')) {
 					continue;
 				}
-				$fields[ $key ] = array(
+				$fields[$key] = array(
 					'key'         => $key,
 					'type'        => $schema['type'] ?? 'string',
 					'description' => $schema['description'] ?? '',
@@ -156,40 +161,40 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 			}
 
 			// 2. ACF fields (if active).
-			if ( function_exists( 'acf_get_field_groups' ) ) {
+			if (function_exists('acf_get_field_groups')) {
 				try {
-					$groups = acf_get_field_groups( array( 'post_type' => $post_type ) );
-					foreach ( $groups as $group ) {
-						$acf_fields = acf_get_fields( $group['key'] );
-						if ( ! $acf_fields || ! is_array( $acf_fields ) ) {
+					$groups = acf_get_field_groups(array('post_type' => $post_type));
+					foreach ($groups as $group) {
+						$acf_fields = acf_get_fields($group['key']);
+						if (! $acf_fields || ! is_array($acf_fields)) {
 							continue;
 						}
-						foreach ( $acf_fields as $field ) {
-							if ( empty( $field['name'] ) ) {
+						foreach ($acf_fields as $field) {
+							if (empty($field['name'])) {
 								continue;
 							}
-							$fields[ $field['name'] ] = array(
+							$fields[$field['name']] = array(
 								'key'         => $field['name'],
-								'type'        => self::map_acf_type( $field['type'] ?? 'text' ),
-								'description' => ( $field['label'] ?? '' ) . ( ! empty( $field['instructions'] ) ? ' — ' . $field['instructions'] : '' ),
+								'type'        => self::map_acf_type($field['type'] ?? 'text'),
+								'description' => ($field['label'] ?? '') . (! empty($field['instructions']) ? ' — ' . $field['instructions'] : ''),
 								'source'      => 'acf',
 								'acf_type'    => $field['type'] ?? 'text',
-								'required'    => (bool) ( $field['required'] ?? false ),
+								'required'    => (bool) ($field['required'] ?? false),
 								'choices'     => $field['choices'] ?? null,
 								'default'     => $field['default_value'] ?? null,
 							);
 						}
 					}
-				} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch (\Throwable $e) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 					// ACF field inspection failed for this post type — skip gracefully.
 				}
 			}
 
 			// 3. Existing meta fields in DB (sample from latest posts).
-			$sample_fields = self::get_sample_meta_keys( $post_type );
-			foreach ( $sample_fields as $key ) {
-				if ( ! isset( $fields[ $key ] ) ) {
-					$fields[ $key ] = array(
+			$sample_fields = self::get_sample_meta_keys($post_type);
+			foreach ($sample_fields as $key) {
+				if (! isset($fields[$key])) {
+					$fields[$key] = array(
 						'key'         => $key,
 						'type'        => 'string',
 						'description' => 'Field detected in existing posts.',
@@ -199,7 +204,7 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 				}
 			}
 
-			return array_values( $fields );
+			return array_values($fields);
 		}
 
 		/**
@@ -208,11 +213,12 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 		 * @param string $post_type Post type slug to sample meta keys from.
 		 * @return array
 		 */
-		private static function get_sample_meta_keys( string $post_type ): array {
+		private static function get_sample_meta_keys(string $post_type): array
+		{
 			global $wpdb;
 
-			$like_underscore = $wpdb->esc_like( '_' ) . '%';
-			$like_field      = $wpdb->esc_like( 'field_' ) . '%';
+			$like_underscore = $wpdb->esc_like('_') . '%';
+			$like_field      = $wpdb->esc_like('field_') . '%';
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Meta key discovery query, results vary per post type.
 			$keys = $wpdb->get_col(
@@ -240,7 +246,8 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 		 * @param string $acf_type ACF field type to map.
 		 * @return string
 		 */
-		private static function map_acf_type( string $acf_type ): string {
+		private static function map_acf_type(string $acf_type): string
+		{
 			$map = array(
 				'text'             => 'string',
 				'textarea'         => 'string',
@@ -278,7 +285,7 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 				'clone'            => 'object',
 			);
 
-			return $map[ $acf_type ] ?? 'string';
+			return $map[$acf_type] ?? 'string';
 		}
 
 		/**
@@ -286,36 +293,36 @@ if ( ! class_exists( 'SENTINEL_Schema_Inspector' ) ) {
 		 *
 		 * @return array
 		 */
-		public static function get_site_schema_summary(): array {
+		public static function get_site_schema_summary(): array
+		{
 			$post_types = self::get_post_types();
 
 			$summary = array(
-				'site_name'  => get_bloginfo( 'name' ),
+				'site_name'  => get_bloginfo('name'),
 				'site_url'   => home_url(),
 				'post_types' => array(),
 				'total_cpts' => 0,
 			);
 
-			foreach ( $post_types as $pt ) {
-				$tax_names  = array_column( $pt['taxonomies'], 'name' );
-				$meta_names = array_column( $pt['meta_fields'], 'key' );
+			foreach ($post_types as $pt) {
+				$tax_names  = array_column($pt['taxonomies'], 'name');
+				$meta_names = array_column($pt['meta_fields'], 'key');
 
 				$summary['post_types'][] = array(
 					'name'             => $pt['name'],
 					'label'            => $pt['label'],
 					'hierarchical'     => $pt['hierarchical'],
-					'taxonomy_count'   => count( $pt['taxonomies'] ),
+					'taxonomy_count'   => count($pt['taxonomies']),
 					'taxonomies'       => $tax_names,
-					'meta_field_count' => count( $pt['meta_fields'] ),
+					'meta_field_count' => count($pt['meta_fields']),
 					'meta_fields'      => $meta_names,
-					'supports'         => array_keys( array_filter( $pt['supports'] ) ),
+					'supports'         => array_keys(array_filter($pt['supports'])),
 				);
 			}
 
-			$summary['total_cpts'] = count( $summary['post_types'] );
+			$summary['total_cpts'] = count($summary['post_types']);
 
 			return $summary;
 		}
 	}
-
 }

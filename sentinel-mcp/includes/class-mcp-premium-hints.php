@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Premium hints with per-session throttle (Sprint 5.2).
  *
@@ -13,20 +14,21 @@
  * still surfaces the message.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://mcpwp.com/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! class_exists( 'SENTINEL_Premium_Hints' ) ) {
+if (! class_exists('SENTINEL_Premium_Hints')) {
 
 	/**
 	 * Throttled Premium-upsell hint emitter.
 	 */
-	class SENTINEL_Premium_Hints {
+	class SENTINEL_Premium_Hints
+	{
 
 		/**
 		 * Throttle window in seconds. Roughly aligned with the OAuth access
@@ -43,20 +45,21 @@ if ( ! class_exists( 'SENTINEL_Premium_Hints' ) ) {
 		 * @param string $message     Human-readable message. Treated as a translatable string by the caller.
 		 * @return array{feature_slug:string,message:string,upgrade_url:string,category:string}|null
 		 */
-		public static function maybe_hint( string $category, string $feature_slug, string $message ): ?array {
-			$client_id = class_exists( 'SENTINEL_OAuth_Interceptor' )
+		public static function maybe_hint(string $category, string $feature_slug, string $message): ?array
+		{
+			$client_id = class_exists('SENTINEL_OAuth_Interceptor')
 				? SENTINEL_OAuth_Interceptor::get_current_client_id()
 				: '';
 
-			if ( '' !== $client_id && self::is_throttled( $client_id, $category ) ) {
+			if ('' !== $client_id && self::is_throttled($client_id, $category)) {
 				return null;
 			}
 
-			if ( '' !== $client_id ) {
-				self::mark_emitted( $client_id, $category );
+			if ('' !== $client_id) {
+				self::mark_emitted($client_id, $category);
 			}
 
-			$upgrade_url = defined( 'SENTINEL_PREMIUM_PRODUCT_URL' )
+			$upgrade_url = defined('SENTINEL_PREMIUM_PRODUCT_URL')
 				? SENTINEL_PREMIUM_PRODUCT_URL
 				: 'https://mcpwp.com/';
 
@@ -71,31 +74,35 @@ if ( ! class_exists( 'SENTINEL_Premium_Hints' ) ) {
 		/**
 		 * Whether the (client_id, category) pair already emitted a hint in this window.
 		 */
-		public static function is_throttled( string $client_id, string $category ): bool {
-			$key = self::key( $client_id, $category );
-			return false !== get_transient( $key );
+		public static function is_throttled(string $client_id, string $category): bool
+		{
+			$key = self::key($client_id, $category);
+			return false !== get_transient($key);
 		}
 
 		/**
 		 * Mark the (client_id, category) pair as having received a hint.
 		 */
-		public static function mark_emitted( string $client_id, string $category ): void {
-			$key = self::key( $client_id, $category );
-			set_transient( $key, 1, self::THROTTLE_TTL );
+		public static function mark_emitted(string $client_id, string $category): void
+		{
+			$key = self::key($client_id, $category);
+			set_transient($key, 1, self::THROTTLE_TTL);
 		}
 
 		/**
 		 * Reset throttle for a category (mainly used in tests or admin tooling).
 		 */
-		public static function reset( string $client_id, string $category ): void {
-			delete_transient( self::key( $client_id, $category ) );
+		public static function reset(string $client_id, string $category): void
+		{
+			delete_transient(self::key($client_id, $category));
 		}
 
 		/**
 		 * Compose the transient key.
 		 */
-		protected static function key( string $client_id, string $category ): string {
-			return 'mcpcomal_hint_' . md5( $client_id . '|' . $category );
+		protected static function key(string $client_id, string $category): string
+		{
+			return 'mcpcomal_hint_' . md5($client_id . '|' . $category);
 		}
 	}
 }

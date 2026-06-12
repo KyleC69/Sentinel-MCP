@@ -53,40 +53,66 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
         /**
          * Build the authorization URL.
          *
-         * @param array $args Optional overrides: client_id, redirect_uri, scope.
-         * @return string URL to redirect the user to.
-         */
-        /**
-         * Build the authorization URL.
-         *
-         * The caller must provide a valid {@code client_id}. Previously the method fell back to a stored option which, in many installations, contains the server name (e.g. "my-mcp-server-bbf60057"). This caused the server to receive an unexpected static client_id. The method now requires an explicit {@code client_id} argument; if omitted a {@code WP_Error} is returned.
+         * Uses the provided {@code client_id} when available, otherwise falls back
+         * to the stored option and resolves legacy server-name values to the real
+         * registered OAuth client ID before building the redirect URL.
          *
          * @param array $args Optional overrides:
-         *   - client_id (string)   Required. The OAuth client identifier.
+         *   - client_id (string)   Optional. The OAuth client identifier.
          *   - redirect_uri (string) Optional. Must be a valid URL; HTTPS, HTTP (localhost) or the vscode scheme are accepted.
          *   - scope (string)        Optional OAuth scope.
          * @return string|WP_Error Authorization URL or error.
          */
-        public static function get_authorization_url(array $args = []): string|WP_Error
+        /**
+         * Resolve the stored client_id to a real registered client.
+         *
+         * The plugin may have an outdated option value that contains the server name
+         * instead of the generated client_id. This helper attempts to look up the
+         * client by ID first, then falls back to a lookup by client_name. If a valid
+         * client is found, the option is updated to the correct ID.
+         *
+         * @return string|WP_Error Resolved client_id or WP_Error on failure.
+         */
+        private static function resolve_client_id(?string $client_id = null): string|WP_Error
         {
-            $client_id = $args['client_id'] ?? self::get_option('client_id');
-            if (empty($client_id)) {
-                return new WP_Error('missing_client_id', 'client_id is required to build the authorization URL.', array('status' => 400));
+            if (null === $client_id) {
+                $client_id = get_option('sentinel_oauth_client_id');
             }
 
-            // Verify that the client_id exists. If not, attempt to resolve via client_name (stored option may contain the server name).
+            if (! is_string($client_id) || '' === trim($client_id)) {
+                return new WP_Error('missing_client_id', 'client_id is required.', array('status' => 400));
+            }
+
             $client = SENTINEL_OAuth_DB::get_client_by_id($client_id);
-            if (! $client) {
-                // Try treating the stored value as a client_name.
-                $client_by_name = SENTINEL_OAuth_DB::get_client_by_name($client_id);
-                if ($client_by_name) {
-                    // Update client_id to the actual ID and persist for future calls.
-                    $client_id = $client_by_name['client_id'];
-                    // Optionally update the stored option to the correct ID.
-                    update_option('sentinel_oauth_client_id', $client_id);
-                } else {
-                    return new WP_Error('invalid_client_id', 'Provided client_id does not correspond to a registered OAuth client.', array('status' => 400));
+            if ($client) {
+                return $client['client_id'];
+            }
+
+            $client_by_name = SENTINEL_OAuth_DB::get_client_by_name($client_id);
+            if ($client_by_name) {
+                update_option('sentinel_oauth_client_id', $client_by_name['client_id']);
+                return $client_by_name['client_id'];
+            }
+
+            return new WP_Error('invalid_client_id', 'Provided client_id does not correspond to a registered OAuth client.', array('status' => 400));
+        }
+
+        public static function get_authorization_url(array $args = []): string|WP_Error
+        {
+            // Allow explicit override via args, otherwise resolve stored option.
+            $client_id = $args['client_id'] ?? null;
+            if (empty($client_id)) {
+                $resolved = self::resolve_client_id();
+                if (is_wp_error($resolved)) {
+                    return $resolved;
                 }
+                $client_id = $resolved;
+            } else {
+                $resolved = self::resolve_client_id($client_id);
+                if (is_wp_error($resolved)) {
+                    return $resolved;
+                }
+                $client_id = $resolved;
             }
 
             // Allow custom redirect URIs; default to admin‑ajax callback.
@@ -142,7 +168,11 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
                 wp_die('Authorization code missing.');
             }
 
-            $client_id = self::get_option('client_id');
+            $client_id_res = self::resolve_client_id();
+            if (is_wp_error($client_id_res)) {
+                wp_die($client_id_res->get_error_message());
+            }
+            $client_id = $client_id_res;
             $verifier  = get_transient('mcp_oauth_pkce_' . $client_id);
             if (! $verifier) {
                 wp_die('PKCE verifier not found.');
@@ -218,7 +248,11 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
                 return false;
             }
 
-            $client_id = self::get_option('client_id');
+            $client_id_res = self::resolve_client_id();
+            if (is_wp_error($client_id_res)) {
+                return false;
+            }
+            $client_id = $client_id_res;
             $token_endpoint = self::get_option('token_endpoint');
 
             $response = wp_remote_post($token_endpoint, array(
@@ -249,6 +283,9 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
 
         /**
          * Helper to get plugin options for OAuth configuration.
+         *
+         * Falls back to the live REST endpoint URLs so the manager always
+         * points at the current site regardless of stale option values.
          */
         private static function get_option(string $key)
         {
@@ -261,7 +298,17 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
             }
 
             $options = get_option('sentinel_oauth_config', array());
-            return $options[$key] ?? '';
+            if (! empty($options[$key])) {
+                return $options[$key];
+            }
+
+            // Fallback to live REST endpoints so the manager never returns
+            // empty strings for the OAuth protocol URLs.
+            return match ($key) {
+                'auth_endpoint'   => rest_url('sentinel-auth/v1/authorize'),
+                'token_endpoint'  => rest_url('sentinel-auth/v1/token'),
+                default           => '',
+            };
         }
     }
 

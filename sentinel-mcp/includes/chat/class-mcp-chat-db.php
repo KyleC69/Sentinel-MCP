@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Chat AI Database layer.
  *
@@ -6,18 +7,19 @@
  * conversations and messages in the Chat AI feature.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @since      1.1.0
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Database operations for the Chat AI subsystem.
  */
-class SENTINEL_Chat_DB {
+class SENTINEL_Chat_DB
+{
 
 	const DB_VERSION     = '1.0.0';
 	const OPT_DB_VERSION = 'mcpcomal_chat_db_version';
@@ -34,7 +36,8 @@ class SENTINEL_Chat_DB {
 	 *
 	 * @return string
 	 */
-	public static function conversations_table(): string {
+	public static function conversations_table(): string
+	{
 		global $wpdb;
 		return $wpdb->prefix . 'mcpcomal_chat_conversations';
 	}
@@ -44,7 +47,8 @@ class SENTINEL_Chat_DB {
 	 *
 	 * @return string
 	 */
-	public static function messages_table(): string {
+	public static function messages_table(): string
+	{
 		global $wpdb;
 		return $wpdb->prefix . 'mcpcomal_chat_messages';
 	}
@@ -54,7 +58,8 @@ class SENTINEL_Chat_DB {
 	 *
 	 * @return void
 	 */
-	public static function create_tables(): void {
+	public static function create_tables(): void
+	{
 		global $wpdb;
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -91,10 +96,10 @@ class SENTINEL_Chat_DB {
 			KEY conversation_id (conversation_id)
 		) {$charset_collate};";
 
-		dbDelta( $sql_conversations );
-		dbDelta( $sql_messages );
+		dbDelta($sql_conversations);
+		dbDelta($sql_messages);
 
-		update_option( self::OPT_DB_VERSION, self::DB_VERSION );
+		update_option(self::OPT_DB_VERSION, self::DB_VERSION);
 
 		self::$table_verified = true;
 	}
@@ -104,8 +109,9 @@ class SENTINEL_Chat_DB {
 	 *
 	 * @return void
 	 */
-	public static function maybe_upgrade(): void {
-		if ( get_option( self::OPT_DB_VERSION ) !== self::DB_VERSION ) {
+	public static function maybe_upgrade(): void
+	{
+		if (get_option(self::OPT_DB_VERSION) !== self::DB_VERSION) {
 			self::create_tables();
 		}
 	}
@@ -115,8 +121,9 @@ class SENTINEL_Chat_DB {
 	 *
 	 * @return void
 	 */
-	public static function ensure_tables(): void {
-		if ( self::$table_verified ) {
+	public static function ensure_tables(): void
+	{
+		if (self::$table_verified) {
 			return;
 		}
 
@@ -124,10 +131,10 @@ class SENTINEL_Chat_DB {
 
 		$table  = self::conversations_table();
 		$exists = $wpdb->get_var(
-			$wpdb->prepare( 'SHOW TABLES LIKE %s', $table )
+			$wpdb->prepare('SHOW TABLES LIKE %s', $table)
 		);
 
-		if ( $exists === $table ) {
+		if ($exists === $table) {
 			self::$table_verified = true;
 			return;
 		}
@@ -140,13 +147,14 @@ class SENTINEL_Chat_DB {
 	 *
 	 * @return void
 	 */
-	public static function drop_tables(): void {
+	public static function drop_tables(): void
+	{
 		global $wpdb;
 
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_chat_messages" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_chat_conversations" );
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_chat_messages");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_chat_conversations");
 
-		delete_option( self::OPT_DB_VERSION );
+		delete_option(self::OPT_DB_VERSION);
 	}
 
 	// ─── Conversations CRUD ──────────────────────────────────────────
@@ -159,23 +167,24 @@ class SENTINEL_Chat_DB {
 	 * @param string $model    AI model ID.
 	 * @return int|false Conversation ID on success, false on failure.
 	 */
-	public static function create_conversation( int $user_id, string $provider = 'anthropic', string $model = 'claude-sonnet-4-6' ): int|false {
+	public static function create_conversation(int $user_id, string $provider = 'anthropic', string $model = 'claude-sonnet-4-6'): int|false
+	{
 		global $wpdb;
 
 		self::ensure_tables();
 
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$now = gmdate('Y-m-d H:i:s');
 
 		$inserted = $wpdb->insert(
 			self::conversations_table(),
 			array(
 				'user_id'    => $user_id,
-				'provider'   => sanitize_text_field( $provider ),
-				'model'      => sanitize_text_field( $model ),
+				'provider'   => sanitize_text_field($provider),
+				'model'      => sanitize_text_field($model),
 				'created_at' => $now,
 				'updated_at' => $now,
 			),
-			array( '%d', '%s', '%s', '%s', '%s' )
+			array('%d', '%s', '%s', '%s', '%s')
 		);
 
 		return $inserted ? (int) $wpdb->insert_id : false;
@@ -188,7 +197,8 @@ class SENTINEL_Chat_DB {
 	 * @param int $user_id WordPress user ID.
 	 * @return array|null Conversation row or null.
 	 */
-	public static function get_conversation( int $id, int $user_id ): array|null {
+	public static function get_conversation(int $id, int $user_id): array|null
+	{
 		global $wpdb;
 
 		self::ensure_tables();
@@ -214,7 +224,8 @@ class SENTINEL_Chat_DB {
 	 * @param int $offset  Offset for pagination.
 	 * @return array List of conversation rows.
 	 */
-	public static function list_conversations( int $user_id, int $limit = 50, int $offset = 0 ): array {
+	public static function list_conversations(int $user_id, int $limit = 50, int $offset = 0): array
+	{
 		global $wpdb;
 
 		self::ensure_tables();
@@ -241,15 +252,16 @@ class SENTINEL_Chat_DB {
 	 * @param string $title   New title.
 	 * @return bool True on success.
 	 */
-	public static function update_title( int $id, int $user_id, string $title ): bool {
+	public static function update_title(int $id, int $user_id, string $title): bool
+	{
 		global $wpdb;
 
 		$updated = $wpdb->update(
 			self::conversations_table(),
-			array( 'title' => sanitize_text_field( $title ) ),
-			array( 'id' => $id, 'user_id' => $user_id ),
-			array( '%s' ),
-			array( '%d', '%d' )
+			array('title' => sanitize_text_field($title)),
+			array('id' => $id, 'user_id' => $user_id),
+			array('%s'),
+			array('%d', '%d')
 		);
 
 		return false !== $updated && $updated > 0;
@@ -264,18 +276,19 @@ class SENTINEL_Chat_DB {
 	 * @param string $model    AI model ID.
 	 * @return bool True on success.
 	 */
-	public static function update_provider( int $id, int $user_id, string $provider, string $model ): bool {
+	public static function update_provider(int $id, int $user_id, string $provider, string $model): bool
+	{
 		global $wpdb;
 
 		$updated = $wpdb->update(
 			self::conversations_table(),
 			array(
-				'provider' => sanitize_text_field( $provider ),
-				'model'    => sanitize_text_field( $model ),
+				'provider' => sanitize_text_field($provider),
+				'model'    => sanitize_text_field($model),
 			),
-			array( 'id' => $id, 'user_id' => $user_id ),
-			array( '%s', '%s' ),
-			array( '%d', '%d' )
+			array('id' => $id, 'user_id' => $user_id),
+			array('%s', '%s'),
+			array('%d', '%d')
 		);
 
 		return false !== $updated && $updated > 0;
@@ -287,15 +300,16 @@ class SENTINEL_Chat_DB {
 	 * @param int $id Conversation ID.
 	 * @return void
 	 */
-	public static function touch( int $id ): void {
+	public static function touch(int $id): void
+	{
 		global $wpdb;
 
 		$wpdb->update(
 			self::conversations_table(),
-			array( 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ),
-			array( 'id' => $id ),
-			array( '%s' ),
-			array( '%d' )
+			array('updated_at' => gmdate('Y-m-d H:i:s')),
+			array('id' => $id),
+			array('%s'),
+			array('%d')
 		);
 	}
 
@@ -306,7 +320,8 @@ class SENTINEL_Chat_DB {
 	 * @param int $user_id WordPress user ID (ownership check).
 	 * @return bool True on success.
 	 */
-	public static function delete_conversation( int $id, int $user_id ): bool {
+	public static function delete_conversation(int $id, int $user_id): bool
+	{
 		global $wpdb;
 
 		// Verify ownership.
@@ -319,22 +334,22 @@ class SENTINEL_Chat_DB {
 			)
 		);
 
-		if ( ! $exists ) {
+		if (! $exists) {
 			return false;
 		}
 
 		// Delete messages first.
 		$wpdb->delete(
 			self::messages_table(),
-			array( 'conversation_id' => $id ),
-			array( '%d' )
+			array('conversation_id' => $id),
+			array('%d')
 		);
 
 		// Delete conversation.
 		$deleted = $wpdb->delete(
 			self::conversations_table(),
-			array( 'id' => $id ),
-			array( '%d' )
+			array('id' => $id),
+			array('%d')
 		);
 
 		return false !== $deleted && $deleted > 0;
@@ -348,12 +363,13 @@ class SENTINEL_Chat_DB {
 	 * @param int    $limit   Maximum number of results.
 	 * @return array List of matching conversation rows.
 	 */
-	public static function search_conversations( int $user_id, string $query, int $limit = 30 ): array {
+	public static function search_conversations(int $user_id, string $query, int $limit = 30): array
+	{
 		global $wpdb;
 
 		self::ensure_tables();
 
-		$like = '%' . $wpdb->esc_like( $query ) . '%';
+		$like = '%' . $wpdb->esc_like($query) . '%';
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
@@ -406,18 +422,18 @@ class SENTINEL_Chat_DB {
 			self::messages_table(),
 			array(
 				'conversation_id' => $conversation_id,
-				'role'            => sanitize_text_field( $role ),
+				'role'            => sanitize_text_field($role),
 				'content'         => $content,
-				'tool_calls'      => null !== $tool_calls ? wp_json_encode( $tool_calls ) : null,
-				'tool_results'    => null !== $tool_results ? wp_json_encode( $tool_results ) : null,
+				'tool_calls'      => null !== $tool_calls ? wp_json_encode($tool_calls) : null,
+				'tool_results'    => null !== $tool_results ? wp_json_encode($tool_results) : null,
 				'tokens_in'       => $tokens_in,
 				'tokens_out'      => $tokens_out,
 			),
-			array( '%d', '%s', '%s', '%s', '%s', '%d', '%d' )
+			array('%d', '%s', '%s', '%s', '%s', '%d', '%d')
 		);
 
-		if ( $inserted ) {
-			self::touch( $conversation_id );
+		if ($inserted) {
+			self::touch($conversation_id);
 		}
 
 		return $inserted ? (int) $wpdb->insert_id : false;
@@ -430,7 +446,8 @@ class SENTINEL_Chat_DB {
 	 * @param int $user_id         WordPress user ID.
 	 * @return array List of message rows.
 	 */
-	public static function get_messages( int $conversation_id, int $user_id ): array {
+	public static function get_messages(int $conversation_id, int $user_id): array
+	{
 		global $wpdb;
 
 		self::ensure_tables();
@@ -450,16 +467,16 @@ class SENTINEL_Chat_DB {
 			ARRAY_A
 		);
 
-		if ( ! $rows ) {
+		if (! $rows) {
 			return array();
 		}
 
-		foreach ( $rows as &$row ) {
-			if ( null !== $row['tool_calls'] ) {
-				$row['tool_calls'] = json_decode( $row['tool_calls'], true ) ?? array();
+		foreach ($rows as &$row) {
+			if (null !== $row['tool_calls']) {
+				$row['tool_calls'] = json_decode($row['tool_calls'], true) ?? array();
 			}
-			if ( null !== $row['tool_results'] ) {
-				$row['tool_results'] = json_decode( $row['tool_results'], true ) ?? array();
+			if (null !== $row['tool_results']) {
+				$row['tool_results'] = json_decode($row['tool_results'], true) ?? array();
 			}
 		}
 
@@ -472,7 +489,8 @@ class SENTINEL_Chat_DB {
 	 * @param int $conversation_id Conversation ID.
 	 * @return array|null Message row or null.
 	 */
-	public static function get_last_message( int $conversation_id ): array|null {
+	public static function get_last_message(int $conversation_id): array|null
+	{
 		global $wpdb;
 
 		$row = $wpdb->get_row(
@@ -484,12 +502,12 @@ class SENTINEL_Chat_DB {
 			ARRAY_A
 		);
 
-		if ( $row ) {
-			if ( null !== $row['tool_calls'] ) {
-				$row['tool_calls'] = json_decode( $row['tool_calls'], true ) ?? array();
+		if ($row) {
+			if (null !== $row['tool_calls']) {
+				$row['tool_calls'] = json_decode($row['tool_calls'], true) ?? array();
 			}
-			if ( null !== $row['tool_results'] ) {
-				$row['tool_results'] = json_decode( $row['tool_results'], true ) ?? array();
+			if (null !== $row['tool_results']) {
+				$row['tool_results'] = json_decode($row['tool_results'], true) ?? array();
 			}
 		}
 
@@ -504,12 +522,13 @@ class SENTINEL_Chat_DB {
 	 * @param int $days Number of days to keep.
 	 * @return int Number of deleted conversations.
 	 */
-	public static function cleanup_old( int $days = 90 ): int {
+	public static function cleanup_old(int $days = 90): int
+	{
 		global $wpdb;
 
 		self::ensure_tables();
 
-		$threshold = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
+		$threshold = gmdate('Y-m-d H:i:s', time() - ($days * DAY_IN_SECONDS));
 
 		// Get IDs of old conversations.
 		$old_ids = $wpdb->get_col(
@@ -520,11 +539,11 @@ class SENTINEL_Chat_DB {
 			)
 		);
 
-		if ( empty( $old_ids ) ) {
+		if (empty($old_ids)) {
 			return 0;
 		}
 
-		$placeholders = implode( ',', array_fill( 0, count( $old_ids ), '%d' ) );
+		$placeholders = implode(',', array_fill(0, count($old_ids), '%d'));
 
 		// Delete messages.
 		$wpdb->query(

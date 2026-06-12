@@ -1,4 +1,5 @@
 <?php
+
 /**
  * WooCommerce read-only abilities (Sprint 1.6).
  *
@@ -8,64 +9,66 @@
  * directly. Editing WooCommerce data is reserved for the Premium edition.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://mcpwp.com/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! function_exists( 'mcpcomal_wc_redact_email' ) ) {
+if (! function_exists('mcpcomal_wc_redact_email')) {
 	/**
 	 * Redact an email address: jose@example.com → j***@example.com.
 	 *
 	 * @param string $email Email.
 	 * @return string
 	 */
-	function mcpcomal_wc_redact_email( string $email ): string {
-		if ( '' === $email || false === strpos( $email, '@' ) ) {
+	function mcpcomal_wc_redact_email(string $email): string
+	{
+		if ('' === $email || false === strpos($email, '@')) {
 			return '';
 		}
-		list( $local, $domain ) = explode( '@', $email, 2 );
-		return ( '' !== $local ? mb_substr( $local, 0, 1 ) . '***' : '***' ) . '@' . $domain;
+		list($local, $domain) = explode('@', $email, 2);
+		return ('' !== $local ? mb_substr($local, 0, 1) . '***' : '***') . '@' . $domain;
 	}
 }
 
-if ( ! function_exists( 'mcpcomal_wc_redact_name' ) ) {
+if (! function_exists('mcpcomal_wc_redact_name')) {
 	/**
 	 * Redact a person name to initials: "Jose Conti" → "J. C.".
 	 *
 	 * @param string $name Full name.
 	 * @return string
 	 */
-	function mcpcomal_wc_redact_name( string $name ): string {
-		$parts = preg_split( '/\s+/', trim( $name ) );
-		if ( ! is_array( $parts ) ) {
+	function mcpcomal_wc_redact_name(string $name): string
+	{
+		$parts = preg_split('/\s+/', trim($name));
+		if (! is_array($parts)) {
 			return '';
 		}
 		$initials = array();
-		foreach ( $parts as $part ) {
-			if ( '' === $part ) {
+		foreach ($parts as $part) {
+			if ('' === $part) {
 				continue;
 			}
-			$initials[] = mb_strtoupper( mb_substr( $part, 0, 1 ) ) . '.';
+			$initials[] = mb_strtoupper(mb_substr($part, 0, 1)) . '.';
 		}
-		return implode( ' ', $initials );
+		return implode(' ', $initials);
 	}
 }
 
 add_action(
 	'wp_abilities_api_categories_init',
 	function () {
-		if ( ! class_exists( 'WooCommerce' ) ) {
+		if (! class_exists('WooCommerce')) {
 			return;
 		}
 		wp_register_ability_category(
 			'sentinel-wc-read',
 			array(
-				'label'       => __( 'WooCommerce (read-only)', 'mcp-sentinel' ),
-				'description' => __( 'Read-only access to WooCommerce store info, products, recent orders and coupons. Editing WooCommerce data is Premium.', 'mcp-sentinel' ),
+				'label'       => __('WooCommerce (read-only)', 'mcp-sentinel'),
+				'description' => __('Read-only access to WooCommerce store info, products, recent orders and coupons. Editing WooCommerce data is Premium.', 'mcp-sentinel'),
 			)
 		);
 	}
@@ -74,7 +77,7 @@ add_action(
 add_action(
 	'wp_abilities_api_init',
 	function () {
-		if ( ! class_exists( 'WooCommerce' ) ) {
+		if (! class_exists('WooCommerce')) {
 			return;
 		}
 
@@ -100,28 +103,28 @@ add_action(
 				),
 
 				'execute_callback'    => function () {
-					$base_country_state = function_exists( 'wc_get_base_location' ) ? wc_get_base_location() : array();
+					$base_country_state = function_exists('wc_get_base_location') ? wc_get_base_location() : array();
 
 					return array(
-						'store_name'        => (string) get_option( 'blogname', '' ),
-						'store_address_1'   => (string) get_option( 'woocommerce_store_address', '' ),
-						'store_address_2'   => (string) get_option( 'woocommerce_store_address_2', '' ),
-						'store_city'        => (string) get_option( 'woocommerce_store_city', '' ),
-						'store_postcode'    => (string) get_option( 'woocommerce_store_postcode', '' ),
-						'base_country'      => isset( $base_country_state['country'] ) ? (string) $base_country_state['country'] : '',
-						'base_state'        => isset( $base_country_state['state'] ) ? (string) $base_country_state['state'] : '',
-						'currency_code'     => function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : '',
-						'currency_symbol'   => function_exists( 'get_woocommerce_currency_symbol' ) ? (string) get_woocommerce_currency_symbol() : '',
-						'weight_unit'       => (string) get_option( 'woocommerce_weight_unit', '' ),
-						'dimension_unit'    => (string) get_option( 'woocommerce_dimension_unit', '' ),
-						'prices_include_tax' => 'yes' === get_option( 'woocommerce_prices_include_tax', 'no' ),
-						'tax_enabled'       => 'yes' === get_option( 'woocommerce_calc_taxes', 'no' ),
+						'store_name'        => (string) get_option('blogname', ''),
+						'store_address_1'   => (string) get_option('woocommerce_store_address', ''),
+						'store_address_2'   => (string) get_option('woocommerce_store_address_2', ''),
+						'store_city'        => (string) get_option('woocommerce_store_city', ''),
+						'store_postcode'    => (string) get_option('woocommerce_store_postcode', ''),
+						'base_country'      => isset($base_country_state['country']) ? (string) $base_country_state['country'] : '',
+						'base_state'        => isset($base_country_state['state']) ? (string) $base_country_state['state'] : '',
+						'currency_code'     => function_exists('get_woocommerce_currency') ? (string) get_woocommerce_currency() : '',
+						'currency_symbol'   => function_exists('get_woocommerce_currency_symbol') ? (string) get_woocommerce_currency_symbol() : '',
+						'weight_unit'       => (string) get_option('woocommerce_weight_unit', ''),
+						'dimension_unit'    => (string) get_option('woocommerce_dimension_unit', ''),
+						'prices_include_tax' => 'yes' === get_option('woocommerce_prices_include_tax', 'no'),
+						'tax_enabled'       => 'yes' === get_option('woocommerce_calc_taxes', 'no'),
 						'language'          => (string) get_locale(),
 					);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_woocommerce' ) || current_user_can( 'read' );
+					return current_user_can('manage_woocommerce') || current_user_can('read');
 				},
 
 				'meta'                => array(
@@ -185,8 +188,8 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					if ( ! function_exists( 'wc_get_products' ) ) {
+				'execute_callback'    => function ($input = null) {
+					if (! function_exists('wc_get_products')) {
 						return array(
 							'success' => false,
 							'message' => 'WooCommerce is not active.',
@@ -194,10 +197,10 @@ add_action(
 					}
 
 					$per_page_raw = $input['per_page'] ?? $input['count'] ?? 20;
-					$per_page     = max( 1, min( 50, (int) $per_page_raw ) );
-					$page         = isset( $input['page'] ) ? max( 1, (int) $input['page'] ) : 1;
-					$status       = isset( $input['status'] ) ? sanitize_text_field( (string) $input['status'] ) : 'publish';
-					$search       = isset( $input['search'] ) ? sanitize_text_field( (string) $input['search'] ) : '';
+					$per_page     = max(1, min(50, (int) $per_page_raw));
+					$page         = isset($input['page']) ? max(1, (int) $input['page']) : 1;
+					$status       = isset($input['status']) ? sanitize_text_field((string) $input['status']) : 'publish';
+					$search       = isset($input['search']) ? sanitize_text_field((string) $input['search']) : '';
 
 					$args = array(
 						'limit'    => $per_page,
@@ -205,16 +208,16 @@ add_action(
 						'status'   => $status,
 						'paginate' => true,
 					);
-					if ( '' !== $search ) {
+					if ('' !== $search) {
 						$args['s'] = $search;
 					}
 
-					$result = wc_get_products( $args );
+					$result = wc_get_products($args);
 
 					$items = array();
-					foreach ( $result->products as $product ) {
+					foreach ($result->products as $product) {
 						$image_id  = (int) $product->get_image_id();
-						$image_url = $image_id ? (string) wp_get_attachment_image_url( $image_id, 'full' ) : '';
+						$image_url = $image_id ? (string) wp_get_attachment_image_url($image_id, 'full') : '';
 
 						$items[] = array(
 							'id'           => (int) $product->get_id(),
@@ -242,7 +245,7 @@ add_action(
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'read' );
+					return current_user_can('read');
 				},
 
 				'meta'                => array(
@@ -302,8 +305,8 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					if ( ! function_exists( 'wc_get_orders' ) ) {
+				'execute_callback'    => function ($input = null) {
+					if (! function_exists('wc_get_orders')) {
 						return array(
 							'success' => false,
 							'message' => 'WooCommerce is not active.',
@@ -311,9 +314,9 @@ add_action(
 					}
 
 					$per_page_raw = $input['per_page'] ?? $input['count'] ?? 20;
-					$per_page     = max( 1, min( 50, (int) $per_page_raw ) );
-					$page         = isset( $input['page'] ) ? max( 1, (int) $input['page'] ) : 1;
-					$status       = isset( $input['status'] ) ? sanitize_text_field( (string) $input['status'] ) : '';
+					$per_page     = max(1, min(50, (int) $per_page_raw));
+					$page         = isset($input['page']) ? max(1, (int) $input['page']) : 1;
+					$status       = isset($input['status']) ? sanitize_text_field((string) $input['status']) : '';
 
 					$args = array(
 						'limit'    => $per_page,
@@ -322,17 +325,17 @@ add_action(
 						'orderby'  => 'date',
 						'order'    => 'DESC',
 					);
-					if ( '' !== $status ) {
+					if ('' !== $status) {
 						$args['status'] = $status;
 					}
 
-					$result = wc_get_orders( $args );
+					$result = wc_get_orders($args);
 					$items  = array();
 
-					foreach ( $result->orders as $order ) {
+					foreach ($result->orders as $order) {
 						$first_name = (string) $order->get_billing_first_name();
 						$last_name  = (string) $order->get_billing_last_name();
-						$full_name  = trim( $first_name . ' ' . $last_name );
+						$full_name  = trim($first_name . ' ' . $last_name);
 
 						$items[] = array(
 							'id'             => (int) $order->get_id(),
@@ -340,10 +343,10 @@ add_action(
 							'status'         => (string) $order->get_status(),
 							'currency'       => (string) $order->get_currency(),
 							'total'          => (string) $order->get_total(),
-							'date_created'   => $order->get_date_created() ? $order->get_date_created()->date( 'c' ) : '',
+							'date_created'   => $order->get_date_created() ? $order->get_date_created()->date('c') : '',
 							'items_count'    => (int) $order->get_item_count(),
-							'customer_initials' => mcpcomal_wc_redact_name( $full_name ),
-							'email_redacted' => mcpcomal_wc_redact_email( (string) $order->get_billing_email() ),
+							'customer_initials' => mcpcomal_wc_redact_name($full_name),
+							'email_redacted' => mcpcomal_wc_redact_email((string) $order->get_billing_email()),
 							'payment_method' => (string) $order->get_payment_method(),
 						);
 					}
@@ -359,9 +362,9 @@ add_action(
 					$hint = SENTINEL_Premium_Hints::maybe_hint(
 						'wc-orders-extended',
 						'wc-orders-full-details',
-						__( 'Full customer details, line items, addresses, refunds and CSV export are available in Premium.', 'mcp-sentinel' )
+						__('Full customer details, line items, addresses, refunds and CSV export are available in Premium.', 'mcp-sentinel')
 					);
-					if ( null !== $hint ) {
+					if (null !== $hint) {
 						$response['_premium_hint'] = $hint;
 					}
 
@@ -369,7 +372,7 @@ add_action(
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_woocommerce' );
+					return current_user_can('manage_woocommerce');
 				},
 
 				'meta'                => array(
@@ -419,9 +422,9 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$per_page = isset( $input['per_page'] ) ? max( 1, min( 100, (int) $input['per_page'] ) ) : 25;
-					$page     = isset( $input['page'] ) ? max( 1, (int) $input['page'] ) : 1;
+				'execute_callback'    => function ($input = null) {
+					$per_page = isset($input['per_page']) ? max(1, min(100, (int) $input['per_page'])) : 25;
+					$page     = isset($input['page']) ? max(1, (int) $input['page']) : 1;
 
 					$query = new WP_Query(
 						array(
@@ -435,9 +438,9 @@ add_action(
 					);
 
 					$items = array();
-					foreach ( $query->posts as $post ) {
-						if ( function_exists( 'wc_get_coupon_id_by_code' ) && function_exists( 'WC' ) && class_exists( 'WC_Coupon' ) ) {
-							$coupon = new WC_Coupon( $post->ID );
+					foreach ($query->posts as $post) {
+						if (function_exists('wc_get_coupon_id_by_code') && function_exists('WC') && class_exists('WC_Coupon')) {
+							$coupon = new WC_Coupon($post->ID);
 							$expiry = $coupon->get_date_expires();
 							$items[] = array(
 								'id'            => (int) $coupon->get_id(),
@@ -446,7 +449,7 @@ add_action(
 								'amount'        => (string) $coupon->get_amount(),
 								'usage_count'   => (int) $coupon->get_usage_count(),
 								'usage_limit'   => (int) $coupon->get_usage_limit(),
-								'expiry_date'   => $expiry ? $expiry->date( 'c' ) : '',
+								'expiry_date'   => $expiry ? $expiry->date('c') : '',
 							);
 						}
 					}
@@ -461,7 +464,7 @@ add_action(
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'manage_woocommerce' );
+					return current_user_can('manage_woocommerce');
 				},
 
 				'meta'                => array(

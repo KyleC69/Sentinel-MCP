@@ -1,17 +1,18 @@
 <?php
+
 /**
  * User Management Abilities.
  *
  * List and read WordPress users.
  *
  * @package    SENTINEL
- * @author     José Conti <j.conti@joseconti.com>
- * @copyright  2026 José Conti
+ * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
+ * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
  * @link       https://plugins.joseconti.com/product/sentinel-mcp/
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /*
  * Category
@@ -24,8 +25,8 @@ add_action(
 		wp_register_ability_category(
 			'sentinel-users',
 			array(
-				'label'       => __( 'User Management', 'mcp-sentinel' ),
-				'description' => __( 'List and read WordPress users.', 'mcp-sentinel' ),
+				'label'       => __('User Management', 'mcp-sentinel'),
+				'description' => __('List and read WordPress users.', 'mcp-sentinel'),
 			)
 		);
 	}
@@ -50,9 +51,9 @@ add_action(
 				'label'               => 'List WordPress users',
 				'category'            => 'sentinel-users',
 				'description'         => 'All parameters optional. '
-								. 'Lists WordPress users with filters for role, search (name/email), '
-								. 'and ordering. Returns user ID, username, email, display name, role, '
-								. 'registration date, post count, and role distribution summary.',
+					. 'Lists WordPress users with filters for role, search (name/email), '
+					. 'and ordering. Returns user ID, username, email, display name, role, '
+					. 'registration date, post count, and role distribution summary.',
 
 				'input_schema'        => array(
 					'type'       => 'object',
@@ -69,12 +70,12 @@ add_action(
 						'orderby' => array(
 							'type'    => 'string',
 							'default' => 'registered',
-							'enum'    => array( 'registered', 'display_name', 'login', 'email' ),
+							'enum'    => array('registered', 'display_name', 'login', 'email'),
 						),
 						'order'   => array(
 							'type'    => 'string',
 							'default' => 'DESC',
-							'enum'    => array( 'ASC', 'DESC' ),
+							'enum'    => array('ASC', 'DESC'),
 						),
 						'count'   => array(
 							'type'        => 'integer',
@@ -96,12 +97,12 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input ) {
-					return SENTINEL_User_Manager::list_users( $input );
+				'execute_callback'    => function ($input) {
+					return SENTINEL_User_Manager::list_users($input);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'list_users' );
+					return current_user_can('list_users');
 				},
 
 				'meta'                => array(
@@ -129,10 +130,10 @@ add_action(
 				'label'               => 'View user details',
 				'category'            => 'sentinel-users',
 				'description'         => 'Required: user_id (integer). '
-								. 'Returns full details for a WordPress user: name, email, roles, '
-								. 'registration date, URL, bio, post count, and all user meta fields. '
-								. 'Sensitive meta (session tokens, internal settings) is excluded. '
-								. 'Alias: id is also accepted instead of user_id.',
+					. 'Returns full details for a WordPress user: name, email, roles, '
+					. 'registration date, URL, bio, post count, and all user meta fields. '
+					. 'Sensitive meta (session tokens, internal settings) is excluded. '
+					. 'Alias: id is also accepted instead of user_id.',
 
 				'input_schema'        => array(
 					'type'       => 'object',
@@ -154,13 +155,13 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input ) {
+				'execute_callback'    => function ($input) {
 					$input['user_id'] = $input['user_id'] ?? $input['id'] ?? 0;
-					return SENTINEL_User_Manager::read_user( $input );
+					return SENTINEL_User_Manager::read_user($input);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'list_users' );
+					return current_user_can('list_users');
 				},
 
 				'meta'                => array(
@@ -188,11 +189,11 @@ add_action(
 				'label'               => 'Discover user meta fields',
 				'category'            => 'sentinel-users',
 				'description'         => 'Lists all distinct user meta keys present in the database, categorized as '
-								. 'WordPress core, WooCommerce (billing/shipping), or custom fields. '
-								. 'Use this to discover what custom meta fields exist (e.g. DNI, customer type, '
-								. 'company ID) before creating or updating users. Optionally includes usage counts. '
-								. 'Pass inspect_key to get the distinct values of a specific meta key '
-								. '(useful for enum-like fields such as customer_type).',
+					. 'WordPress core, WooCommerce (billing/shipping), or custom fields. '
+					. 'Use this to discover what custom meta fields exist (e.g. DNI, customer type, '
+					. 'company ID) before creating or updating users. Optionally includes usage counts. '
+					. 'Pass inspect_key to get the distinct values of a specific meta key '
+					. '(useful for enum-like fields such as customer_type).',
 
 				'input_schema'        => array(
 					'type'       => 'object',
@@ -216,12 +217,12 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input ) {
-					return SENTINEL_User_Manager::list_meta_keys( $input );
+				'execute_callback'    => function ($input) {
+					return SENTINEL_User_Manager::list_meta_keys($input);
 				},
 
 				'permission_callback' => function () {
-					return current_user_can( 'list_users' );
+					return current_user_can('list_users');
 				},
 
 				'meta'                => array(
