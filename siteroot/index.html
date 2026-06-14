@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentinel-MCP | WordPress as an MCP Server</title>
+    <meta
+      name="description"
+      content="Sentinel-MCP turns WordPress into a first-class Model Context Protocol server with 60+ abilities, OAuth 2.1, per-client permissions, and deep auto-discovery."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Archivo:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="brand">SENTINEL-MCP</div>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#clients">Clients</a>
+        <a href="#install">Install</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero section reveal">
+        <div class="hero-copy">
+          <p class="eyebrow">WordPress + AI Infrastructure</p>
+          <h1>Turn Any WordPress Site Into A Production MCP Server</h1>
+          <p class="lead">
+            Sentinel-MCP exposes your real WordPress schema as AI-ready abilities: post types,
+            taxonomies, fields, media, SEO, multilingual data, diagnostics, and more. No hand-made
+            YAML. No brittle endpoint wrappers.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="../README.md">Read Main Docs</a>
+            <a class="btn btn-ghost" href="#install">Quick Start</a>
+          </div>
+        </div>
+        <div class="hero-panel">
+          <img src="../sentinel-mcp/Sentinel-MCP.png" alt="Sentinel-MCP preview" />
+          <div class="chip-bar">
+            <span>60+ Abilities</span>
+            <span>OAuth 2.1 + PKCE</span>
+            <span>Per-Client Allowlists</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats section reveal">
+        <article>
+          <h2 data-counter="60">0</h2>
+          <p>Built-in Lite abilities</p>
+        </article>
+        <article>
+          <h2 data-counter="8">0</h2>
+          <p>SEO plugins supported</p>
+        </article>
+        <article>
+          <h2 data-counter="3">0</h2>
+          <p>Major i18n plugins supported</p>
+        </article>
+        <article>
+          <h2 data-counter="30">0</h2>
+          <p>Days of activity retention</p>
+        </article>
+      </section>
+
+      <section id="features" class="section reveal">
+        <div class="section-head">
+          <p class="eyebrow">Why This Repo Matters</p>
+          <h2>Comprehensive MCP Layer For WordPress</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <h3>Auto-Discovery Core</h3>
+            <p>
+              Detects CPTs, taxonomies, statuses, shortcodes, block patterns, ACF and meta at
+              runtime so clients see the true shape of your site.
+            </p>
+          </article>
+          <article>
+            <h3>Universal Content Operations</h3>
+            <p>
+              Create, read, update, search, and delete content with taxonomy/meta filters, featured
+              image workflows, and Gutenberg-aware payloads.
+            </p>
+          </article>
+          <article>
+            <h3>Security + Trust Fabric</h3>
+            <p>
+              OAuth 2.1 with PKCE, Dynamic Client Registration, per-client ability allowlists, and
+              per-client rate limits provide controlled agent access.
+            </p>
+          </article>
+          <article>
+            <h3>Observability</h3>
+            <p>
+              Activity logs with retention, call status and timing, plus a public health endpoint for
+              uptime systems.
+            </p>
+          </article>
+          <article>
+            <h3>Cross-Plugin Intelligence</h3>
+            <p>
+              Unified SEO reads across 8 plugins, multilingual reads across Polylang/WPML/
+              TranslatePress, and conditional WooCommerce coverage.
+            </p>
+          </article>
+          <article>
+            <h3>AI Native Workflows</h3>
+            <p>
+              Includes Gemini image generation abilities and a WP 7.0+ admin AI Mode for in-dashboard
+              conversational workflows.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="architecture" class="section reveal">
+        <div class="section-head">
+          <p class="eyebrow">Flow</p>
+          <h2>How Sentinel-MCP Operates</h2>
+        </div>
+        <div class="flow">
+          <article><h3>1. Client Connects</h3><p>Claude, ChatGPT, Copilot, Cursor, Continue, and others register and authenticate with OAuth 2.1.</p></article>
+          <article><h3>2. Capabilities Are Scoped</h3><p>Each client receives only the abilities granted in its allowlist and operates under rate limits.</p></article>
+          <article><h3>3. Abilities Execute</h3><p>Content, media, taxonomy, diagnostics, SEO, multilingual, and WooCommerce reads run against live WordPress state.</p></article>
+          <article><h3>4. Everything Is Auditable</h3><p>Activity logs capture who called what, status, timing, and IP for operations visibility.</p></article>
+        </div>
+      </section>
+
+      <section id="clients" class="section reveal">
+        <div class="section-head">
+          <p class="eyebrow">Compatibility</p>
+          <h2>Confirmed MCP Clients</h2>
+        </div>
+        <ul class="client-list">
+          <li>Claude Desktop / Claude Code / Cowork</li>
+          <li>ChatGPT</li>
+          <li>GitHub Copilot in VS Code</li>
+          <li>Cursor AI</li>
+          <li>Windsurf</li>
+          <li>Continue</li>
+          <li>Augment Code</li>
+          <li>JetBrains AI Assistant</li>
+        </ul>
+      </section>
+
+      <section class="section split reveal">
+        <article>
+          <p class="eyebrow">Repository Highlights</p>
+          <h2>Major Areas In This Codebase</h2>
+          <ul>
+            <li>sentinel-mcp/includes: ability handlers, admin modules, managers, health endpoints</li>
+            <li>sentinel-mcp/assets: plugin CSS/JS/images for admin and UX layers</li>
+            <li>ai/: AI mode implementation and provider integration surfaces</li>
+            <li>tests/: chat and connector validation harnesses</li>
+            <li>docs/: architecture, findings, and testing notes</li>
+          </ul>
+        </article>
+        <article>
+          <p class="eyebrow">Requirements</p>
+          <h2>Runtime Baseline</h2>
+          <ul>
+            <li>WordPress 7.0+ recommended (AI Mode), 6.9+ baseline for MCP workflows</li>
+            <li>PHP 8.3+</li>
+            <li>MCP-capable AI client with remote server + OAuth support</li>
+            <li>WordPress MCP Adapter available (bundled fallback supported)</li>
+          </ul>
+        </article>
+      </section>
+
+      <section id="install" class="section reveal">
+        <div class="section-head">
+          <p class="eyebrow">Get Started</p>
+          <h2>Install In Minutes</h2>
+        </div>
+        <ol class="install-steps">
+          <li>Install and activate Sentinel-MCP in WordPress.</li>
+          <li>Open Settings -> Sentinel-MCP and run the Get Started wizard.</li>
+          <li>Create or verify OAuth client setup.</li>
+          <li>Copy the MCP server URL from the Connect/Status area.</li>
+          <li>Add that URL to your AI client and authorize once.</li>
+          <li>Begin natural-language operations against your WordPress site.</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Sentinel-MCP static project page generated from repository documentation and package metadata.</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
