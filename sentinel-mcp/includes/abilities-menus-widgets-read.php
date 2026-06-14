@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Menus, widgets and sidebars read abilities (Sprint 1.5).
  *

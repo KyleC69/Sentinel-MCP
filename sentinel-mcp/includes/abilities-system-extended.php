@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * System / cron read abilities (Sprint 1.8).
  *

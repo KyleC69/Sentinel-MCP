@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Abilities de descubrimiento.
  *

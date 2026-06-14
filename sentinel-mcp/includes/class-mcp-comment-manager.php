@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Comment Manager for MCP Content Manager.
  *
@@ -15,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Comment_Manager')) {
+if (! class_exists('SentinelMCP\SENTINEL_Comment_Manager')) {
 
 	/**
 	 * Handles comment listing, moderation, and reply operations.

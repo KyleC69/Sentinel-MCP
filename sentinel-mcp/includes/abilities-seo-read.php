@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * SEO read ability (Sprint 1.7).
  *

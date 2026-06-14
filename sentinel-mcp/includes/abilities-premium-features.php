@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Premium features discovery ability.
  *

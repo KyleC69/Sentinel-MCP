@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth 2.1 Server -- Orchestrator.
  *
@@ -10,12 +12,12 @@
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://plugins.joseconti.com/product/sentinel-mcp/
+ * @link       https://github.com/KyleC69/Sentinel-MCP
  */
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_OAuth_Server')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_Server')) {
 
 	/**
 	 * OAuth 2.1 server orchestrator for MCP Content Manager.
@@ -144,7 +146,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				$namespace,
 				'/register',
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array(__CLASS__, 'handle_register'),
 					'permission_callback' => '__return_true', // Public per RFC 7591.
 				)
@@ -158,12 +160,12 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				'/authorize',
 				array(
 					array(
-						'methods'             => WP_REST_Server::READABLE,
+						'methods'             => \WP_REST_Server::READABLE,
 						'callback'            => array('SENTINEL_OAuth_Authorize', 'handle_get'),
 						'permission_callback' => '__return_true', // Login enforced in callback.
 					),
 					array(
-						'methods'             => WP_REST_Server::CREATABLE,
+						'methods'             => \WP_REST_Server::CREATABLE,
 						'callback'            => array('SENTINEL_OAuth_Authorize', 'handle_post'),
 						'permission_callback' => '__return_true', // Nonce + login verified in callback.
 					),
@@ -176,7 +178,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				$namespace,
 				'/token',
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array('SENTINEL_OAuth_Token', 'handle'),
 					'permission_callback' => '__return_true', // Public per RFC 6749.
 				)
@@ -188,7 +190,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				$namespace,
 				'/revoke',
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array('SENTINEL_OAuth_Token', 'handle_revoke'),
 					'permission_callback' => '__return_true', // Public per RFC 7009.
 				)
@@ -198,7 +200,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				$namespace,
 				'/debug-probe',
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array(__CLASS__, 'handle_debug_probe'),
 					'permission_callback' => function (): bool {
 						return current_user_can('manage_options');
@@ -210,10 +212,10 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 		/**
 		 * Run a one-off HTTP probe against a target OAuth endpoint for troubleshooting.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_REST_Response|WP_Error
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_REST_Response|\WP_Error
 		 */
-		public static function handle_debug_probe(WP_REST_Request $request): WP_REST_Response|WP_Error
+		public static function handle_debug_probe(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
 		{
 			$endpoint = esc_url_raw($request->get_param('endpoint') ?? '');
 			$method   = strtoupper(sanitize_text_field($request->get_param('method') ?? 'POST'));
@@ -221,7 +223,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 			$headers  = $request->get_param('headers') ?? array();
 
 			if ('' === $endpoint) {
-				return new WP_Error('invalid_request', 'An endpoint URL is required.', array('status' => 400));
+				return new \WP_Error('invalid_request', 'An endpoint URL is required.', array('status' => 400));
 			}
 
 			if (! is_array($headers)) {
@@ -251,14 +253,14 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 
 			$response = wp_remote_request($endpoint, $args);
 			if (is_wp_error($response)) {
-				return new WP_Error('probe_failed', $response->get_error_message(), array('status' => 500));
+				return new \WP_Error('probe_failed', $response->get_error_message(), array('status' => 500));
 			}
 
 			$response_code = (int) wp_remote_retrieve_response_code($response);
 			$response_body = wp_remote_retrieve_body($response);
 			$response_headers = wp_remote_retrieve_headers($response);
 
-			return new WP_REST_Response(
+			return new \WP_REST_Response(
 				array(
 					'status'   => $response_code,
 					'body'     => $response_body,
@@ -276,10 +278,10 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 		/**
 		 * Handle Dynamic Client Registration (DCR) requests.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_REST_Response|WP_Error
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_REST_Response|\WP_Error
 		 */
-		public static function handle_register(WP_REST_Request $request): WP_REST_Response|WP_Error
+		public static function handle_register(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
 		{
 			$body = $request->get_json_params();
 
@@ -291,7 +293,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 
 			// Validate required fields.
 			if (empty($client_name) || empty($redirect_uris) || ! is_array($redirect_uris)) {
-				return new WP_Error(
+				return new \WP_Error(
 					'invalid_client_metadata',
 					'client_name and redirect_uris are required.',
 					array('status' => 400)
@@ -302,7 +304,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 			foreach ($redirect_uris as $uri) {
 				$uri = self::sanitize_redirect_uri($uri);
 				if (empty($uri)) {
-					return new WP_Error(
+					return new \WP_Error(
 						'invalid_redirect_uri',
 						'All redirect_uris must be non‑empty URLs.',
 						array('status' => 400)
@@ -311,7 +313,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				// Parse scheme to allow https, http (localhost), or vscode.
 				$scheme = parse_url($uri, PHP_URL_SCHEME);
 				if (! in_array($scheme, array('https', 'http', 'vscode'), true)) {
-					return new WP_Error(
+					return new \WP_Error(
 						'invalid_redirect_uri',
 						'All redirect_uris must use https, http (for localhost), or vscode scheme.',
 						array('status' => 400)
@@ -321,7 +323,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 				if ('http' === $scheme) {
 					$host = parse_url($uri, PHP_URL_HOST);
 					if ('127.0.0.1' !== $host && 'localhost' !== $host) {
-						return new WP_Error(
+						return new \WP_Error(
 							'invalid_redirect_uri',
 							'HTTP redirect_uris are only allowed for localhost.',
 							array('status' => 400)
@@ -335,7 +337,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 
 			// Validate auth method.
 			if (! in_array($auth_method, array('none', 'client_secret_post'), true)) {
-				return new WP_Error(
+				return new \WP_Error(
 					'invalid_client_metadata',
 					'token_endpoint_auth_method must be "none" or "client_secret_post".',
 					array('status' => 400)
@@ -352,7 +354,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 			);
 
 			if (! $client) {
-				return new WP_Error(
+				return new \WP_Error(
 					'server_error',
 					'Could not register client.',
 					array('status' => 500)
@@ -375,7 +377,7 @@ if (! class_exists('SENTINEL_OAuth_Server')) {
 			// Persist the generated client_id for use in authorization flows.
 			update_option('sentinel_oauth_client_id', $client['client_id']);
 
-			return new WP_REST_Response($response_data, 201);
+			return new \WP_REST_Response($response_data, 201);
 		}
 
 		/**

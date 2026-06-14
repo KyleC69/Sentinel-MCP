@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Content shortcuts abilities (Sprint 1.3).
  *
@@ -19,10 +22,10 @@ if ( ! function_exists( 'mcpcomal_format_post_summary' ) ) {
 	/**
 	 * Format a single post for content-shortcuts output.
 	 *
-	 * @param WP_Post $post Post object.
+	 * @param \WP_Post $post Post object.
 	 * @return array
 	 */
-	function mcpcomal_format_post_summary( WP_Post $post ): array {
+	function mcpcomal_format_post_summary( \WP_Post $post ): array {
 		$excerpt = $post->post_excerpt ? $post->post_excerpt : wp_strip_all_tags( (string) $post->post_content );
 		$excerpt = trim( preg_replace( '/\s+/', ' ', (string) $excerpt ) );
 		if ( strlen( $excerpt ) > 200 ) {
@@ -45,7 +48,7 @@ if ( ! function_exists( 'mcpcomal_format_post_summary' ) ) {
 
 if ( ! function_exists( 'mcpcomal_query_posts_by_status' ) ) {
 	/**
-	 * Run a WP_Query and format results.
+	 * Run a \WP_Query and format results.
 	 *
 	 * @param string $post_type Post type slug.
 	 * @param string|array $status Status or list of statuses.
@@ -56,7 +59,7 @@ if ( ! function_exists( 'mcpcomal_query_posts_by_status' ) ) {
 	 * @return array
 	 */
 	function mcpcomal_query_posts_by_status( string $post_type, $status, int $per_page, int $page, string $orderby = 'date', string $order = 'DESC' ): array {
-		$query = new WP_Query(
+		$query = new \WP_Query(
 			array(
 				'post_type'              => $post_type,
 				'post_status'            => $status,

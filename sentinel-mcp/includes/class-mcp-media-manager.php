@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Media Manager for MCP Content Manager.
  *
@@ -16,7 +18,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Media_Manager')) {
+if (! class_exists('SentinelMCP\SENTINEL_Media_Manager')) {
 
 	/**
 	 * Media Library operations manager.

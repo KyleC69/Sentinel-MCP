@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth 2.1 Database layer.
  *
@@ -15,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_OAuth_DB')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_DB')) {
 
 	/**
 	 * Database operations for the OAuth 2.1 subsystem.

@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Activity Log for MCP calls (Sprint 2.1).
  *
@@ -15,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'SENTINEL_Activity_Log' ) ) {
+if ( ! class_exists( 'SentinelMCP\SENTINEL_Activity_Log' ) ) {
 
 	/**
 	 * Lightweight, append-only audit log for MCP ability invocations.
@@ -107,7 +110,7 @@ if ( ! class_exists( 'SENTINEL_Activity_Log' ) ) {
 		 * @param string $tool_name Tool slug.
 		 * @param mixed  $mcp_tool  Tool instance.
 		 * @param mixed  $server    Server instance.
-		 * @return array|WP_Error
+		 * @return array|\WP_Error
 		 */
 		public static function on_pre_call( $args, $tool_name, $mcp_tool, $server ) {
 			self::$in_flight[ (string) $tool_name ] = microtime( true );
@@ -117,7 +120,7 @@ if ( ! class_exists( 'SENTINEL_Activity_Log' ) ) {
 		/**
 		 * Post-call filter: compute duration and persist the entry.
 		 *
-		 * @param mixed  $result    Tool result (may be WP_Error).
+		 * @param mixed  $result    Tool result (may be \WP_Error).
 		 * @param array  $args      Tool args.
 		 * @param string $tool_name Tool slug.
 		 * @param mixed  $mcp_tool  Tool instance.

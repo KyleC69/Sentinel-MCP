@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Premium hints with per-session throttle (Sprint 5.2).
  *
@@ -17,12 +19,12 @@
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://mcpwp.com/
+ * @link       https://github.com/KyleC69/Sentinel-MCP
  */
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Premium_Hints')) {
+if (! class_exists('SentinelMCP\SENTINEL_Premium_Hints')) {
 
 	/**
 	 * Throttled Premium-upsell hint emitter.
@@ -47,7 +49,7 @@ if (! class_exists('SENTINEL_Premium_Hints')) {
 		 */
 		public static function maybe_hint(string $category, string $feature_slug, string $message): ?array
 		{
-			$client_id = class_exists('SENTINEL_OAuth_Interceptor')
+			$client_id = class_exists('SentinelMCP\SENTINEL_OAuth_Interceptor')
 				? SENTINEL_OAuth_Interceptor::get_current_client_id()
 				: '';
 
@@ -61,7 +63,7 @@ if (! class_exists('SENTINEL_Premium_Hints')) {
 
 			$upgrade_url = defined('SENTINEL_PREMIUM_PRODUCT_URL')
 				? SENTINEL_PREMIUM_PRODUCT_URL
-				: 'https://mcpwp.com/';
+				: 'https://.com/';
 
 			return array(
 				'category'     => $category,

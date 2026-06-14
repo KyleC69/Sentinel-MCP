@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * MCP client configuration exporter (Sprint 3.2).
  *
@@ -16,7 +18,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Config_Exporter')) {
+if (! class_exists('SentinelMCP\SENTINEL_Config_Exporter')) {
 
 	/**
 	 * Builds client-specific config snippets pointing at this site's MCP server.

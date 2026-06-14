@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Prompt gallery (Sprint 4.2).
  *
@@ -16,7 +18,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Prompt_Gallery')) {
+if (! class_exists('SentinelMCP\SENTINEL_Prompt_Gallery')) {
 
 	/**
 	 * Reads data/prompts.json and exposes filtered helpers for the admin UI.

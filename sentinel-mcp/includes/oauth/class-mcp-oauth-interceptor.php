@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth 2.1 MCP Request Interceptor.
  *
@@ -16,7 +18,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_OAuth_Interceptor')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_Interceptor')) {
 
 	/**
 	 * Validates Bearer tokens on incoming MCP REST API requests.
@@ -64,8 +66,8 @@ if (! class_exists('SENTINEL_OAuth_Interceptor')) {
 		/**
 		 * Authenticate MCP requests via Bearer token.
 		 *
-		 * @param WP_Error|null|true $result Existing authentication result.
-		 * @return WP_Error|null|true
+		 * @param \WP_Error|null|true $result Existing authentication result.
+		 * @return \WP_Error|null|true
 		 */
 		public static function authenticate($result)
 		{
@@ -106,7 +108,7 @@ if (! class_exists('SENTINEL_OAuth_Interceptor')) {
 						esc_url(home_url('/.well-known/oauth-protected-resource'))
 					)
 				);
-				return new WP_Error(
+				return new \WP_Error(
 					'rest_not_logged_in',
 					'Authentication required. Use OAuth 2.1 Bearer token.',
 					array('status' => 401)
@@ -115,7 +117,7 @@ if (! class_exists('SENTINEL_OAuth_Interceptor')) {
 
 			// Must be Bearer scheme.
 			if (0 !== strpos($auth_header, 'Bearer ')) {
-				return new WP_Error(
+				return new \WP_Error(
 					'rest_invalid_auth',
 					'Authorization header must use Bearer scheme.',
 					array('status' => 401)
@@ -127,7 +129,7 @@ if (! class_exists('SENTINEL_OAuth_Interceptor')) {
 			$token_row  = SENTINEL_OAuth_DB::get_token_by_access_hash($token_hash);
 
 			if (! $token_row) {
-				return new WP_Error(
+				return new \WP_Error(
 					'rest_invalid_token',
 					'Invalid or expired access token.',
 					array('status' => 401)

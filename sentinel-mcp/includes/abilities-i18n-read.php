@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * I18n read abilities (Sprint 4.1).
  *

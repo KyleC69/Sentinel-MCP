@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth 2.1 Token Endpoint.
  *
@@ -10,16 +12,13 @@
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://plugins.joseconti.com/product/sentinel-mcp/
- * @author     Kyle L Crowder
- * @copyright  2026 Kyle L Crowder
  * @link       https://github.com/KyleC69/Sentinel-MCP
  **/
 
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_OAuth_Token')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_Token')) {
 
 	/**
 	 * Token endpoint handler for the OAuth 2.1 subsystem.
@@ -30,10 +29,10 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 		/**
 		 * Main dispatcher -- routes by grant_type.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_REST_Response|WP_Error
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_REST_Response|\WP_Error
 		 */
-		public static function handle(WP_REST_Request $request): WP_REST_Response|WP_Error
+		public static function handle(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
 		{
 			$grant_type = sanitize_text_field($request->get_param('grant_type') ?? '');
 
@@ -50,10 +49,10 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 		/**
 		 * Exchange an authorization code for tokens.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_REST_Response|WP_Error
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_REST_Response|\WP_Error
 		 */
-		private static function handle_authorization_code(WP_REST_Request $request): WP_REST_Response|WP_Error
+		private static function handle_authorization_code(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
 		{
 			$code          = sanitize_text_field($request->get_param('code') ?? '');
 			$redirect_uri  = SENTINEL_OAuth_Server::sanitize_redirect_uri($request->get_param('redirect_uri') ?? '');
@@ -118,7 +117,7 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 				return self::oauth_error('server_error', 'Could not generate tokens.', 500);
 			}
 
-			return new WP_REST_Response(
+			return new \WP_REST_Response(
 				array(
 					'access_token'  => $token_data['access_token'],
 					'token_type'    => 'Bearer',
@@ -133,10 +132,10 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 		/**
 		 * Exchange a refresh token for a new token pair.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_REST_Response|WP_Error
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_REST_Response|\WP_Error
 		 */
-		private static function handle_refresh_token(WP_REST_Request $request): WP_REST_Response|WP_Error
+		private static function handle_refresh_token(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
 		{
 			$refresh_token = sanitize_text_field($request->get_param('refresh_token') ?? '');
 			$client_id     = sanitize_text_field($request->get_param('client_id') ?? '');
@@ -173,7 +172,7 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 				return self::oauth_error('server_error', 'Could not generate tokens.', 500);
 			}
 
-			return new WP_REST_Response(
+			return new \WP_REST_Response(
 				array(
 					'access_token'  => $new_tokens['access_token'],
 					'token_type'    => 'Bearer',
@@ -188,17 +187,17 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 		/**
 		 * Handle token revocation (RFC 7009).
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_REST_Response
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_REST_Response
 		 */
-		public static function handle_revoke(WP_REST_Request $request): WP_REST_Response
+		public static function handle_revoke(\WP_REST_Request $request): \WP_REST_Response
 		{
 			$token      = sanitize_text_field($request->get_param('token') ?? '');
 			$token_hint = sanitize_text_field($request->get_param('token_type_hint') ?? '');
 
 			if (empty($token)) {
 				// RFC 7009: always return 200 even for invalid/empty tokens.
-				return new WP_REST_Response(null, 200);
+				return new \WP_REST_Response(null, 200);
 			}
 
 			$hash = SENTINEL_OAuth_DB::hash_token($token);
@@ -213,7 +212,7 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 				}
 			}
 
-			return new WP_REST_Response(null, 200);
+			return new \WP_REST_Response(null, 200);
 		}
 
 		/**
@@ -252,11 +251,11 @@ if (! class_exists('SENTINEL_OAuth_Token')) {
 		 * @param string $code        The error code.
 		 * @param string $description The error description.
 		 * @param int    $status      The HTTP status code.
-		 * @return WP_Error
+		 * @return \WP_Error
 		 */
-		private static function oauth_error(string $code, string $description, int $status = 400): WP_Error
+		private static function oauth_error(string $code, string $description, int $status = 400): \WP_Error
 		{
-			return new WP_Error($code, $description, array('status' => $status));
+			return new \WP_Error($code, $description, array('status' => $status));
 		}
 	}
 }

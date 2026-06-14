@@ -1,11 +1,22 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth 2.1 Authorization Endpoint.
  *
  * Handles the authorization page display and form processing.
  * Validates client, redirect_uri, PKCE, user session, and generates
  * authorization codes.
+ * *
+ * *
+ * *
+ * *  TODO: enforce per-client scopes
+ * *  Add basic rate limit and logging
+ * *  add feature flag for loopback
+ * *
+ * *
+ *
  *
  * @package    SENTINEL
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
@@ -16,7 +27,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_OAuth_Authorize')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_Authorize')) {
 
 	/**
 	 * Authorization endpoint handler for the OAuth 2.1 subsystem.
@@ -27,77 +38,75 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 		/**
 		 * GET /authorize -- validate params, check login, render consent page.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_Error|void
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_Error|void
 		 */
-		public static function handle_get(WP_REST_Request $request)
+		public static function handle_get(\WP_REST_Request $request)
 		{
 			$params = self::extract_params($request);
 
-			// Validate response_type.
+			// Only the authorization code flow is supported.
 			if ('code' !== $params['response_type']) {
-				return new WP_Error(
+				return new \WP_Error(
 					'unsupported_response_type',
 					'Only response_type=code is supported.',
 					array('status' => 400)
 				);
 			}
 
-			// Validate client exists, accepting legacy stored client names if needed.
-			$client = SENTINEL_OAuth_DB::get_client_by_id_or_name($params['client_id']);
+			// In production, client_id must be a real registered client ID.
+			$client = SENTINEL_OAuth_DB::get_client_by_id($params['client_id']);
 			if (! $client) {
-				return new WP_Error(
+				return new \WP_Error(
 					'invalid_client',
 					'Unknown client_id.',
 					array('status' => 400)
 				);
 			}
 
-			// Canonicalize legacy values to the real registered client ID.
+			// Canonicalize to the stored client_id.
 			$params['client_id'] = $client['client_id'];
 
-			// Validate redirect_uri matches registered URIs.
-			if (! in_array($params['redirect_uri'], $client['redirect_uris'], true)) {
-				return new WP_Error(
-					'invalid_redirect_uri',
-					'redirect_uri does not match registered URIs.',
-					array('status' => 400)
-				);
+			// Strict redirect_uri validation (now loopback-aware once you patch validate_redirect_uri()).
+			$redirect_uri_result = self::validate_redirect_uri($params['redirect_uri'], $client);
+			if (is_wp_error($redirect_uri_result)) {
+				return $redirect_uri_result;
 			}
+			$params['redirect_uri'] = $redirect_uri_result;
 
-			// Validate PKCE.
+			// Enforce PKCE with S256.
 			if ('S256' !== $params['code_challenge_method'] || empty($params['code_challenge'])) {
-				return new WP_Error(
+				return new \WP_Error(
 					'invalid_request',
 					'PKCE with S256 is required.',
 					array('status' => 400)
 				);
 			}
 
-			// WordPress REST API strips cookie auth when there is no wp_rest nonce.
-			// Since this is a browser-based redirect flow, restore the user from
-			// the logged_in cookie directly.
+			// Restore user from logged_in cookie (REST strips cookie auth without wp_rest nonce).
 			self::restore_user_from_cookie();
 
-			// If user is not logged in, redirect to wp-login.php.
+			// If user is not logged in, send them to wp-login.php and bounce back here.
 			if (! is_user_logged_in()) {
-				$current_url = rest_url('sentinel-auth/v1/authorize') . '?' . http_build_query($params);
+				$rest_prefix = rest_get_url_prefix();
+				$current_url = home_url("{$rest_prefix}/sentinel-auth/v1/authorize") . '?' . http_build_query($params);
 				wp_safe_redirect(wp_login_url($current_url));
 				exit;
 			}
 
-			// Render authorization page.
+			// Render authorization (consent) page.
 			self::render_authorize_page($client, $params);
 			exit;
 		}
 
+
 		/**
 		 * POST /authorize -- process form submission (approve or deny).
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
-		 * @return WP_Error|void
+		 * @param \WP_REST_Request $request The incoming REST request.
+		 * @return \WP_Error|void
 		 */
-		public static function handle_post(WP_REST_Request $request)
+		public static function handle_post(\WP_REST_Request $request)
 		{
 			// Restore user from cookie (REST API strips cookie auth without wp_rest nonce).
 			self::restore_user_from_cookie();
@@ -106,16 +115,16 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 			// with the REST API's reserved _wpnonce parameter).
 			$nonce = sanitize_text_field($request->get_param('sentinel_oauth_nonce') ?? '');
 			if (! wp_verify_nonce($nonce, 'sentinel_oauth_authorize')) {
-				return new WP_Error(
+				return new \WP_Error(
 					'invalid_nonce',
 					'Security check failed.',
 					array('status' => 403)
 				);
 			}
 
-			// Must be logged in.
+			// Must be logged in to approve or deny.
 			if (! is_user_logged_in()) {
-				return new WP_Error(
+				return new \WP_Error(
 					'unauthorized',
 					'User must be logged in.',
 					array('status' => 401)
@@ -123,22 +132,29 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 			}
 
 			$action                = sanitize_text_field($request->get_param('action') ?? '');
-			$client_id             = sanitize_text_field($request->get_param('client_id') ?? '');
-			$redirect_uri          = SENTINEL_OAuth_Server::sanitize_redirect_uri($request->get_param('redirect_uri') ?? '');
+			$client_id_param       = sanitize_text_field($request->get_param('client_id') ?? '');
+			$redirect_uri_param    = (string) ($request->get_param('redirect_uri') ?? '');
 			$scope                 = sanitize_text_field($request->get_param('scope') ?? '');
 			$state                 = sanitize_text_field($request->get_param('state') ?? '');
 			$code_challenge        = sanitize_text_field($request->get_param('code_challenge') ?? '');
 			$code_challenge_method = sanitize_text_field($request->get_param('code_challenge_method') ?? '');
 
-			// Re-validate client and redirect_uri (defense in depth).
-			$client = SENTINEL_OAuth_DB::get_client_by_id_or_name($client_id);
-			if (! $client || ! in_array($redirect_uri, $client['redirect_uris'], true)) {
-				return new WP_Error(
+			// In production, only look up by client_id (no name fallback).
+			$client = SENTINEL_OAuth_DB::get_client_by_id($client_id_param);
+			if (! $client) {
+				return new \WP_Error(
 					'invalid_client',
-					'Invalid client or redirect URI.',
+					'Invalid client.',
 					array('status' => 400)
 				);
 			}
+
+			// Strict redirect_uri validation, same rules as GET.
+			$redirect_uri_result = self::validate_redirect_uri($redirect_uri_param, $client);
+			if (is_wp_error($redirect_uri_result)) {
+				return $redirect_uri_result;
+			}
+			$redirect_uri = $redirect_uri_result;
 
 			$client_id = $client['client_id'];
 
@@ -152,9 +168,18 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 					),
 					$redirect_uri
 				);
-				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirecting to external client redirect_uri validated above.
+				// Redirecting to external client redirect_uri validated above.
 				wp_redirect($deny_url);
 				exit;
+			}
+
+			// Enforce PKCE again on POST (defense in depth).
+			if ('S256' !== $code_challenge_method || empty($code_challenge)) {
+				return new \WP_Error(
+					'invalid_request',
+					'PKCE with S256 is required.',
+					array('status' => 400)
+				);
 			}
 
 			// Generate authorization code.
@@ -170,7 +195,7 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 			);
 
 			if (! $code) {
-				return new WP_Error(
+				return new \WP_Error(
 					'server_error',
 					'Could not generate authorization code.',
 					array('status' => 500)
@@ -185,10 +210,148 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 				),
 				$redirect_uri
 			);
-			// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Redirecting to external client redirect_uri validated above.
+			// Redirecting to external client redirect_uri validated above.
 			wp_redirect($success_url);
 			exit;
 		}
+
+		/**
+		 * Strictly validate a redirect_uri against the client's registered URIs.
+		 *
+		 * - Sanitizes the URI.
+		 * - Requires scheme + host.
+		 * - Enforces HTTPS.
+		 * - Forbids loopback hosts (localhost, 127.0.0.1) for web clients.
+		 * - Requires exact match against client['redirect_uris'].
+		 *
+		 * @param string $redirect_uri Raw redirect_uri from the request.
+		 * @param array  $client       Client record from the database.
+		 * @return string|\WP_Error     Validated redirect_uri or \WP_Error.
+		 */
+
+
+
+
+		private static function validate_redirect_uri(string $redirect_uri, array $client)
+		{
+			$redirect_uri = SENTINEL_OAuth_Server::sanitize_redirect_uri($redirect_uri);
+
+
+			//Missing Redirect
+			if (empty($redirect_uri)) {
+				return new \WP_Error(
+					'invalid_redirect_uri',
+					'Missing redirect_uri.',
+					array('status' => 400)
+				);
+			}
+
+			$parsed = wp_parse_url($redirect_uri);
+			if (! isset($parsed['scheme'], $parsed['host'])) {
+				return new \WP_Error(
+					'invalid_redirect_uri',
+					'Malformed redirect_uri.',
+					array('status' => 400)
+				);
+			}
+
+			$scheme = strtolower($parsed['scheme']);
+			$host   = strtolower($parsed['host']);
+
+
+
+
+
+			// Loopback support for native clients (VS Code, Insomnia, etc.).
+			$loopback_hosts = array('127.0.0.1', 'localhost');
+			if (in_array($host, $loopback_hosts, true)) {
+				// Loopback must use http.
+				if ('http' !== $scheme) {
+					return new \WP_Error(
+						'invalid_redirect_uri',
+						'Loopback redirect URIs must use http.',
+						array('status' => 400)
+					);
+				}
+
+				if (empty($client['redirect_uris']) || ! is_array($client['redirect_uris'])) {
+					return new \WP_Error(
+						'invalid_redirect_uri',
+						'Client has no registered redirect URIs.',
+						array('status' => 400)
+					);
+				}
+
+				// For loopback, match on scheme + host (+ optional path), ignore port.
+				$normalized_requested = $scheme . '://' . $host . (isset($parsed['path']) ? $parsed['path'] : '/');
+
+				$allowed = false;
+				foreach ($client['redirect_uris'] as $registered) {
+					$reg = wp_parse_url($registered);
+					if (! isset($reg['scheme'], $reg['host'])) {
+						continue;
+					}
+
+					$reg_scheme = strtolower($reg['scheme']);
+					$reg_host   = strtolower($reg['host']);
+					$reg_path   = isset($reg['path']) ? $reg['path'] : '/';
+
+					$normalized_registered = $reg_scheme . '://' . $reg_host . $reg_path;
+
+					if ($normalized_registered === $normalized_requested) {
+						$allowed = true;
+						break;
+					}
+				}
+
+				if (! $allowed) {
+					return new \WP_Error(
+						'invalid_redirect_uri',
+						'redirect_uri does not match registered URIs.',
+						array('status' => 400)
+					);
+				}
+
+				return $redirect_uri;
+			}
+
+			// Non-loopback clients must use HTTPS.
+			if ('https' !== $scheme) {
+				return new \WP_Error(
+					'invalid_redirect_uri',
+					'redirect_uri must use HTTPS.',
+					array('status' => 400)
+				);
+			}
+
+			if (empty($client['redirect_uris']) || ! is_array($client['redirect_uris'])) {
+				return new \WP_Error(
+					'invalid_redirect_uri',
+					'Client has no registered redirect URIs.',
+					array('status' => 400)
+				);
+			}
+
+			if (! in_array($redirect_uri, $client['redirect_uris'], true)) {
+				return new \WP_Error(
+					'invalid_redirect_uri',
+					'redirect_uri does not match registered URIs.',
+					array('status' => 400)
+				);
+			}
+
+			return $redirect_uri;
+		}
+
+
+
+
+
+
+
+
+
+
 
 		/**
 		 * Restore the current user from the logged_in cookie.
@@ -207,13 +370,6 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 				return;
 			}
 
-			// wp_set_current_user() is required here because the WordPress REST API
-			// intentionally strips cookie-based authentication when the wp_rest nonce
-			// is missing (CSRF protection). The OAuth authorize endpoint is a
-			// browser-based redirect, so there is no nonce on the initial GET.
-			// We validate the logged_in cookie directly via wp_validate_auth_cookie()
-			// and then restore the user session. This does NOT create or log in users --
-			// it only restores the already-authenticated session for the consent page.
 			$user_id = wp_validate_auth_cookie('', 'logged_in');
 			if ($user_id) {
 				wp_set_current_user($user_id);
@@ -223,10 +379,10 @@ if (! class_exists('SENTINEL_OAuth_Authorize')) {
 		/**
 		 * Extract and sanitize authorization parameters from the request.
 		 *
-		 * @param WP_REST_Request $request The incoming REST request.
+		 * @param \WP_REST_Request $request The incoming REST request.
 		 * @return array Sanitized parameter array.
 		 */
-		private static function extract_params(WP_REST_Request $request): array
+		private static function extract_params(\WP_REST_Request $request): array
 		{
 			return array(
 				'response_type'         => sanitize_text_field($request->get_param('response_type') ?? ''),

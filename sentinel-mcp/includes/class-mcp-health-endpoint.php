@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Public /health REST endpoint (Sprint 3.3).
  *
@@ -15,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Health_Endpoint')) {
+if (! class_exists('SentinelMCP\SENTINEL_Health_Endpoint')) {
 
 	/**
 	 * Registers /sentinel/v1/health.
@@ -50,7 +52,7 @@ if (! class_exists('SENTINEL_Health_Endpoint')) {
 		/**
 		 * Build the health payload.
 		 */
-		public static function handle(): WP_REST_Response
+		public static function handle(): \WP_REST_Response
 		{
 			global $wp_version, $wpdb;
 
@@ -78,7 +80,7 @@ if (! class_exists('SENTINEL_Health_Endpoint')) {
 				}
 			}
 
-			return new WP_REST_Response(
+			return new \WP_REST_Response(
 				array(
 					'status'               => 'ok',
 					'plugin_version'       => defined('SENTINEL_VERSION') ? SENTINEL_VERSION : '',

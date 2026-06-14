@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Extended discovery abilities (Sprint 1.1).
  *
@@ -313,7 +316,7 @@ add_action(
 					$post_types         = get_post_types( array( 'public' => true ), 'objects' );
 					foreach ( $post_types as $pt ) {
 						$sample_id = 0;
-						$query     = new WP_Query(
+						$query     = new \WP_Query(
 							array(
 								'post_type'              => $pt->name,
 								'post_status'            => 'publish',

@@ -1,7 +1,4 @@
-<?php
-
-
-use Swaggest\JsonSchema\Context;
+<?php\nuse Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRef\Preloaded;
 use Swaggest\JsonSchema\Schema;

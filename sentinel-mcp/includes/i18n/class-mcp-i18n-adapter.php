@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * I18n adapter base + locator (Sprint 4.1).
  *
@@ -16,7 +18,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_I18n_Adapter')) {
+if (! class_exists('SentinelMCP\SENTINEL_I18n_Adapter')) {
 
 	/**
 	 * Locator for the active i18n adapter.

@@ -6,6 +6,8 @@
  * It can work both with and without the mcp-wordpress-remote proxy.
  *
  * Note: SSE (GET streaming) is not yet implemented; GET currently returns 405.
+ * SSE TRANSPORT HAS BEEN ADDED TO THIS VENDOR FILE BY A THIRD PARTY: KYLE L CROWDER
+ * @author: 	KYLE L. CROWDER KCROWDERGOOG@GMAIL.COM
  *
  * @package McpAdapter
  */
@@ -136,16 +138,88 @@ class HttpTransport implements McpRestTransportInterface {
 		return $user_has_capability;
 	}
 
-	/**
-	 * Handle HTTP requests according to MCP 2025-11-25 specification
-	 *
-	 * @param \WP_REST_Request<array<string, mixed>> $request The request object.
-	 *
-	 * @return \WP_REST_Response
-	 */
-	public function handle_request( \WP_REST_Request $request ): \WP_REST_Response {
-		$context = new HttpRequestContext( $request );
 
-		return $this->request_handler->handle_request( $context );
+	/**
+	 * Handle SSE GET streaming for MCP event stream.
+	 *
+	 * This implements the MCP 2025-11-25 SSE transport shape.
+	 */
+	public function handle_sse(\WP_REST_Request $request)
+	{
+
+		// Validate Authorization header
+		$auth = $request->get_header('authorization');
+		if (empty($auth) || stripos($auth, 'Bearer ') !== 0) {
+			return new \WP_REST_Response(
+				array('error' => 'Missing or invalid Authorization header.'),
+				401
+			);
+		}
+
+		// Extract token
+		$token = trim(substr($auth, 7));
+
+		// Validate token using existing request handler
+		$context = new HttpRequestContext($request);
+		$transport_context = $this->request_handler->get_transport_context();
+
+		if (! $transport_context->auth_handler->validate_access_token($token)) {
+			return new \WP_REST_Response(
+				array('error' => 'Invalid access token.'),
+				401
+			);
+		}
+
+		// Required MCP header
+		$session_id = $request->get_header('mcp-session-id');
+		if (empty($session_id)) {
+			return new \WP_REST_Response(
+				array('error' => 'Missing MCP session ID.'),
+				400
+			);
+		}
+
+		// Prepare SSE headers
+		header('Content-Type: text/event-stream');
+		header('Cache-Control: no-cache, no-store, must-revalidate');
+		header('Connection: keep-alive');
+		header('X-Accel-Buffering: no');
+
+		@ob_end_flush();
+		@flush();
+
+		// Heartbeat loop
+		while (true) {
+
+			echo "event: heartbeat\n";
+			echo 'data: {"session_id":"' . esc_attr($session_id) . "\"}\n\n";
+
+			@flush();
+
+			if (connection_aborted()) {
+				break;
+			}
+
+			sleep(15);
+		}
+
+		exit;
+	}
+
+
+
+	public function handle_request(\WP_REST_Request $request): \WP_REST_Response
+	{
+
+		$method = strtoupper($request->get_method());
+
+		// GET → SSE
+		if ($method === 'GET') {
+			return $this->handle_sse($request);
+		}
+
+		// DELETE and POST → existing handler
+		$context = new HttpRequestContext($request);
+		return $this->request_handler->handle_request($context);
 	}
 }

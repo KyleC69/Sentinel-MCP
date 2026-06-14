@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Gemini image generator (Lite minimal).
  *
@@ -24,7 +26,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Image_Generator')) {
+if (! class_exists('SentinelMCP\SENTINEL_Image_Generator')) {
 
 	/**
 	 * Minimal Gemini-based image generator with Media Library side-loading.
@@ -130,7 +132,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 		 * Single Gemini generateContent call configured to return an image.
 		 *
 		 * @param string $prompt Prompt.
-		 * @return array{bytes:string,mime:string}|WP_Error
+		 * @return array{bytes:string,mime:string}|\WP_Error
 		 */
 		protected static function call_gemini_once(string $prompt)
 		{
@@ -167,7 +169,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 			$code = (int) wp_remote_retrieve_response_code($response);
 			$raw  = (string) wp_remote_retrieve_body($response);
 			if ($code < 200 || $code >= 300) {
-				return new WP_Error(
+				return new \WP_Error(
 					'mcpcomal_gemini_http_error',
 					sprintf('Gemini API returned HTTP %d: %s', $code, mb_substr($raw, 0, 300))
 				);
@@ -175,7 +177,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 
 			$decoded = json_decode($raw, true);
 			if (! is_array($decoded)) {
-				return new WP_Error('mcpcomal_gemini_invalid_json', 'Gemini API response is not valid JSON.');
+				return new \WP_Error('mcpcomal_gemini_invalid_json', 'Gemini API response is not valid JSON.');
 			}
 
 			$candidates = $decoded['candidates'] ?? array();
@@ -185,7 +187,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 					if (isset($part['inlineData']['data']) && isset($part['inlineData']['mimeType'])) {
 						$bytes = base64_decode((string) $part['inlineData']['data'], true); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 						if (false === $bytes) {
-							return new WP_Error('mcpcomal_gemini_invalid_b64', 'Gemini returned an inlineData part that is not valid base64.');
+							return new \WP_Error('mcpcomal_gemini_invalid_b64', 'Gemini returned an inlineData part that is not valid base64.');
 						}
 						return array(
 							'bytes' => $bytes,
@@ -195,7 +197,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 				}
 			}
 
-			return new WP_Error('mcpcomal_gemini_no_image', 'Gemini did not return an inline image.');
+			return new \WP_Error('mcpcomal_gemini_no_image', 'Gemini did not return an inline image.');
 		}
 
 		/**
@@ -205,7 +207,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 		 * @param string $mime   Mime type ("image/png", "image/jpeg").
 		 * @param string $prompt Prompt to record as meta (and as alt-text fallback).
 		 * @param int    $attach_to_post Optional post id.
-		 * @return array<string,mixed>|WP_Error
+		 * @return array<string,mixed>|\WP_Error
 		 */
 		protected static function sideload_image_bytes(string $bytes, string $mime, string $prompt, int $attach_to_post)
 		{
@@ -223,7 +225,7 @@ if (! class_exists('SENTINEL_Image_Generator')) {
 			$slug   = 'gemini-' . wp_generate_password(8, false, false) . '.' . $ext;
 			$upload = wp_upload_bits($slug, null, $bytes);
 			if (! empty($upload['error'])) {
-				return new WP_Error('mcpcomal_upload_failed', (string) $upload['error']);
+				return new \WP_Error('mcpcomal_upload_failed', (string) $upload['error']);
 			}
 
 			$file_path = (string) $upload['file'];

@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Options Manager for MCP Content Manager.
  *
@@ -15,7 +17,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Options_Manager')) {
+if (! class_exists('SentinelMCP\SENTINEL_Options_Manager')) {
 
 	/**
 	 * WordPress options manager with security whitelist.

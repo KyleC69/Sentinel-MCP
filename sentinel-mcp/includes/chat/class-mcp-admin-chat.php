@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Chat AI Admin page — fullscreen chat interface + Admin Bar button.
  *
@@ -85,6 +87,16 @@ class SENTINEL_Admin_Chat
 			wp_die(esc_html__('You do not have permission to access this page.', 'mcp-sentinel'));
 		}
 
+		add_action('admin_notices', function () {
+			echo '<pre><div>Provider Info</div>';
+			var_dump(
+				SENTINEL_Chat_Engine::get_available_providers(),
+				SENTINEL_Chat_Engine::get_default_provider()
+			);
+			echo '</pre>';
+		});
+
+
 		// Require WordPress 7.0+ (accept beta/RC/alpha builds).
 		$wp_ver = get_bloginfo('version');
 		if (version_compare(preg_replace('/-(alpha|beta|RC)\d*$/i', '', $wp_ver), '7.0', '<')) {
@@ -117,6 +129,13 @@ class SENTINEL_Admin_Chat
 			echo esc_html__('Update WordPress', 'mcp-sentinel');
 			echo '</a></p>';
 			echo '</div></div>';
+			echo '<div>';
+			echo '<pre>';
+			printf('Provider information');
+			printf($providers);
+			printf($default_provider);
+			echo '</pre>';
+			echo '</div>';
 			return;
 		}
 
@@ -168,6 +187,9 @@ class SENTINEL_Admin_Chat
 				break;
 			}
 		}
+
+
+
 
 		wp_localize_script(
 			'sentinel-chat',

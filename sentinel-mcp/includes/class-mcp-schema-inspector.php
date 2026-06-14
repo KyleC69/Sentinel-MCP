@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Inspector de esquemas de WordPress.
  *
@@ -22,9 +24,9 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_Schema_Inspector')) {
+if (! class_exists('SentinelMCP\SENTINEL_Schema_Inspector')) {
 
-	if (class_exists('SENTINEL_Schema_Inspector')) {
+	if (class_exists('SentinelMCP\SENTINEL_Schema_Inspector')) {
 		return;
 	}
 

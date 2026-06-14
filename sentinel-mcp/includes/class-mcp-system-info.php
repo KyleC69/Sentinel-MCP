@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * System Information for MCP Content Manager.
  *
@@ -17,7 +19,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_System_Info')) {
+if (! class_exists('SentinelMCP\SENTINEL_System_Info')) {
 
 	/**
 	 * Provides comprehensive server, PHP, database, and WordPress diagnostics.

@@ -4,7 +4,7 @@ Tags: mcp, ai, claude, chatgpt, woocommerce
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.3
-Stable tag: 1.0.0
+Stable tag: 2.0.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -122,10 +122,6 @@ Any application that implements the Model Context Protocol with remote server su
 * PHP 8.3 or later.
 * The [WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter) plugin (the Lite plugin can also load the bundled adapter automatically if no other source provides it).
 * An MCP-compatible client.
-
-= Need More? Get Premium =
-
-The **[Premium version](https://plugins.joseconti.com/en/product/sentinel-mcp/)** turns your WordPress site into a full agentic workstation: **575 abilities across 17 categories**, with everything Lite has, plus:
 
 * **WooCommerce write (8 modules):** products with variations and attributes, orders edit, refunds, customers CRUD, sales analytics, shipping zones, webhooks, store settings and subscriptions across 5 platforms (WooCommerce Subscriptions, Yith, Sumo, ASWC, WBTE).
 * **SEO suite:** universal write across the same 8 plugins as Lite + a content auditor with scoring and bulk fixes.

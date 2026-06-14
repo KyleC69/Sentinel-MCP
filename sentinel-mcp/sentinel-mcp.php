@@ -4,13 +4,15 @@
  * Plugin Name: Sentinel-MCP
  * Plugin URI:  https://wordpress.org/plugins/sentinel-mcp/
  * Description: Universal content manager via MCP. Auto-discovers all CPTs, taxonomies and custom fields. Create, edit, search and manage any content from Claude, ChatGPT, Copilot or any MCP client.
- * Version:     1.0.0
+ * Version:     2.0.2
  * Author:      Kyle L Crowder
  * Author URI:  https://github.com/KyleC69
  * License:     GPL-2.0-or-later
  * Text Domain: sentinel-mcp
  * Requires at least: 7.0
  * Requires PHP: 8.3
+ *
+ * NOTE: Changes have been made to vendor HTTP Transport file to add SSE transport
  *
  * Requires:
  *  - WordPress Abilities API (wordpress/abilities-api)
@@ -33,39 +35,55 @@ defined('ABSPATH') || exit;
  */
 $mcpcomal_active_plugins = (array) get_option('active_plugins', array());
 $mcpcomal_premium_files  = array(
-	'sentinel-mcp/sentinel-mcp.php',
 	'mcp-content-manager-for-wp/mcp-content-manager-for-wp.php',
 );
+
 $mcpcomal_premium_active = false;
+$mcpcomal_premium_cause  = '';
 foreach ($mcpcomal_premium_files as $mcpcomal_premium_file) {
 	if (in_array($mcpcomal_premium_file, $mcpcomal_active_plugins, true)) {
 		$mcpcomal_premium_active = true;
+		$mcpcomal_premium_cause  = $mcpcomal_premium_file;
 		break;
 	}
 }
 
-if ($mcpcomal_premium_active || (defined('MCM_IS_PREMIUM') && MCM_IS_PREMIUM)) {
+if (defined('MCM_IS_PREMIUM') && MCM_IS_PREMIUM) {
+	$mcpcomal_premium_active = true;
+	$mcpcomal_premium_cause  = 'MCM_IS_PREMIUM constant';
+}
+
+if ($mcpcomal_premium_active) {
 	unset($mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active);
 	add_action(
 		'admin_notices',
-		function () {
+		function () use ($mcpcomal_premium_cause) {
+
 			printf(
 				'<div class="notice notice-info is-dismissible" style="display:flex;align-items:center;gap:10px;padding:12px 16px;">'
 					. '<span class="dashicons dashicons-info" style="font-size:24px;color:#2271b1;"></span>'
 					. '<p style="margin:0;"><strong>Sentinel-MCP:</strong> %s</p>'
 					. '</div>',
-				esc_html__('The Premium version is active. You can safely deactivate the Lite version.', 'mcp-sentinel')
+				esc_html(
+					sprintf(
+						/* translators: %s: the detected cause (plugin file or constant) */
+						__('The Premium version is active (%s). You can safely deactivate the Lite version.', 'mcp-sentinel'),
+						$mcpcomal_premium_cause
+					)
+				)
 			);
 		}
 	);
+	return;
 }
-unset($mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active);
+
+unset($mcpcomal_active_plugins, $mcpcomal_premium_files, $mcpcomal_premium_active, $mcpcomal_premium_cause);
 
 /**
  * Constants.
  */
 if (! defined('SENTINEL_VERSION')) {
-	define('SENTINEL_VERSION', '1.1.0');
+	define('SENTINEL_VERSION', '2.0.2');
 }
 if (! defined('SENTINEL_PATH')) {
 	define('SENTINEL_PATH', plugin_dir_path(__FILE__));
@@ -166,6 +184,22 @@ if (! defined('WP_MCP_DIR')) {
  * Includes.
  */
 require_once SENTINEL_PATH . 'includes/class-mcp-schema-inspector.php';
+
+/**
+ * Admin tab base + subclasses (must load before class-mcp-admin.php).
+ */
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-getstarted.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-status.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-providers.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-connect.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-prompts.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-settings.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-oauth.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-activity.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-info.php';
+require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-premium.php';
+
 require_once SENTINEL_PATH . 'includes/class-mcp-admin.php';
 require_once SENTINEL_PATH . 'includes/abilities-discovery.php';
 require_once SENTINEL_PATH . 'includes/abilities-universal-crud.php';
@@ -254,9 +288,9 @@ require_once SENTINEL_PATH . 'includes/class-mcp-image-generator.php';
 require_once SENTINEL_PATH . 'includes/abilities-image-generation.php';
 
 /**
- * WordPress 7.0 Connectors API.
+ * Connector helpers (must load before chat / admin tabs that use them).
  */
-require_once SENTINEL_PATH . 'includes/class-mcp-connectors.php';
+require_once SENTINEL_PATH . 'includes/helpers.php';
 
 /**
  * Chat AI.
@@ -266,8 +300,8 @@ require_once SENTINEL_PATH . 'includes/chat/class-mcp-chat-engine.php';
 require_once SENTINEL_PATH . 'includes/chat/class-mcp-admin-chat.php';
 require_once SENTINEL_PATH . 'includes/chat/class-mcp-rest-chat.php';
 
-SENTINEL_REST_Chat::init();
-SENTINEL_Admin_Chat::init();
+\SentinelMCP\SENTINEL_REST_Chat::init();
+\SentinelMCP\SENTINEL_Admin_Chat::init();
 
 /**
  * OAuth 2.1 Server.
@@ -292,10 +326,10 @@ require_once SENTINEL_PATH . 'includes/class-mcp-activity-log.php';
 require_once SENTINEL_PATH . 'includes/class-mcp-config-exporter.php';
 require_once SENTINEL_PATH . 'includes/class-mcp-health-endpoint.php';
 
-SENTINEL_OAuth_Server::init();
-SENTINEL_OAuth_Permissions::init();
-SENTINEL_Activity_Log::init();
-SENTINEL_Health_Endpoint::init();
+\SentinelMCP\SENTINEL_OAuth_Server::init();
+\SentinelMCP\SENTINEL_OAuth_Permissions::init();
+\SentinelMCP\SENTINEL_Activity_Log::init();
+\SentinelMCP\SENTINEL_Health_Endpoint::init();
 
 /**
  * Activation.
@@ -320,16 +354,16 @@ register_activation_hook(
 		}
 
 		// Create OAuth tables.
-		SENTINEL_OAuth_DB::create_tables();
+		\SentinelMCP\SENTINEL_OAuth_DB::create_tables();
 
 		// Create Chat AI tables.
-		SENTINEL_Chat_DB::create_tables();
+		\SentinelMCP\SENTINEL_Chat_DB::create_tables();
 
 		// Create Activity Log table.
-		SENTINEL_Activity_Log::create_table();
+		\SentinelMCP\SENTINEL_Activity_Log::create_table();
 
 		// Create backups directory.
-		SENTINEL_File_Manager::ensure_backup_dir();
+		\SentinelMCP\SENTINEL_File_Manager::ensure_backup_dir();
 	}
 );
 
@@ -343,13 +377,13 @@ register_deactivation_hook(
 	}
 );
 
-add_action('plugins_loaded', array('SENTINEL_OAuth_DB', 'maybe_upgrade'));
-add_action('plugins_loaded', array('SENTINEL_Chat_DB', 'maybe_upgrade'));
-add_action('plugins_loaded', array('SENTINEL_Activity_Log', 'maybe_upgrade'));
+add_action('plugins_loaded', array('SentinelMCP\SENTINEL_OAuth_DB', 'maybe_upgrade'));
+add_action('plugins_loaded', array('SentinelMCP\SENTINEL_Chat_DB', 'maybe_upgrade'));
+add_action('plugins_loaded', array('SentinelMCP\SENTINEL_Activity_Log', 'maybe_upgrade'));
 
 /**
  * Admin.
  */
 if (is_admin()) {
-	new SENTINEL_Admin();
+	new \SentinelMCP\SENTINEL_Admin();
 }

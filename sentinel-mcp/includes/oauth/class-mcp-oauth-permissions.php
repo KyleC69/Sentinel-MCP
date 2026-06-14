@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth granular permissions and rate limiting (Sprint 2.2 + 2.3).
  *
@@ -14,7 +16,8 @@
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://mcpwp.com/
+ * @link       https://github.com/KyleC69/Sentinel-MCP
+
  */
 
 defined('ABSPATH') || exit;
@@ -26,7 +29,7 @@ if (! defined('MCPCOMAL_RATE_LIMIT_PER_DAY')) {
 	define('MCPCOMAL_RATE_LIMIT_PER_DAY', 10000);
 }
 
-if (! class_exists('SENTINEL_OAuth_Permissions')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_Permissions')) {
 
 	/**
 	 * Pre-execution gates: per-client allowlist and rate limiting.
@@ -45,14 +48,14 @@ if (! class_exists('SENTINEL_OAuth_Permissions')) {
 		/**
 		 * Gate every tool call by allowlist and rate limit.
 		 *
-		 * Runs at priority 5, before activity log (priority 50). Returning a WP_Error
+		 * Runs at priority 5, before activity log (priority 50). Returning a \WP_Error
 		 * short-circuits execution per the contract documented in ToolsHandler.php.
 		 *
 		 * @param array  $args      Tool args.
 		 * @param string $tool_name Tool slug.
 		 * @param mixed  $mcp_tool  Tool instance.
 		 * @param mixed  $server    Server instance.
-		 * @return array|WP_Error
+		 * @return array|\WP_Error
 		 */
 		public static function gate($args, $tool_name, $mcp_tool, $server)
 		{
@@ -68,7 +71,7 @@ if (! class_exists('SENTINEL_OAuth_Permissions')) {
 				if (class_exists('MCPCOMAL_Activity_Log')) {
 					MCPCOMAL_Activity_Log::record((string) $tool_name, 'denied', 0, 'allowlist');
 				}
-				return new WP_Error(
+				return new \WP_Error(
 					'mcpcomal_ability_not_allowed',
 					sprintf(
 						/* translators: %s: ability slug */
@@ -85,7 +88,7 @@ if (! class_exists('SENTINEL_OAuth_Permissions')) {
 				if (class_exists('MCPCOMAL_Activity_Log')) {
 					MCPCOMAL_Activity_Log::record((string) $tool_name, 'rate_limited', 0, $rate['scope']);
 				}
-				return new WP_Error(
+				return new \WP_Error(
 					'rate_limit_exceeded',
 					__('Rate limit exceeded.', 'mcp-sentinel'),
 					array(

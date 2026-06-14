@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * Full Site Editing read abilities (Sprint 1.4).
  *

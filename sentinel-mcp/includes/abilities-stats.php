@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Site stats abilities (Sprint 1.2).
  *

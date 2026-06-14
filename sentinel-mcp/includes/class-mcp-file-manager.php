@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * File Manager for MCP Content Manager.
  *
@@ -16,7 +18,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_File_Manager')) {
+if (! class_exists('SentinelMCP\SENTINEL_File_Manager')) {
 
 	/**
 	 * Secure file operations manager for wp-content directory.
@@ -155,23 +157,23 @@ if (! class_exists('SENTINEL_File_Manager')) {
 		 *
 		 * @param string $path      The path to validate (relative to wp-content/, or bare filename for ABSPATH files).
 		 * @param bool   $must_exist Whether the file must already exist.
-		 * @return string|WP_Error Normalized absolute path on success, WP_Error on failure.
+		 * @return string|\WP_Error Normalized absolute path on success, \WP_Error on failure.
 		 */
 		public static function validate_path(string $path, bool $must_exist = true)
 		{
 			// Block obvious traversal attempts before any processing.
 			if (str_contains($path, '..')) {
-				return new WP_Error('path_traversal', 'Directory traversal is not allowed.');
+				return new \WP_Error('path_traversal', 'Directory traversal is not allowed.');
 			}
 
 			// Block null bytes.
 			if (str_contains($path, "\0")) {
-				return new WP_Error('invalid_path', 'Null bytes are not allowed in paths.');
+				return new \WP_Error('invalid_path', 'Null bytes are not allowed in paths.');
 			}
 
 			// Block stream wrappers (phar://, php://, etc.).
 			if (preg_match('#^[a-z][a-z0-9+.\-]*://#i', $path)) {
-				return new WP_Error('invalid_path', 'Stream wrappers are not allowed.');
+				return new \WP_Error('invalid_path', 'Stream wrappers are not allowed.');
 			}
 
 			// Normalize the path.
@@ -201,7 +203,7 @@ if (! class_exists('SENTINEL_File_Manager')) {
 			if (! $is_abspath_file) {
 				$relative = str_replace($content_dir . '/', '', $path);
 				if (0 !== validate_file($relative)) {
-					return new WP_Error('invalid_path', 'Path validation failed.');
+					return new \WP_Error('invalid_path', 'Path validation failed.');
 				}
 			}
 
@@ -210,7 +212,7 @@ if (! class_exists('SENTINEL_File_Manager')) {
 				$real_path = realpath($path);
 				if (false === $real_path) {
 					$display = $is_abspath_file ? $clean_name : str_replace($content_dir . '/', '', $path);
-					return new WP_Error('file_not_found', 'File does not exist: ' . $display);
+					return new \WP_Error('file_not_found', 'File does not exist: ' . $display);
 				}
 
 				if ($is_abspath_file) {
@@ -219,14 +221,14 @@ if (! class_exists('SENTINEL_File_Manager')) {
 					$norm_real    = wp_normalize_path($real_path);
 
 					if (! str_starts_with($norm_real, $real_abspath)) {
-						return new WP_Error('path_outside_allowed', 'Path resolves outside allowed directories.');
+						return new \WP_Error('path_outside_allowed', 'Path resolves outside allowed directories.');
 					}
 				} else {
 					$real_content_dir = realpath(WP_CONTENT_DIR);
 
 					// Verify the resolved path is within wp-content.
 					if (! str_starts_with(wp_normalize_path($real_path), wp_normalize_path($real_content_dir))) {
-						return new WP_Error('path_outside_content', 'Path resolves outside of wp-content/.');
+						return new \WP_Error('path_outside_content', 'Path resolves outside of wp-content/.');
 					}
 				}
 
@@ -237,7 +239,7 @@ if (! class_exists('SENTINEL_File_Manager')) {
 				$real_parent = realpath($parent);
 
 				if (false === $real_parent) {
-					return new WP_Error('parent_not_found', 'Parent directory does not exist.');
+					return new \WP_Error('parent_not_found', 'Parent directory does not exist.');
 				}
 
 				if ($is_abspath_file) {
@@ -245,13 +247,13 @@ if (! class_exists('SENTINEL_File_Manager')) {
 					$norm_parent  = wp_normalize_path($real_parent);
 
 					if ($real_abspath !== $norm_parent && ! str_starts_with($norm_parent, $real_abspath)) {
-						return new WP_Error('path_outside_allowed', 'Path resolves outside allowed directories.');
+						return new \WP_Error('path_outside_allowed', 'Path resolves outside allowed directories.');
 					}
 				} else {
 					$real_content_dir = realpath(WP_CONTENT_DIR);
 
 					if (! str_starts_with(wp_normalize_path($real_parent), wp_normalize_path($real_content_dir))) {
-						return new WP_Error('path_outside_content', 'Path resolves outside of wp-content/.');
+						return new \WP_Error('path_outside_content', 'Path resolves outside of wp-content/.');
 					}
 				}
 
@@ -262,7 +264,7 @@ if (! class_exists('SENTINEL_File_Manager')) {
 			if (! $is_abspath_file) {
 				$backup_dir = wp_normalize_path(self::get_backup_dir());
 				if (str_starts_with($path, $backup_dir)) {
-					return new WP_Error('backup_dir_protected', 'Cannot operate on files inside the backups directory.');
+					return new \WP_Error('backup_dir_protected', 'Cannot operate on files inside the backups directory.');
 				}
 			}
 
@@ -270,7 +272,7 @@ if (! class_exists('SENTINEL_File_Manager')) {
 			if (! $is_abspath_file) {
 				$extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 				if (! in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-					return new WP_Error(
+					return new \WP_Error(
 						'extension_not_allowed',
 						sprintf(
 							'File extension "%s" is not allowed. Allowed: %s',

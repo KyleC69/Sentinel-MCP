@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * User Manager for MCP Content Manager.
  *
@@ -14,7 +16,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_User_Manager')) {
+if (! class_exists('SentinelMCP\SENTINEL_User_Manager')) {
 
 	/**
 	 * WordPress user management operations.

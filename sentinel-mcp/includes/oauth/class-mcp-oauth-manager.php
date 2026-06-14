@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * OAuth 2.0 Manager.
  *
@@ -12,7 +14,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_OAuth_Manager')) {
+if (! class_exists('SentinelMCP\SENTINEL_OAuth_Manager')) {
 
     class SENTINEL_OAuth_Manager
     {
@@ -61,7 +63,7 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
          *   - client_id (string)   Optional. The OAuth client identifier.
          *   - redirect_uri (string) Optional. Must be a valid URL; HTTPS, HTTP (localhost) or the vscode scheme are accepted.
          *   - scope (string)        Optional OAuth scope.
-         * @return string|WP_Error Authorization URL or error.
+         * @return string|\WP_Error Authorization URL or error.
          */
         /**
          * Resolve the stored client_id to a real registered client.
@@ -71,16 +73,16 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
          * client by ID first, then falls back to a lookup by client_name. If a valid
          * client is found, the option is updated to the correct ID.
          *
-         * @return string|WP_Error Resolved client_id or WP_Error on failure.
+         * @return string|\WP_Error Resolved client_id or \WP_Error on failure.
          */
-        private static function resolve_client_id(?string $client_id = null): string|WP_Error
+        private static function resolve_client_id(?string $client_id = null): string|\WP_Error
         {
             if (null === $client_id) {
                 $client_id = get_option('sentinel_oauth_client_id');
             }
 
             if (! is_string($client_id) || '' === trim($client_id)) {
-                return new WP_Error('missing_client_id', 'client_id is required.', array('status' => 400));
+                return new \WP_Error('missing_client_id', 'client_id is required.', array('status' => 400));
             }
 
             $client = SENTINEL_OAuth_DB::get_client_by_id($client_id);
@@ -94,10 +96,10 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
                 return $client_by_name['client_id'];
             }
 
-            return new WP_Error('invalid_client_id', 'Provided client_id does not correspond to a registered OAuth client.', array('status' => 400));
+            return new \WP_Error('invalid_client_id', 'Provided client_id does not correspond to a registered OAuth client.', array('status' => 400));
         }
 
-        public static function get_authorization_url(array $args = []): string|WP_Error
+        public static function get_authorization_url(array $args = []): string|\WP_Error
         {
             // Allow explicit override via args, otherwise resolve stored option.
             $client_id = $args['client_id'] ?? null;
@@ -121,13 +123,13 @@ if (! class_exists('SENTINEL_OAuth_Manager')) {
             $scheme = parse_url($redirect_uri, PHP_URL_SCHEME);
             $allowed = array('https', 'http', 'vscode');
             if (! in_array($scheme, $allowed, true)) {
-                return new WP_Error('invalid_redirect_uri', 'Provided redirect_uri must use https, http (localhost), or vscode scheme.', array('status' => 400));
+                return new \WP_Error('invalid_redirect_uri', 'Provided redirect_uri must use https, http (localhost), or vscode scheme.', array('status' => 400));
             }
             // If http, ensure it's localhost to avoid insecure redirects.
             if ('http' === $scheme) {
                 $host = parse_url($redirect_uri, PHP_URL_HOST);
                 if ('127.0.0.1' !== $host && 'localhost' !== $host) {
-                    return new WP_Error('invalid_redirect_uri', 'HTTP redirect_uri is only allowed for localhost.', array('status' => 400));
+                    return new \WP_Error('invalid_redirect_uri', 'HTTP redirect_uri is only allowed for localhost.', array('status' => 400));
                 }
             }
 

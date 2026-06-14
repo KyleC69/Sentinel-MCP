@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Polylang i18n adapter (Sprint 4.1).
  *
@@ -14,7 +16,7 @@
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SENTINEL_I18n_Polylang')) {
+if (! class_exists('SentinelMCP\SENTINEL_I18n_Polylang')) {
 
 	/**
 	 * Polylang read-only adapter.

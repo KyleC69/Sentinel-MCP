@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * Chat AI Engine — orchestrates AI conversations using soukicz/llm SDK.
  *
@@ -185,70 +187,86 @@ class SENTINEL_Chat_Engine
 		),
 	);
 
+	public static function get_connector_id(string $provider): string
+	{
+		return self::WP_CONNECTOR_MAP[$provider]['connector_id'] ?? $provider;
+	}
+
 	/**
-	 * Check if an API key is configured for a provider.
+	 * Check if a provider is configured and available.
 	 *
-	 * Uses the WordPress AI plugin's has_connector_authentication() when
-	 * available (avoids external API requests). Falls back to local lookup.
+	 * Queries the AiClient registry via mcpcomal_is_connector_configured().
 	 *
 	 * @param string $provider Provider slug.
 	 * @return bool
 	 */
 	public static function has_api_key(string $provider): bool
 	{
-		if (function_exists('has_connector_authentication')) {
-			return has_connector_authentication($provider);
-		}
+		$connector_id = self::get_connector_id($provider);
 
-		return ! empty(self::get_api_key($provider));
+		return mcpcomal_is_connector_configured($connector_id);
 	}
 
 	/**
 	 * Get the API key for a provider.
 	 *
-	 * Checks in order (same as WordPress 7.0 Connectors API):
-	 * 1. Environment variable (e.g., ANTHROPIC_API_KEY)
-	 * 2. PHP constant (e.g., ANTHROPIC_API_KEY)
-	 * 3. WordPress Connectors API option (e.g., connectors_ai_anthropic_api_key)
-	 * 4. WordPress Connectors API wp_get_connector() setting_name
+	 * Queries the AiClient registry for the provider's authentication
+	 * configuration and returns the resolved key from env, constant, or option.
 	 *
 	 * @param string $provider Provider slug.
 	 * @return string|null
 	 */
 	private static function get_api_key(string $provider): ?string
 	{
-		$map = self::WP_CONNECTOR_MAP[$provider] ?? null;
+		$connector_id = self::get_connector_id($provider);
 
-		if ($map) {
-			// 1. Environment variable.
-			$env_key = getenv($map['env_var']);
-			if (! empty($env_key) && is_string($env_key)) {
-				return $env_key;
+		if (! class_exists('\WordPress\AiClient\AiClient')) {
+			return null;
+		}
+
+		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
+
+		if (! $registry->hasProvider($connector_id)) {
+			return null;
+		}
+
+		$class_name = $registry->getProviderClassName($connector_id);
+		if (! $class_name || ! class_exists($class_name)) {
+			return null;
+		}
+
+		$provider_instance = new $class_name();
+		if (! method_exists($provider_instance, 'getAuthentication')) {
+			return null;
+		}
+
+		$auth = $provider_instance->getAuthentication();
+		if (! is_array($auth) || ($auth['method'] ?? '') !== 'api_key') {
+			return null;
+		}
+
+		$setting_name = $auth['setting_name'] ?? '';
+		$env_var_name = $auth['env_var_name'] ?? '';
+		$constant_name = $auth['constant_name'] ?? '';
+
+		if ('' !== $env_var_name) {
+			$env_value = getenv($env_var_name);
+			if (false !== $env_value && '' !== $env_value) {
+				return $env_value;
 			}
+		}
 
-			// 2. PHP constant.
-			if (defined($map['env_var'])) {
-				$const_key = constant($map['env_var']);
-				if (! empty($const_key) && is_string($const_key)) {
-					return $const_key;
-				}
+		if ('' !== $constant_name && defined($constant_name)) {
+			$const_value = constant($constant_name);
+			if (is_string($const_value) && '' !== $const_value) {
+				return $const_value;
 			}
+		}
 
-			// 3. WordPress Connectors API option (direct).
-			$option_key = get_option($map['option'], '');
-			if (! empty($option_key)) {
-				return $option_key;
-			}
-
-			// 4. WordPress Connectors API via wp_get_connector() (dynamic setting_name).
-			if (function_exists('wp_get_connector')) {
-				$connector = wp_get_connector($map['connector_id']);
-				if ($connector && ! empty($connector['authentication']['setting_name'])) {
-					$setting_key = get_option($connector['authentication']['setting_name'], '');
-					if (! empty($setting_key)) {
-						return $setting_key;
-					}
-				}
+		if ('' !== $setting_name) {
+			$db_value = get_option($setting_name, '');
+			if ('' !== $db_value) {
+				return $db_value;
 			}
 		}
 
@@ -258,62 +276,46 @@ class SENTINEL_Chat_Engine
 	/**
 	 * Get the source of the API key for a provider.
 	 *
-	 * Uses the WordPress AI plugin's get_connector_api_key_source() when
-	 * available. Falls back to local lookup.
+	 * Queries the AiClient registry for the provider's authentication
+	 * configuration and delegates to mcpcomal_get_connector_api_key_source().
 	 *
 	 * @param string $provider Provider slug.
 	 * @return string 'env_var', 'constant', 'connectors_api', or 'none'.
 	 */
 	public static function get_api_key_source(string $provider): string
 	{
-		if (function_exists('wp_get_connector') && function_exists('get_connector_api_key_source')) {
-			$connector = wp_get_connector($provider);
-			if (is_array($connector) && isset($connector['authentication']['setting_name'])) {
-				$auth = $connector['authentication'];
-				$source = get_connector_api_key_source(
-					$auth['setting_name'] ?? '',
-					$auth['env_var_name'] ?? '',
-					$auth['constant_name'] ?? ''
-				);
-				if ('none' !== $source) {
-					return $source;
-				}
-			}
+		$connector_id = self::get_connector_id($provider);
+
+		if (! class_exists('\WordPress\AiClient\AiClient')) {
+			return 'none';
 		}
 
-		$map = self::WP_CONNECTOR_MAP[$provider] ?? null;
+		$registry = \WordPress\AiClient\AiClient::defaultRegistry();
 
-		if ($map) {
-			// Environment variable.
-			$env_key = getenv($map['env_var']);
-			if (! empty($env_key) && is_string($env_key)) {
-				return 'env_var';
-			}
-
-			// PHP constant.
-			if (defined($map['env_var']) && ! empty(constant($map['env_var']))) {
-				return 'constant';
-			}
-
-			// Connectors API option.
-			$option_key = get_option($map['option'], '');
-			if (! empty($option_key)) {
-				return 'connectors_api';
-			}
-
-			// Connectors API via wp_get_connector().
-			if (function_exists('wp_get_connector')) {
-				$connector = wp_get_connector($map['connector_id']);
-				if ($connector && ! empty($connector['authentication']['setting_name'])) {
-					$setting_key = get_option($connector['authentication']['setting_name'], '');
-					if (! empty($setting_key)) {
-						return 'connectors_api';
-					}
-				}
-			}
+		if (! $registry->hasProvider($connector_id)) {
+			return 'none';
 		}
 
-		return 'none';
+		$class_name = $registry->getProviderClassName($connector_id);
+		if (! $class_name || ! class_exists($class_name)) {
+			return 'none';
+		}
+
+		$provider_instance = new $class_name();
+		if (! method_exists($provider_instance, 'getAuthentication')) {
+			return 'none';
+		}
+
+		$auth = $provider_instance->getAuthentication();
+		if (! is_array($auth) || ($auth['method'] ?? '') !== 'api_key') {
+			return 'none';
+		}
+
+		return mcpcomal_get_connector_api_key_source(
+			$auth['setting_name'] ?? '',
+			$auth['env_var_name'] ?? '',
+			$auth['constant_name'] ?? ''
+		);
 	}
 
 	// ─── Client Creation ─────────────────────────────────────────────

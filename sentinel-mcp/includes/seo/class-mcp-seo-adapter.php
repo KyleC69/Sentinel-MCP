@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * SEO read adapter (Sprint 1.7).
  *
@@ -26,7 +29,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'SENTINEL_SEO_Adapter' ) ) {
+if ( ! class_exists( 'SentinelMCP\SENTINEL_SEO_Adapter' ) ) {
 
 	/**
 	 * Lightweight SEO meta reader across multiple plugins.

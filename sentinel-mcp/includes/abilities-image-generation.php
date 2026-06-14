@@ -1,4 +1,7 @@
 <?php
+
+namespace SentinelMCP;
+
 /**
  * AI image generation abilities (Lite minimal).
  *

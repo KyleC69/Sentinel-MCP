@@ -1,5 +1,7 @@
 <?php
 
+namespace SentinelMCP;
+
 /**
  * WooCommerce read-only abilities (Sprint 1.6).
  *
@@ -426,7 +428,7 @@ add_action(
 					$per_page = isset($input['per_page']) ? max(1, min(100, (int) $input['per_page'])) : 25;
 					$page     = isset($input['page']) ? max(1, (int) $input['page']) : 1;
 
-					$query = new WP_Query(
+					$query = new \WP_Query(
 						array(
 							'post_type'      => 'shop_coupon',
 							'posts_per_page' => $per_page,
