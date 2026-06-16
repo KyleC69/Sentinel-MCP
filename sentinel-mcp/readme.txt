@@ -239,7 +239,7 @@ Yes. The plugin uses OAuth 2.1 with PKCE for authentication. Every MCP connectio
 
 = Can I limit which abilities a specific AI client can use? =
 
-Yes. Each OAuth client has its own `allowed_abilities` allowlist. Open **Settings > Sentinel-MCP > Authentication**, click the **Permissions** button next to the client and pick "All abilities" or "Restricted to selected abilities" with checkboxes grouped by area (Core, WooCommerce, Multilingual, SEO). You can let Claude Desktop run everything while a CI integration only sees `list-recent-posts` and `read-post`. The helper class `SENTINEL_OAuth_Permissions` also exposes `set/get/is_allowed` APIs for programmatic management.
+Yes. Each OAuth client has its own `allowed_abilities` allowlist. Open **Settings > Sentinel-MCP > Authentication**, click the **Permissions** button next to the client and pick "All abilities" or "Restricted to selected abilities" with checkboxes grouped by area (Core, WooCommerce, Multilingual, SEO). You can let Claude Desktop run everything while a CI integration only sees `list-recent-posts` and `read-post`. The helper class `OAuth_Permissions` also exposes `set/get/is_allowed` APIs for programmatic management.
 
 = How do I monitor MCP usage? =
 

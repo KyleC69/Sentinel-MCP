@@ -14,7 +14,7 @@
 
 ## 1. Executive Summary
 
-The chat page does **not dynamically query** the Ollama instance for its model list (e.g., `ollama list` or `GET /api/tags`). Instead, it relies on a **statically hardcoded model catalog** inside `SENTINEL_Chat_Engine::PROVIDERS`. Whether any provider’s models appear in the dropdown is gated by a single boolean, `has_key`, which is computed server-side and passed to the browser via `wp_localize_script`. If `has_key` is `false` for Ollama, the entire provider block is filtered out in JavaScript before the dropdown is rendered.
+The chat page does **not dynamically query** the Ollama instance for its model list (e.g., `ollama list` or `GET /api/tags`). Instead, it relies on a **statically hardcoded model catalog** inside `Chat_Engine::PROVIDERS`. Whether any provider’s models appear in the dropdown is gated by a single boolean, `has_key`, which is computed server-side and passed to the browser via `wp_localize_script`. If `has_key` is `false` for Ollama, the entire provider block is filtered out in JavaScript before the dropdown is rendered.
 
 Even when the API key is confirmed present in the WordPress Connectors UI and in the environment variable, the chat page can still fail to recognize Ollama due to **how and when** the key is resolved, and because the model list is never refreshed from the actual Ollama server.
 
@@ -24,11 +24,11 @@ Even when the API key is confirmed present in the WordPress Connectors UI and in
 
 ### 2.1 Page Render (`class-mcp-admin-chat.php`)
 
-When an admin opens **AI Mode** (`admin.php?page=sentinel-chat`), `SENTINEL_Admin_Chat::render_page()` executes:
+When an admin opens **AI Mode** (`admin.php?page=sentinel-chat`), `Admin_Chat::render_page()` executes:
 
 1. **WordPress version check** — If WP < 7.0, it shows a hard-block message and returns early. No chat UI is rendered.
 2. **Script enqueueing** — Loads `marked`, `DOMPurify`, `highlight.js`, and the main `mcpcomal-chat.js`.
-3. **Provider data build** — Calls `SENTINEL_Chat_Engine::get_available_providers()`.
+3. **Provider data build** — Calls `Chat_Engine::get_available_providers()`.
 4. **Key presence check** — Iterates providers to set `$has_any_key = true` if **any** provider has `has_key === true`.
 5. **Localization** — Injects a global JS object `window.mcpcomalChat` via `wp_localize_script` with:
    - `hasApiKey` (boolean)
@@ -102,7 +102,7 @@ Other AI pages in the plugin may:
 
 - Use `wp_get_connector('ollama')` directly and read `$connector['authentication']['setting_name']`.
 - Call `get_option('connectors_ai_ollama_api_key')` in isolation.
-- Access the key via a different code path that does not go through `SENTINEL_Chat_Engine`.
+- Access the key via a different code path that does not go through `Chat_Engine`.
 
 The chat engine, however, is the **only** place that combines all four checks into a single `has_key` boolean. If any one of these checks behaves differently (e.g., `getenv()` returns `false` in the web-server SAPI but `true` in CLI), the chat page will report `has_key = false` while other pages may still work.
 

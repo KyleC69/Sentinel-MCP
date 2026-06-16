@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -13,17 +15,15 @@ namespace SentinelMCP;
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
  * @copyright  2026 Kyle L Crowder
  * @license    GPL-2.0-or-later
- * @link       https://mcpwp.com/
+ * @link       https://github.com/KyleC69/Sentinel-MCP
  */
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_I18n_Adapter')) {
-
 	/**
 	 * Locator for the active i18n adapter.
 	 */
-	abstract class SENTINEL_I18n_Adapter
+	abstract class I18n_Adapter
 	{
 
 		/**
@@ -31,14 +31,14 @@ if (! class_exists('SentinelMCP\SENTINEL_I18n_Adapter')) {
 		 */
 		public static function active(): string
 		{
-			if (SENTINEL_I18n_Polylang::is_active()) {
-				return 'SENTINEL_I18n_Polylang';
+			if (I18n_Polylang::is_active()) {
+				return 'I18n_Polylang';
 			}
-			if (SENTINEL_I18n_WPML::is_active()) {
-				return 'SENTINEL_I18n_WPML';
+			if (I18n_WPML::is_active()) {
+				return 'I18n_WPML';
 			}
-			if (SENTINEL_I18n_TranslatePress::is_active()) {
-				return 'SENTINEL_I18n_TranslatePress';
+			if (I18n_TranslatePress::is_active()) {
+				return 'I18n_TranslatePress';
 			}
 			return '';
 		}

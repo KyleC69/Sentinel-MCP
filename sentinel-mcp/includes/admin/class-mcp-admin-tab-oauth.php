@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SentinelMCP;
 
+use WP_Application_Passwords;
+
 /**
  * OAuth admin tab.
  *
@@ -16,14 +18,12 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
-
 	/**
 	 * Renders the Authentication (OAuth + Application Passwords) tab.
 	 *
 	 * Also handles its own POST actions.
 	 */
-	class SENTINEL_Admin_Tab_OAuth extends SENTINEL_Admin_Tab
+	class Admin_Tab_OAuth extends Admin_Tab
 	{
 
 		/**
@@ -50,8 +50,8 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 				return;
 			}
 
-			$oauth_clients = SENTINEL_OAuth_DB::get_all_clients();
-			$active_tokens = SENTINEL_OAuth_DB::get_active_tokens();
+			$oauth_clients = OAuth_DB::get_all_clients();
+			$active_tokens = OAuth_DB::get_active_tokens();
 			$has_mcp       = class_exists('\WP\MCP\Core\McpAdapter');
 			$mcp_url       = $has_mcp ? rest_url('mcp/mcp-adapter-default-server') : '';
 			?>
@@ -181,8 +181,8 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 			if (isset($_POST['mcpcomal_revoke_client'])) {
 				$client_id = sanitize_text_field(wp_unslash($_POST['mcpcomal_revoke_client']));
 				check_admin_referer('mcpcomal_revoke_client_' . $client_id);
-				SENTINEL_OAuth_DB::revoke_all_for_client($client_id);
-				SENTINEL_OAuth_DB::delete_client($client_id);
+				OAuth_DB::revoke_all_for_client($client_id);
+				OAuth_DB::delete_client($client_id);
 				$this->redirect_with_notice('oauth', 'success', 'OAuth client revoked successfully.');
 			}
 
@@ -193,12 +193,12 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 
 				$mode = isset($_POST['mcpcomal_perm_mode']) ? sanitize_key((string) $_POST['mcpcomal_perm_mode']) : 'all';
 				if ('all' === $mode) {
-					SENTINEL_OAuth_Permissions::set_allowed_abilities($client_id, null);
+					OAuth_Permissions::set_allowed_abilities($client_id, null);
 				} else {
 					$selected = isset($_POST['mcpcomal_perm_abilities']) && is_array($_POST['mcpcomal_perm_abilities'])
 						? array_map('sanitize_text_field', wp_unslash((array) $_POST['mcpcomal_perm_abilities']))
 						: [];
-					SENTINEL_OAuth_Permissions::set_allowed_abilities($client_id, $selected);
+					OAuth_Permissions::set_allowed_abilities($client_id, $selected);
 				}
 
 				$this->redirect_with_notice('oauth', 'success', 'Permissions saved.');
@@ -208,7 +208,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 			if (isset($_POST['mcpcomal_revoke_token'])) {
 				$token_id = (int) $_POST['mcpcomal_revoke_token'];
 				check_admin_referer('mcpcomal_revoke_token_' . $token_id);
-				SENTINEL_OAuth_DB::revoke_token_by_id($token_id);
+				OAuth_DB::revoke_token_by_id($token_id);
 				$this->redirect_with_notice('oauth', 'success', 'Token revoked successfully.');
 			}
 
@@ -383,7 +383,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 		 */
 		private function render_permissions_view(string $client_id): void
 		{
-			$client   = $client_id ? SENTINEL_OAuth_DB::get_client_by_id($client_id) : null;
+			$client   = $client_id ? OAuth_DB::get_client_by_id($client_id) : null;
 			$back_url = $this->tab_url('oauth');
 
 			if (! $client) {
@@ -396,7 +396,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 				return;
 			}
 
-			$current   = SENTINEL_OAuth_Permissions::get_allowed_abilities($client_id);
+			$current   = OAuth_Permissions::get_allowed_abilities($client_id);
 			$mode      = (null === $current) ? 'all' : 'restricted';
 			$selected  = is_array($current) ? $current : [];
 			$abilities = $this->get_mcpcomal_abilities_grouped();
@@ -519,4 +519,3 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_OAuth')) {
 			return $grouped;
 		}
 	}
-}

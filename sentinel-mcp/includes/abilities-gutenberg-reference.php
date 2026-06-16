@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -20,70 +22,10 @@ namespace SentinelMCP;
  * @link       https://github.com/KyleC69/Sentinel-MCP
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-
-/**
- * Register the sentinel/gutenberg-reference ability.
- */
-add_action(
-	'wp_abilities_api_init',
-	function () {
-
-		wp_register_ability(
-			'sentinel/gutenberg-reference',
-			array(
-				'label'               => 'Gutenberg block markup reference',
-				'category'            => 'sentinel-discovery',
-				'description'         => 'All parameters optional. Returns a complete reference guide for writing Gutenberg block markup. '
-					. 'Includes syntax examples for all core blocks (paragraphs, headings, lists, columns, '
-					. 'groups, buttons, images, cover, media-text, separator, spacer, table, code, quote, '
-					. 'and more) plus the list of all blocks registered on this site. '
-					. 'Call this BEFORE creating content if you need to use advanced Gutenberg layouts. '
-					. 'The content field in sentinel/create-content and sentinel/update-content accepts '
-					. 'Gutenberg block markup directly (<!-- wp:blockname --> delimiters).',
-
-				'input_schema'        => array(
-					'type'       => 'object',
-					'default'    => array(),
-					'properties' => array(
-						'section' => array(
-							'type'        => 'string',
-							'description' => 'Which section to return: "guide" for markup examples, '
-								. '"registry" for all registered blocks on this site, '
-								. '"all" for both.',
-							'enum'        => array( 'guide', 'registry', 'all' ),
-							'default'     => 'all',
-						),
-					),
-				),
-
-				'output_schema'       => array(
-					'type'                 => 'object',
-					'additionalProperties' => true,
-				),
-
-				'execute_callback'    => 'mcpcomal_gutenberg_reference_execute',
-
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
-
-				'meta'                => array(
-					'mcp' => array(
-						'public'      => true,
-						'annotations' => array(
-							'readOnlyHint'    => true,
-							'destructiveHint' => false,
-							'idempotentHint'  => true,
-							'openWorldHint'   => false,
-						),
-					),
-				),
-			)
-		);
-	}
-);
+\SentinelMCP\Abilities\Registry::register(new \SentinelMCP\Abilities\Gutenberg\Gutenberg_Reference_Ability());
+\SentinelMCP\Abilities\Registry::init();
 
 /**
  * Execute the gutenberg-reference ability.
@@ -91,16 +33,17 @@ add_action(
  * @param array $input Ability input with optional 'section' key.
  * @return array Reference data.
  */
-function mcpcomal_gutenberg_reference_execute( array $input ): array {
-	$section = sanitize_text_field( $input['section'] ?? 'all' );
-	$result  = array( 'success' => true );
+function mcpcomal_gutenberg_reference_execute(array $input): array
+{
+	$section = sanitize_text_field($input['section'] ?? 'all');
+	$result  = array('success' => true);
 
-	if ( 'guide' === $section || 'all' === $section ) {
+	if ('guide' === $section || 'all' === $section) {
 		$result['syntax_rules'] = mcpcomal_gutenberg_syntax_rules();
 		$result['blocks']       = mcpcomal_gutenberg_block_examples();
 	}
 
-	if ( 'registry' === $section || 'all' === $section ) {
+	if ('registry' === $section || 'all' === $section) {
 		$result['registered_blocks'] = mcpcomal_gutenberg_registered_blocks();
 	}
 
@@ -112,7 +55,8 @@ function mcpcomal_gutenberg_reference_execute( array $input ): array {
  *
  * @return array Rules as strings.
  */
-function mcpcomal_gutenberg_syntax_rules(): array {
+function mcpcomal_gutenberg_syntax_rules(): array
+{
 	return array(
 		'Block delimiters are HTML comments: <!-- wp:blockname {"attr":"value"} --> content <!-- /wp:blockname -->',
 		'Self-closing blocks (no content): <!-- wp:blockname {"attr":"value"} /-->',
@@ -135,7 +79,8 @@ function mcpcomal_gutenberg_syntax_rules(): array {
  *
  * @return array Block examples.
  */
-function mcpcomal_gutenberg_block_examples(): array {
+function mcpcomal_gutenberg_block_examples(): array
+{
 	return array(
 
 		// --- TEXT BLOCKS ---
@@ -299,46 +244,47 @@ function mcpcomal_gutenberg_block_examples(): array {
  *
  * @return array List of registered blocks with name, title, category and attributes.
  */
-function mcpcomal_gutenberg_registered_blocks(): array {
-	if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
-		return array( 'error' => 'Block registry not available.' );
+function mcpcomal_gutenberg_registered_blocks(): array
+{
+	if (! class_exists('WP_Block_Type_Registry')) {
+		return array('error' => 'Block registry not available.');
 	}
 
 	$registry = WP_Block_Type_Registry::get_instance();
 	$blocks   = $registry->get_all_registered();
 	$result   = array();
 
-	foreach ( $blocks as $name => $block_type ) {
+	foreach ($blocks as $name => $block_type) {
 		$entry = array(
 			'name'     => $name,
 			'title'    => $block_type->title ?? '',
 			'category' => $block_type->category ?? '',
 		);
 
-		if ( ! empty( $block_type->description ) ) {
+		if (! empty($block_type->description)) {
 			$entry['description'] = $block_type->description;
 		}
 
-		if ( ! empty( $block_type->parent ) ) {
+		if (! empty($block_type->parent)) {
 			$entry['parent'] = $block_type->parent;
 		}
 
 		// Include attribute names only (not full schemas) to keep response compact.
-		if ( ! empty( $block_type->attributes ) ) {
-			$entry['attributes'] = array_keys( $block_type->attributes );
+		if (! empty($block_type->attributes)) {
+			$entry['attributes'] = array_keys($block_type->attributes);
 		}
 
 		// Include non-false supports.
-		if ( ! empty( $block_type->supports ) && is_array( $block_type->supports ) ) {
+		if (! empty($block_type->supports) && is_array($block_type->supports)) {
 			$active = array_keys(
 				array_filter(
 					$block_type->supports,
-					function ( $v ) {
+					function ($v) {
 						return false !== $v;
 					}
 				)
 			);
-			if ( ! empty( $active ) ) {
+			if (! empty($active)) {
 				$entry['supports'] = $active;
 			}
 		}

@@ -16,12 +16,10 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Status')) {
-
 	/**
 	 * Renders the Status tab: MCP status, OAuth endpoints, detected integrations.
 	 */
-	class SENTINEL_Admin_Tab_Status extends SENTINEL_Admin_Tab
+	class Admin_Tab_Status extends Admin_Tab
 	{
 
 		/**
@@ -134,36 +132,31 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Status')) {
 			if (class_exists('WooCommerce')) {
 				$badges[] = [
 					'label'   => __('WooCommerce detected', 'mcp-sentinel'),
-					'message' => __('Premium adds 8 modules with 60+ abilities for products, orders, customers, coupons, shipping, taxes and subscriptions.', 'mcp-sentinel'),
-					'cat'     => 'woocommerce',
+					'message' => __('WooCommerce read-only abilities are available. Write support is on the roadmap.', 'mcp-sentinel'),
 				];
 			}
 			if (defined('WPSEO_VERSION')) {
 				$badges[] = [
 					'label'   => __('Yoast SEO detected', 'mcp-sentinel'),
-					'message' => __('Premium adds full write SEO management across Yoast, Rank Math and AIOSEO.', 'mcp-sentinel'),
-					'cat'     => 'seo',
+					'message' => __('Read-only SEO meta is available. Full write management is on the roadmap.', 'mcp-sentinel'),
 				];
 			}
 			if (defined('RANK_MATH_VERSION')) {
 				$badges[] = [
 					'label'   => __('Rank Math detected', 'mcp-sentinel'),
-					'message' => __('Premium adds full write SEO management for Rank Math.', 'mcp-sentinel'),
-					'cat'     => 'seo',
+					'message' => __('Read-only SEO meta is available. Full write management is on the roadmap.', 'mcp-sentinel'),
 				];
 			}
 			if (defined('POLYLANG_VERSION') || defined('ICL_SITEPRESS_VERSION') || defined('TRP_PLUGIN_VERSION')) {
 				$badges[] = [
 					'label'   => __('Multilingual plugin detected', 'mcp-sentinel'),
-					'message' => __('Premium adds translation creation and per-language sync for Polylang, WPML and TranslatePress.', 'mcp-sentinel'),
-					'cat'     => 'multilingual',
+					'message' => __('Read-only i18n discovery is available. Translation creation is on the roadmap.', 'mcp-sentinel'),
 				];
 			}
 			if (class_exists('ACF') || function_exists('get_field')) {
 				$badges[] = [
 					'label'   => __('ACF detected', 'mcp-sentinel'),
-					'message' => __('Premium adds universal field write across all ACF field types.', 'mcp-sentinel'),
-					'cat'     => 'custom-fields',
+					'message' => __('Read-only field discovery is available. Universal field write is on the roadmap.', 'mcp-sentinel'),
 				];
 			}
 
@@ -174,20 +167,13 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Status')) {
 			<div class="card" style="max-width:700px;margin-bottom:20px;padding:15px;">
 				<h3 style="margin-top:0;"><?php esc_html_e('Detected on this site', 'mcp-sentinel'); ?></h3>
 				<?php foreach ($badges as $badge) : ?>
-					<?php
-					$cat_url = $this->tab_url(
-						'premium',
-						['cat' => $badge['cat']]
-					);
-					?>
 					<div style="border-left:3px solid #2271b1;padding:8px 12px;margin-bottom:8px;background:#f6f7f7;">
 						<strong><?php echo esc_html((string) $badge['label']); ?></strong><br>
-						<span style="color:#50575e;"><?php echo esc_html((string) $badge['message']); ?></span><br>
-						<a href="<?php echo esc_url($cat_url); ?>" style="font-size:13px;"><?php esc_html_e('See Premium features', 'mcp-sentinel'); ?> &rarr;</a>
+						<span style="color:#50575e;"><?php echo esc_html((string) $badge['message']); ?></span>
 					</div>
 				<?php endforeach; ?>
 			</div>
 			<?php
 		}
 	}
-}
+

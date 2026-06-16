@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SentinelMCP;
 
-use WP\Mcp;
 /**
  * Get Started admin tab.
  *
@@ -17,12 +16,10 @@ use WP\Mcp;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_GetStarted')) {
-
 	/**
 	 * Renders the Get Started onboarding tab.
 	 */
-	class SENTINEL_Admin_Tab_GetStarted extends SENTINEL_Admin_Tab
+	class Admin_Tab_GetStarted extends Admin_Tab
 	{
 
 		/**
@@ -58,7 +55,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_GetStarted')) {
 				],
 				[
 					'label' => 'MCP Adapter loaded',
-					'pass'  => class_exists('WP\MCP\McpAdapter'),
+					'pass'  => class_exists('\WP\MCP\Core\McpAdapter'),
 					'value' => '',
 				],
 				[
@@ -66,26 +63,11 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_GetStarted')) {
 					'pass'  => self::oauth_tables_exist(),
 					'value' => '',
 				],
-				[
-					'label' => 'MCM is premium',
-					'pass'  => true,
-					'value' => 'MCM_PREMIUM',
-				],
-				[
-					'label' => 'premium active',
-					'pass'  => true,
-					'value' => '',
-				],
-				[
-					'label' => 'Premium Product Url',
-					'pass'  => true,
-					'value' => SENTINEL_PREMIUM_PRODUCT_URL,
-				],
 			];
 
 			$oauth_url   = $this->tab_url('oauth');
 			$connect_url = $this->tab_url('connect');
-			?>
+?>
 			<div class="card" style="max-width:800px;margin-bottom:20px;padding:15px;">
 				<h2 style="margin-top:0;">Step 1 &mdash; Environment check</h2>
 				<table class="widefat striped" style="margin-bottom:0;">
@@ -136,7 +118,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_GetStarted')) {
 				<p>Once your AI client is connected, ask it: "List my registered MCP abilities" or "Show me my site structure". You should see the 56+ abilities provided by this plugin.</p>
 				<p>If something fails, check the <a href="<?php echo esc_url(admin_url('options-general.php?page=sentinel-settings&tab=activity')); ?>">Activity Log</a> for the latest tool calls.</p>
 			</div>
-			<?php
+<?php
 		}
 
 		/**
@@ -152,4 +134,4 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_GetStarted')) {
 			return $found === $table;
 		}
 	}
-}
+

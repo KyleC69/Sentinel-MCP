@@ -42,12 +42,12 @@ When these instructions are ambiguous, silent on a specific situation, or confli
 
 ### Class Naming & Structure
 - **Namespace**: `SentinelMCP` — all classes live in the `SentinelMCP` namespace
-- **Prefix**: `SENTINEL_*` for classes (e.g., `SENTINEL_Admin`, `SENTINEL_Chat_Engine`)
+- **Prefix**: No `SENTINEL_` prefix; the namespace provides uniqueness (e.g., `Admin`, `Chat_Engine`)
 - **Function prefix**: `mcpcomal_*` for standalone helper functions (global namespace)
 - **File guards**: Every file must start with `defined('ABSPATH') || exit;`
-- **Class guards**: Wrap class definitions with `if (! class_exists('SentinelMCP\SENTINEL_...'))`
+- **Class guards**: Wrap class definitions with `if (! class_exists('SentinelMCP\ClassName'))`
 - **Hook style**: Use `[$this, 'method']` or `[__CLASS__, 'method']` for callbacks
-- **Cross-namespace references**: Use `use SentinelMCP\SENTINEL_...;` or fully-qualified `\SentinelMCP\SENTINEL_...`
+- **Cross-namespace references**: Use `use SentinelMCP\ClassName;` or fully-qualified `\SentinelMCP\ClassName`
 
 ### Loading Pattern
 The plugin does **not** use PSR-4 autoloading. `sentinel-mcp.php` manually `require_once`s every class file. When adding a new class:
@@ -121,7 +121,7 @@ Before finishing any task in this codebase:
 - [ ] No debug dumps or hardcoded secrets
 - [ ] All tests pass including new ones
 - [ ] Security checks (nonce + capabilities) in place for state-changing code
-- [ ] `php -l` passes with no errors
+- [ ] `php -l` passes with no errors - **Mandatory**
 - [ ] Any potentially problematic or poor quality code patterns found nearby are flagged to the user
 
 ## Quality Priority Statement

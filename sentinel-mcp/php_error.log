@@ -1,0 +1,388 @@
+[15-Jun-2026 04:39:35 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 04:39:37 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 04:50:58 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 04:52:33 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 04:59:08 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 04:59:08 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 05:04:55 UTC] PHP Parse error:  syntax error, unexpected token "private" in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/class-mcp-schema-inspector.php on line 223
+[15-Jun-2026 05:23:44 UTC] PHP Parse error:  Unmatched '}' in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/admin/class-mcp-admin-tab.php on line 137
+[15-Jun-2026 05:32:54 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 05:32:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 05:32:54 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 05:32:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 05:54:47 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 05:54:47 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:04:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:14 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:14 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:22 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:22 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:22 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:22 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:26 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Warning:  require_once(/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php): Failed to open stream: No such file or directory in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94
+[15-Jun-2026 06:18:27 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/includes/Requirements.php' (include_path='.:/opt/alt/php84/usr/share/pear:/opt/alt/php84/usr/share/php:/usr/share/pear:/usr/share/php') in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php:94
+Stack trace:
+#0 /home/ctv3mcrz33ir/public_html/wp-settings.php(589): include_once()
+#1 /home/ctv3mcrz33ir/public_html/wp-config.php(114): require_once('/home/ctv3mcrz3...')
+#2 /home/ctv3mcrz33ir/public_html/wp-load.php(50): require_once('/home/ctv3mcrz3...')
+#3 /home/ctv3mcrz33ir/public_html/wp-blog-header.php(13): require_once('/home/ctv3mcrz3...')
+#4 /home/ctv3mcrz33ir/public_html/index.php(17): require('/home/ctv3mcrz3...')
+#5 {main}
+  thrown in /home/ctv3mcrz33ir/public_html/wp-content/plugins/sentinel-mcp/sentinel-mcp.php on line 94

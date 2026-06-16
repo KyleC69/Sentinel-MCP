@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\ai",
+    "\\ai\\includes",
+    "\\ai\\includes\\Admin",
+    "\\ai\\includes\\Admin\\Dashboard",
+    "\\sentinel-mcp",
+    "\\sentinel-mcp\\includes",
+    "\\tests"
+  ],
+  "SelectedNode": "\\ai\\includes\\Admin\\Dashboard\\AI_Capabilities_Widget.php",
+  "PreviewInSolutionExplorer": false
+}

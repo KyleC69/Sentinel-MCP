@@ -16,15 +16,13 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab')) {
-
 	/**
 	 * Abstract base for every admin settings tab.
 	 *
 	 * Subclasses must implement render() and may override
 	 * handle_post() to process tab-specific form submissions.
 	 */
-	abstract class SENTINEL_Admin_Tab
+	abstract class Admin_Tab
 	{
 
 		/**
@@ -83,7 +81,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab')) {
 		/**
 		 * Handle POST actions specific to this tab.
 		 *
-		 * Called from SENTINEL_Admin::handle_oauth_actions() when the
+		 * Called from Admin::handle_oauth_actions() when the
 		 * current tab matches this slug.  Return true to indicate that
 		 * a redirect was already performed and no further processing
 		 * should happen.
@@ -136,4 +134,4 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab')) {
 			exit;
 		}
 	}
-}
+

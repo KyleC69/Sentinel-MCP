@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -21,12 +23,14 @@ defined('ABSPATH') || exit;
 /**
  * Chat AI admin page and admin bar button.
  */
-class SENTINEL_Admin_Chat
+
+class Admin_Chat
 {
 
 	/**
 	 * Initialize hooks.
 	 */
+	
 	public static function init(): void
 	{
 		add_action('admin_bar_menu', array(__CLASS__, 'add_admin_bar_button'), 999);
@@ -87,16 +91,6 @@ class SENTINEL_Admin_Chat
 			wp_die(esc_html__('You do not have permission to access this page.', 'mcp-sentinel'));
 		}
 
-		add_action('admin_notices', function () {
-			echo '<pre><div>Provider Info</div>';
-			var_dump(
-				SENTINEL_Chat_Engine::get_available_providers(),
-				SENTINEL_Chat_Engine::get_default_provider()
-			);
-			echo '</pre>';
-		});
-
-
 		// Require WordPress 7.0+ (accept beta/RC/alpha builds).
 		$wp_ver = get_bloginfo('version');
 		if (version_compare(preg_replace('/-(alpha|beta|RC)\d*$/i', '', $wp_ver), '7.0', '<')) {
@@ -129,13 +123,6 @@ class SENTINEL_Admin_Chat
 			echo esc_html__('Update WordPress', 'mcp-sentinel');
 			echo '</a></p>';
 			echo '</div></div>';
-			echo '<div>';
-			echo '<pre>';
-			printf('Provider information');
-			printf($providers);
-			printf($default_provider);
-			echo '</pre>';
-			echo '</div>';
 			return;
 		}
 
@@ -178,8 +165,8 @@ class SENTINEL_Admin_Chat
 		);
 
 		// Build provider data for JS.
-		$providers        = SENTINEL_Chat_Engine::get_available_providers();
-		$default_provider = SENTINEL_Chat_Engine::get_default_provider();
+		$providers        = Chat_Engine::get_available_providers();
+		$default_provider = Chat_Engine::get_default_provider();
 		$has_any_key      = false;
 		foreach ($providers as $p) {
 			if ($p['has_key']) {
@@ -203,7 +190,7 @@ class SENTINEL_Admin_Chat
 				'hasApiKey'       => $has_any_key,
 				'providers'       => $providers,
 				'defaultProvider' => $default_provider,
-				'defaultModel'    => SENTINEL_Chat_Engine::get_default_model($default_provider),
+				'defaultModel'    => Chat_Engine::get_default_model($default_provider),
 				'settingsUrl'     => admin_url('options-connectors.php'),
 				'adminUrl'        => admin_url(),
 				'siteInfo'        => array(

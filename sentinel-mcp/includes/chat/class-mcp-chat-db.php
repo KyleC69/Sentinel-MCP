@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -20,7 +22,7 @@ defined('ABSPATH') || exit;
 /**
  * Database operations for the Chat AI subsystem.
  */
-class SENTINEL_Chat_DB
+class Chat_DB
 {
 
 	const DB_VERSION     = '1.0.0';

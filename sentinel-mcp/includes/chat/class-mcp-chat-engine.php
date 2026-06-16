@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -34,68 +36,10 @@ use Soukicz\Llm\Tool\CallbackToolDefinition;
 /**
  * Chat AI Engine.
  */
-class SENTINEL_Chat_Engine
+class Chat_Engine
 {
 
-	/**
-	 * Available AI providers with their models.
-	 *
-	 * @var array
-	 */
-	const PROVIDERS = array(
-		'anthropic'  => array(
-			'label'   => 'Anthropic Claude',
-			'models'  => array(
-				'claude-sonnet-4-6'  => 'Claude Sonnet 4.6',
-				'claude-opus-4-6'    => 'Claude Opus 4.6',
-				'claude-haiku-4-5'   => 'Claude Haiku 4.5',
-			),
-			'default' => 'claude-sonnet-4-6',
-		),
-		'openai'     => array(
-			'label'   => 'OpenAI',
-			'models'  => array(
-				'gpt-4o'      => 'GPT-4o',
-				'gpt-4o-mini' => 'GPT-4o Mini',
-				'o3'          => 'o3',
-				'o4-mini'     => 'o4 Mini',
-			),
-			'default' => 'gpt-4o',
-		),
-		'gemini'     => array(
-			'label'   => 'Google Gemini',
-			'models'  => array(
-				'gemini-2.5-pro'   => 'Gemini 2.5 Pro',
-				'gemini-2.5-flash' => 'Gemini 2.5 Flash',
-			),
-			'default' => 'gemini-2.5-flash',
-		),
-		'openrouter' => array(
-			'label'   => 'OpenRouter',
-			'models'  => array(
-				'anthropic/claude-sonnet-4'    => 'Claude Sonnet 4 (OpenRouter)',
-				'openai/gpt-4o'               => 'GPT-4o (OpenRouter)',
-				'google/gemini-2.5-flash'     => 'Gemini 2.5 Flash (OpenRouter)',
-				'meta-llama/llama-4-maverick' => 'Llama 4 Maverick',
-			),
-			'default' => 'anthropic/claude-sonnet-4',
-		),
-		'ollama'     => array(
-			'label'   => 'Ollama Cloud',
-			'models'  => array(
-				'ministral-3:3b'        => 'Ministral 3 3B — Free',
-				'qwen3.5:4b'            => 'Qwen 3.5 4B — Free',
-				'nemotron-3-nano:4b'    => 'Nemotron 3 Nano 4B — Free',
-				'ministral-3:8b'        => 'Ministral 3 8B — Free',
-				'qwen3.5:9b'            => 'Qwen 3.5 9B — Free',
-				'devstral-small:24b'    => 'Devstral Small 24B',
-				'gemma4:27b'            => 'Gemma 4 27B',
-				'qwen3.5:32b'           => 'Qwen 3.5 32B',
-				'nemotron-3-super:120b' => 'Nemotron 3 Super 120B — Premium',
-			),
-			'default' => 'qwen3.5:4b',
-		),
-	);
+
 
 	/**
 	 * Get available providers with their models.
@@ -104,7 +48,7 @@ class SENTINEL_Chat_Engine
 	 */
 	public static function get_available_providers(): array
 	{
-		$providers = self::PROVIDERS;
+		$providers = Chat_Provider_Registry::get_providers();
 
 		// Mark which ones have API keys configured and their source.
 		foreach ($providers as $id => &$provider) {
@@ -133,69 +77,22 @@ class SENTINEL_Chat_Engine
 	 */
 	public static function get_default_model(string $provider): string
 	{
-		return self::PROVIDERS[$provider]['default'] ?? 'claude-sonnet-4-6';
+		return Chat_Provider_Registry::get_providers()[$provider]['default'] ?? 'claude-sonnet-4-6';
 	}
 
-	/**
-	 * Maximum number of direct tools to send to each provider.
-	 *
-	 * Anthropic has generous TPM limits and supports many tools natively.
-	 * OpenAI/Gemini/OpenRouter have strict TPM limits on lower-tier plans,
-	 * so we use "discovery mode" (2 meta-tools) instead of sending all tools.
-	 *
-	 * @var array
-	 */
-	const PROVIDER_TOOL_LIMITS = array(
-		'anthropic'  => 128,
-		'openai'     => 0,  // Discovery mode: use meta-tools.
-		'gemini'     => 0,  // Discovery mode: use meta-tools.
-		'openrouter' => 0,  // Discovery mode: use meta-tools.
-		'ollama'     => 115,  // Discovery mode: use meta-tools.
-	);
 
-	/**
-	 * Map of provider slugs to WordPress 7.0 Connectors API IDs
-	 * and their environment variable / constant names.
-	 *
-	 * @var array
-	 */
-	const WP_CONNECTOR_MAP = array(
-		'anthropic'  => array(
-			'connector_id' => 'anthropic',
-			'env_var'      => 'ANTHROPIC_API_KEY',
-			'option'       => 'connectors_ai_anthropic_api_key',
-		),
-		'openai'     => array(
-			'connector_id' => 'openai',
-			'env_var'      => 'OPENAI_API_KEY',
-			'option'       => 'connectors_ai_openai_api_key',
-		),
-		'gemini'     => array(
-			'connector_id' => 'google',
-			'env_var'      => 'GOOGLE_API_KEY',
-			'option'       => 'connectors_ai_google_api_key',
-		),
-		'openrouter' => array(
-			'connector_id' => 'openrouter',
-			'env_var'      => 'OPENROUTER_API_KEY',
-			'option'       => 'connectors_ai_openrouter_api_key',
-		),
-		'ollama'     => array(
-			'connector_id' => 'ollama',
-			'env_var'      => 'OLLAMA_API_KEY',
-			'option'       => 'connectors_ai_ollama_api_key',
-		),
-	);
+
+
 
 	public static function get_connector_id(string $provider): string
 	{
-		return self::WP_CONNECTOR_MAP[$provider]['connector_id'] ?? $provider;
+		return Chat_Provider_Registry::get_connector_map()[$provider]['connector_id'] ?? $provider;
 	}
 
 	/**
 	 * Check if a provider is configured and available.
 	 *
-	 * Queries the AiClient registry via mcpcomal_is_connector_configured().
+	 * Queries the AiClient registry via is_connector_configured().
 	 *
 	 * @param string $provider Provider slug.
 	 * @return bool
@@ -204,7 +101,7 @@ class SENTINEL_Chat_Engine
 	{
 		$connector_id = self::get_connector_id($provider);
 
-		return mcpcomal_is_connector_configured($connector_id);
+		return is_connector_configured($connector_id);
 	}
 
 	/**
@@ -277,7 +174,7 @@ class SENTINEL_Chat_Engine
 	 * Get the source of the API key for a provider.
 	 *
 	 * Queries the AiClient registry for the provider's authentication
-	 * configuration and delegates to mcpcomal_get_connector_api_key_source().
+	 * configuration and delegates to get_connector_api_key_source().
 	 *
 	 * @param string $provider Provider slug.
 	 * @return string 'env_var', 'constant', 'connectors_api', or 'none'.
@@ -311,7 +208,7 @@ class SENTINEL_Chat_Engine
 			return 'none';
 		}
 
-		return mcpcomal_get_connector_api_key_source(
+		return get_connector_api_key_source(
 			$auth['setting_name'] ?? '',
 			$auth['env_var_name'] ?? '',
 			$auth['constant_name'] ?? ''
@@ -361,7 +258,7 @@ class SENTINEL_Chat_Engine
 		}
 
 		// 1. Verify conversation exists and belongs to user.
-		$conversation_row = SENTINEL_Chat_DB::get_conversation($conversation_id, $user_id);
+		$conversation_row = Chat_DB::get_conversation($conversation_id, $user_id);
 		if (! $conversation_row) {
 			return array('success' => false, 'error' => 'Conversation not found.');
 		}
@@ -391,10 +288,10 @@ class SENTINEL_Chat_Engine
 		}
 
 		// 4. Save user message to DB.
-		SENTINEL_Chat_DB::add_message($conversation_id, 'user', $user_message);
+		Chat_DB::add_message($conversation_id, 'user', $user_message);
 
 		// 5. Load message history and build LLM conversation.
-		$db_messages = SENTINEL_Chat_DB::get_messages($conversation_id, $user_id);
+		$db_messages = Chat_DB::get_messages($conversation_id, $user_id);
 		$llm_messages = self::build_llm_messages($db_messages);
 
 		// 6. Build system prompt and prepend as first message.
@@ -436,7 +333,7 @@ class SENTINEL_Chat_Engine
 			$error_message = self::parse_error($e);
 
 			// Save error as assistant message.
-			SENTINEL_Chat_DB::add_message(
+			Chat_DB::add_message(
 				$conversation_id,
 				'assistant',
 				'I encountered an error: ' . $error_message
@@ -446,7 +343,7 @@ class SENTINEL_Chat_Engine
 		}
 
 		// 10. Save assistant response to DB.
-		SENTINEL_Chat_DB::add_message(
+		Chat_DB::add_message(
 			$conversation_id,
 			'assistant',
 			$assistant_text,
@@ -465,7 +362,7 @@ class SENTINEL_Chat_Engine
 			if (mb_strlen($user_message) > 60) {
 				$auto_title .= '...';
 			}
-			SENTINEL_Chat_DB::update_title($conversation_id, $user_id, $auto_title);
+			Chat_DB::update_title($conversation_id, $user_id, $auto_title);
 		}
 
 		return array(
@@ -524,7 +421,7 @@ class SENTINEL_Chat_Engine
 	 */
 	public static function uses_discovery_mode(string $provider_id): bool
 	{
-		return (self::PROVIDER_TOOL_LIMITS[$provider_id] ?? 0) === 0;
+		return (Chat_Provider_Registry::get_provider_tool_limits()[$provider_id] ?? 0) === 0;
 	}
 
 	private static function build_system_prompt(string $provider_id = 'anthropic'): string
@@ -851,7 +748,7 @@ DISCOVERY;
 	private static function build_direct_tools(int $user_id, array &$tool_executions, string $provider_id): array
 	{
 		$abilities      = wp_get_abilities();
-		$max_tools      = self::PROVIDER_TOOL_LIMITS[$provider_id] ?? 128;
+		$max_tools      = Chat_Provider_Registry::get_provider_tool_limits()[$provider_id] ?? 128;
 		$needs_sanitize = in_array($provider_id, array('openai', 'gemini', 'openrouter'), true);
 		$sdk_tools      = array();
 

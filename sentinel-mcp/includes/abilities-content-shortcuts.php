@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -16,20 +18,21 @@ namespace SentinelMCP;
  * @link       https://github.com/KyleC69/Sentinel-MCP
  */
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
-if ( ! function_exists( 'mcpcomal_format_post_summary' ) ) {
+if (! function_exists('mcpcomal_format_post_summary')) {
 	/**
 	 * Format a single post for content-shortcuts output.
 	 *
 	 * @param \WP_Post $post Post object.
 	 * @return array
 	 */
-	function mcpcomal_format_post_summary( \WP_Post $post ): array {
-		$excerpt = $post->post_excerpt ? $post->post_excerpt : wp_strip_all_tags( (string) $post->post_content );
-		$excerpt = trim( preg_replace( '/\s+/', ' ', (string) $excerpt ) );
-		if ( strlen( $excerpt ) > 200 ) {
-			$excerpt = mb_substr( $excerpt, 0, 200 ) . '...';
+	function mcpcomal_format_post_summary(\WP_Post $post): array
+	{
+		$excerpt = $post->post_excerpt ? $post->post_excerpt : wp_strip_all_tags((string) $post->post_content);
+		$excerpt = trim(preg_replace('/\s+/', ' ', (string) $excerpt));
+		if (strlen($excerpt) > 200) {
+			$excerpt = mb_substr($excerpt, 0, 200) . '...';
 		}
 
 		return array(
@@ -40,13 +43,13 @@ if ( ! function_exists( 'mcpcomal_format_post_summary' ) ) {
 			'date'      => (string) $post->post_date,
 			'modified'  => (string) $post->post_modified,
 			'author_id' => (int) $post->post_author,
-			'permalink' => (string) get_permalink( $post ),
+			'permalink' => (string) get_permalink($post),
 			'excerpt'   => $excerpt,
 		);
 	}
 }
 
-if ( ! function_exists( 'mcpcomal_query_posts_by_status' ) ) {
+if (! function_exists('mcpcomal_query_posts_by_status')) {
 	/**
 	 * Run a \WP_Query and format results.
 	 *
@@ -58,15 +61,16 @@ if ( ! function_exists( 'mcpcomal_query_posts_by_status' ) ) {
 	 * @param string $order ASC or DESC.
 	 * @return array
 	 */
-	function mcpcomal_query_posts_by_status( string $post_type, $status, int $per_page, int $page, string $orderby = 'date', string $order = 'DESC' ): array {
+	function mcpcomal_query_posts_by_status(string $post_type, $status, int $per_page, int $page, string $orderby = 'date', string $order = 'DESC'): array
+	{
 		$query = new \WP_Query(
 			array(
 				'post_type'              => $post_type,
 				'post_status'            => $status,
-				'posts_per_page'         => max( 1, min( 50, $per_page ) ),
-				'paged'                  => max( 1, $page ),
+				'posts_per_page'         => max(1, min(50, $per_page)),
+				'paged'                  => max(1, $page),
 				'orderby'                => $orderby,
-				'order'                  => 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC',
+				'order'                  => 'ASC' === strtoupper($order) ? 'ASC' : 'DESC',
 				'no_found_rows'          => false,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
@@ -74,13 +78,13 @@ if ( ! function_exists( 'mcpcomal_query_posts_by_status' ) ) {
 		);
 
 		$items = array();
-		foreach ( $query->posts as $post ) {
-			$items[] = mcpcomal_format_post_summary( $post );
+		foreach ($query->posts as $post) {
+			$items[] = mcpcomal_format_post_summary($post);
 		}
 
 		return array(
-			'page'        => max( 1, $page ),
-			'per_page'    => max( 1, min( 50, $per_page ) ),
+			'page'        => max(1, $page),
+			'per_page'    => max(1, min(50, $per_page)),
 			'total'       => (int) $query->found_posts,
 			'total_pages' => (int) $query->max_num_pages,
 			'items'       => $items,
@@ -141,37 +145,25 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$post_type = isset( $input['post_type'] ) ? sanitize_key( (string) $input['post_type'] ) : 'post';
-					$per_page  = isset( $input['per_page'] ) ? (int) $input['per_page'] : ( isset( $input['count'] ) ? (int) $input['count'] : 10 );
-					$page      = isset( $input['page'] ) ? (int) $input['page'] : 1;
-					$status    = isset( $input['status'] ) ? sanitize_text_field( (string) $input['status'] ) : 'publish';
+				'execute_callback'    => function ($input = null) {
+					$post_type = isset($input['post_type']) ? sanitize_key((string) $input['post_type']) : 'post';
+					$per_page  = isset($input['per_page']) ? (int) $input['per_page'] : (isset($input['count']) ? (int) $input['count'] : 10);
+					$page      = isset($input['page']) ? (int) $input['page'] : 1;
+					$status    = isset($input['status']) ? sanitize_text_field((string) $input['status']) : 'publish';
 
-					if ( ! post_type_exists( $post_type ) ) {
+					if (! post_type_exists($post_type)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Post type "%s" not found.', $post_type ),
+							'message' => sprintf('Post type "%s" not found.', $post_type),
 						);
 					}
 
-					return mcpcomal_query_posts_by_status( $post_type, $status, $per_page, $page );
+					return mcpcomal_query_posts_by_status($post_type, $status, $per_page, $page);
 				},
 
-				'permission_callback' => function () {
-					return current_user_can( 'read' );
-				},
+				'permission_callback' => mcpcomal_ability_permission('read'),
 
-				'meta'                => array(
-					'mcp' => array(
-						'public'      => true,
-						'annotations' => array(
-							'readOnlyHint'    => true,
-							'destructiveHint' => false,
-							'idempotentHint'  => true,
-							'openWorldHint'   => false,
-						),
-					),
-				),
+				'meta'                => mcpcomal_ability_meta(),
 			)
 		);
 
@@ -208,16 +200,16 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$per_page = isset( $input['per_page'] ) ? max( 1, min( 100, (int) $input['per_page'] ) ) : 25;
-					$page     = isset( $input['page'] ) ? max( 1, (int) $input['page'] ) : 1;
+				'execute_callback'    => function ($input = null) {
+					$per_page = isset($input['per_page']) ? max(1, min(100, (int) $input['per_page'])) : 25;
+					$page     = isset($input['page']) ? max(1, (int) $input['page']) : 1;
 
 					$query    = new WP_Comment_Query();
 					$comments = $query->query(
 						array(
 							'status'  => 'hold',
 							'number'  => $per_page,
-							'offset'  => ( $page - 1 ) * $per_page,
+							'offset'  => ($page - 1) * $per_page,
 							'orderby' => 'comment_date_gmt',
 							'order'   => 'DESC',
 						)
@@ -231,17 +223,12 @@ add_action(
 					);
 
 					$items = array();
-					foreach ( (array) $comments as $comment ) {
-						$email     = (string) $comment->comment_author_email;
-						$redacted  = '';
-						if ( '' !== $email && false !== strpos( $email, '@' ) ) {
-							list( $local, $domain ) = explode( '@', $email, 2 );
-							$redacted               = ( '' !== $local ? mb_substr( $local, 0, 1 ) . '***' : '***' ) . '@' . $domain;
-						}
+					foreach ((array) $comments as $comment) {
+						$redacted = mcpcomal_redact_email((string) $comment->comment_author_email);
 
-						$content = wp_strip_all_tags( (string) $comment->comment_content );
-						if ( strlen( $content ) > 200 ) {
-							$content = mb_substr( $content, 0, 200 ) . '...';
+						$content = wp_strip_all_tags((string) $comment->comment_content);
+						if (strlen($content) > 200) {
+							$content = mb_substr($content, 0, 200) . '...';
 						}
 
 						$items[] = array(
@@ -262,21 +249,9 @@ add_action(
 					);
 				},
 
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
+				'permission_callback' => mcpcomal_ability_permission('edit_posts'),
 
-				'meta'                => array(
-					'mcp' => array(
-						'public'      => true,
-						'annotations' => array(
-							'readOnlyHint'    => true,
-							'destructiveHint' => false,
-							'idempotentHint'  => true,
-							'openWorldHint'   => false,
-						),
-					),
-				),
+				'meta'                => mcpcomal_ability_meta(),
 			)
 		);
 
@@ -317,36 +292,24 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$post_type = isset( $input['post_type'] ) ? sanitize_key( (string) $input['post_type'] ) : 'post';
-					$per_page  = isset( $input['per_page'] ) ? (int) $input['per_page'] : 25;
-					$page      = isset( $input['page'] ) ? (int) $input['page'] : 1;
+				'execute_callback'    => function ($input = null) {
+					$post_type = isset($input['post_type']) ? sanitize_key((string) $input['post_type']) : 'post';
+					$per_page  = isset($input['per_page']) ? (int) $input['per_page'] : 25;
+					$page      = isset($input['page']) ? (int) $input['page'] : 1;
 
-					if ( ! post_type_exists( $post_type ) ) {
+					if (! post_type_exists($post_type)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Post type "%s" not found.', $post_type ),
+							'message' => sprintf('Post type "%s" not found.', $post_type),
 						);
 					}
 
-					return mcpcomal_query_posts_by_status( $post_type, 'future', $per_page, $page, 'date', 'ASC' );
+					return mcpcomal_query_posts_by_status($post_type, 'future', $per_page, $page, 'date', 'ASC');
 				},
 
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
+				'permission_callback' => mcpcomal_ability_permission('edit_posts'),
 
-				'meta'                => array(
-					'mcp' => array(
-						'public'      => true,
-						'annotations' => array(
-							'readOnlyHint'    => true,
-							'destructiveHint' => false,
-							'idempotentHint'  => true,
-							'openWorldHint'   => false,
-						),
-					),
-				),
+				'meta'                => mcpcomal_ability_meta(),
 			)
 		);
 
@@ -387,36 +350,24 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input = null ) {
-					$post_type = isset( $input['post_type'] ) ? sanitize_key( (string) $input['post_type'] ) : 'post';
-					$per_page  = isset( $input['per_page'] ) ? (int) $input['per_page'] : 25;
-					$page      = isset( $input['page'] ) ? (int) $input['page'] : 1;
+				'execute_callback'    => function ($input = null) {
+					$post_type = isset($input['post_type']) ? sanitize_key((string) $input['post_type']) : 'post';
+					$per_page  = isset($input['per_page']) ? (int) $input['per_page'] : 25;
+					$page      = isset($input['page']) ? (int) $input['page'] : 1;
 
-					if ( ! post_type_exists( $post_type ) ) {
+					if (! post_type_exists($post_type)) {
 						return array(
 							'success' => false,
-							'message' => sprintf( 'Post type "%s" not found.', $post_type ),
+							'message' => sprintf('Post type "%s" not found.', $post_type),
 						);
 					}
 
-					return mcpcomal_query_posts_by_status( $post_type, 'trash', $per_page, $page );
+					return mcpcomal_query_posts_by_status($post_type, 'trash', $per_page, $page);
 				},
 
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
+				'permission_callback' => mcpcomal_ability_permission('edit_posts'),
 
-				'meta'                => array(
-					'mcp' => array(
-						'public'      => true,
-						'annotations' => array(
-							'readOnlyHint'    => true,
-							'destructiveHint' => false,
-							'idempotentHint'  => true,
-							'openWorldHint'   => false,
-						),
-					),
-				),
+				'meta'                => mcpcomal_ability_meta(),
 			)
 		);
 
@@ -432,7 +383,7 @@ add_action(
 				'input_schema'        => array(
 					'type'                 => 'object',
 					'default'              => array(),
-					'required'             => array( 'post_id' ),
+					'required'             => array('post_id'),
 					'properties'           => array(
 						'post_id' => array(
 							'type'        => 'integer',
@@ -448,41 +399,41 @@ add_action(
 					'additionalProperties' => true,
 				),
 
-				'execute_callback'    => function ( $input ) {
-					$post_id = isset( $input['post_id'] ) ? absint( $input['post_id'] ) : 0;
-					if ( ! $post_id || ! get_post( $post_id ) ) {
+				'execute_callback'    => function ($input) {
+					$post_id = isset($input['post_id']) ? absint($input['post_id']) : 0;
+					if (! $post_id || ! get_post($post_id)) {
 						return array(
 							'success' => false,
 							'message' => 'Post not found.',
 						);
 					}
 
-					$revisions = wp_get_post_revisions( $post_id, array( 'order' => 'DESC' ) );
+					$revisions = wp_get_post_revisions($post_id, array('order' => 'DESC'));
 					$items     = array();
 
-					foreach ( $revisions as $rev ) {
+					foreach ($revisions as $rev) {
 						$items[] = array(
 							'id'              => (int) $rev->ID,
 							'parent_post_id'  => (int) $post_id,
 							'author_id'       => (int) $rev->post_author,
 							'date'            => (string) $rev->post_date,
 							'modified'        => (string) $rev->post_modified,
-							'is_autosave'     => wp_is_post_autosave( $rev ) ? true : false,
-							'title_length'    => mb_strlen( (string) $rev->post_title ),
-							'content_length'  => mb_strlen( (string) $rev->post_content ),
+							'is_autosave'     => wp_is_post_autosave($rev) ? true : false,
+							'title_length'    => mb_strlen((string) $rev->post_title),
+							'content_length'  => mb_strlen((string) $rev->post_content),
 						);
 					}
 
 					return array(
 						'parent_post_id' => $post_id,
-						'count'          => count( $items ),
+						'count'          => count($items),
 						'items'          => $items,
 					);
 				},
 
-				'permission_callback' => function ( $input ) {
-					$post_id = isset( $input['post_id'] ) ? absint( $input['post_id'] ) : 0;
-					return $post_id ? current_user_can( 'read_post', $post_id ) : false;
+				'permission_callback' => function ($input) {
+					$post_id = isset($input['post_id']) ? absint($input['post_id']) : 0;
+					return $post_id ? current_user_can('read_post', $post_id) : false;
 				},
 
 				'meta'                => array(

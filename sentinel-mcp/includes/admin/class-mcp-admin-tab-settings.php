@@ -16,14 +16,12 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Settings')) {
-
 	/**
 	 * Renders the Settings tab: debug logging + Gemini config.
 	 *
 	 * Also handles its own POST action (mcpcomal_save_settings).
 	 */
-	class SENTINEL_Admin_Tab_Settings extends SENTINEL_Admin_Tab
+	class Admin_Tab_Settings extends Admin_Tab
 	{
 
 		/**
@@ -43,7 +41,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Settings')) {
 		{
 			$debug_enabled = (bool) get_option('mcpcomal_debug_logging', false);
 			$gemini_key    = (string) get_option('mcpcomal_gemini_api_key', '');
-			$gemini_model  = (string) get_option('mcpcomal_gemini_model', SENTINEL_Image_Generator::DEFAULT_MODEL);
+			$gemini_model  = (string) get_option('mcpcomal_gemini_model', Image_Generator::DEFAULT_MODEL);
 			$key_masked    = '' === $gemini_key ? '' : str_repeat('•', max(0, strlen($gemini_key) - 4)) . substr($gemini_key, -4);
 			?>
 			<form method="post">
@@ -114,7 +112,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Settings')) {
 									printf(
 										/* translators: %s: default model id */
 										esc_html__('Default: %s. Must be a Gemini model that supports image output.', 'mcp-sentinel'),
-										'<code>' . esc_html(SENTINEL_Image_Generator::DEFAULT_MODEL) . '</code>'
+										'<code>' . esc_html(Image_Generator::DEFAULT_MODEL) . '</code>'
 									);
 									?>
 								</p>
@@ -158,10 +156,10 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Settings')) {
 			}
 			if (isset($_POST['mcpcomal_gemini_model'])) {
 				$model = sanitize_text_field(wp_unslash((string) $_POST['mcpcomal_gemini_model']));
-				update_option('mcpcomal_gemini_model', '' === $model ? SENTINEL_Image_Generator::DEFAULT_MODEL : $model, false);
+				update_option('mcpcomal_gemini_model', '' === $model ? Image_Generator::DEFAULT_MODEL : $model, false);
 			}
 
 			$this->redirect_with_notice('settings', 'success', 'Settings saved.');
 		}
 	}
-}
+

@@ -16,12 +16,10 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Activity')) {
-
 	/**
 	 * Renders the Activity Log tab.
 	 */
-	class SENTINEL_Admin_Tab_Activity extends SENTINEL_Admin_Tab
+	class Admin_Tab_Activity extends Admin_Tab
 	{
 
 		/**
@@ -46,7 +44,7 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Activity')) {
 			$ability   = isset($_GET['filter_ability']) ? sanitize_text_field(wp_unslash((string) $_GET['filter_ability'])) : '';
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-			$result = SENTINEL_Activity_Log::query(
+			$result = Activity_Log::query(
 				[
 					'page'      => $page,
 					'per_page'  => 50,
@@ -137,4 +135,4 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Activity')) {
 			<?php
 		}
 	}
-}
+

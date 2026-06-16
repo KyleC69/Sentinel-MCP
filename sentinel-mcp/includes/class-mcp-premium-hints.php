@@ -1,19 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
- * Premium hints with per-session throttle (Sprint 5.2).
+ * Premium hints (stub).
  *
- * Surfaces upsell pointers for actions that are Premium-only or have a much
- * richer Premium counterpart. Each hint is throttled to one occurrence per
- * category per OAuth session (transient TTL ~1 hour, similar to access token
- * lifetime) so the AI client gets the message once, not on every call.
- *
- * Helpers in this class are safe to call from anywhere; they degrade gracefully
- * when no OAuth client is in flight (cookie auth, application password) by
- * always emitting the hint without any throttling, so manual admin testing
- * still surfaces the message.
+ * The Lite edition does not surface premium upsell hints. This class is kept
+ * as a placeholder so any existing call sites remain valid and simply receive
+ * no hint in the Lite edition.
  *
  * @package    SENTINEL
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
@@ -24,87 +20,81 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Premium_Hints')) {
+/**
+ * Premium-upsell hint emitter (no-op in Lite edition).
+ */
+class Premium_Hints
+{
 
 	/**
-	 * Throttled Premium-upsell hint emitter.
+	 * Return a hint payload if not throttled, null otherwise.
+	 *
+	 * In the Lite edition this always returns null so no upsell hints are
+	 * surfaced to AI clients.
+	 *
+	 * @param string $category     Category slug (unused).
+	 * @param string $feature_slug Specific feature being teased (unused).
+	 * @param string $message      Human-readable message (unused).
+	 * @return null
 	 */
-	class SENTINEL_Premium_Hints
+	public static function maybe_hint(string $category, string $feature_slug, string $message): ?array
 	{
+		return null;
+	}
 
-		/**
-		 * Throttle window in seconds. Roughly aligned with the OAuth access
-		 * token TTL so a single AI session receives at most one hint per category.
-		 */
-		const THROTTLE_TTL = HOUR_IN_SECONDS;
+	/**
+	 * Whether the (client_id, category) pair already emitted a hint in this window.
+	 *
+	 * Always false in the Lite edition.
+	 *
+	 * @param string $client_id OAuth client id (unused).
+	 * @param string $category  Category slug (unused).
+	 * @return bool
+	 */
+	public static function is_throttled(string $client_id, string $category): bool
+	{
+		return false;
+	}
 
-		/**
-		 * Return a hint payload if not throttled, null otherwise.
-		 *
-		 * @param string $category    Category slug (e.g. "wc-write", "seo-write", "i18n-write").
-		 *                            Throttling is keyed on this so unrelated areas don't cancel each other.
-		 * @param string $feature_slug Specific feature being teased (used in the payload).
-		 * @param string $message     Human-readable message. Treated as a translatable string by the caller.
-		 * @return array{feature_slug:string,message:string,upgrade_url:string,category:string}|null
-		 */
-		public static function maybe_hint(string $category, string $feature_slug, string $message): ?array
-		{
-			$client_id = class_exists('SentinelMCP\SENTINEL_OAuth_Interceptor')
-				? SENTINEL_OAuth_Interceptor::get_current_client_id()
-				: '';
+	/**
+	 * Mark the (client_id, category) pair as having received a hint.
+	 *
+	 * No-op in the Lite edition.
+	 *
+	 * @param string $client_id OAuth client id (unused).
+	 * @param string $category  Category slug (unused).
+	 * @return void
+	 */
+	public static function mark_emitted(string $client_id, string $category): void
+	{
+		// No-op in Lite edition.
+	}
 
-			if ('' !== $client_id && self::is_throttled($client_id, $category)) {
-				return null;
-			}
+	/**
+	 * Reset throttle for a category (mainly used in tests or admin tooling).
+	 *
+	 * No-op in the Lite edition.
+	 *
+	 * @param string $client_id OAuth client id (unused).
+	 * @param string $category  Category slug (unused).
+	 * @return void
+	 */
+	public static function reset(string $client_id, string $category): void
+	{
+		// No-op in Lite edition.
+	}
 
-			if ('' !== $client_id) {
-				self::mark_emitted($client_id, $category);
-			}
-
-			$upgrade_url = defined('SENTINEL_PREMIUM_PRODUCT_URL')
-				? SENTINEL_PREMIUM_PRODUCT_URL
-				: 'https://.com/';
-
-			return array(
-				'category'     => $category,
-				'feature_slug' => $feature_slug,
-				'message'      => $message,
-				'upgrade_url'  => $upgrade_url,
-			);
-		}
-
-		/**
-		 * Whether the (client_id, category) pair already emitted a hint in this window.
-		 */
-		public static function is_throttled(string $client_id, string $category): bool
-		{
-			$key = self::key($client_id, $category);
-			return false !== get_transient($key);
-		}
-
-		/**
-		 * Mark the (client_id, category) pair as having received a hint.
-		 */
-		public static function mark_emitted(string $client_id, string $category): void
-		{
-			$key = self::key($client_id, $category);
-			set_transient($key, 1, self::THROTTLE_TTL);
-		}
-
-		/**
-		 * Reset throttle for a category (mainly used in tests or admin tooling).
-		 */
-		public static function reset(string $client_id, string $category): void
-		{
-			delete_transient(self::key($client_id, $category));
-		}
-
-		/**
-		 * Compose the transient key.
-		 */
-		protected static function key(string $client_id, string $category): string
-		{
-			return 'mcpcomal_hint_' . md5($client_id . '|' . $category);
-		}
+	/**
+	 * Compose the transient key.
+	 *
+	 * Kept for API compatibility; not used in the Lite edition.
+	 *
+	 * @param string $client_id OAuth client id.
+	 * @param string $category  Category slug.
+	 * @return string
+	 */
+	protected static function key(string $client_id, string $category): string
+	{
+		return 'mcpcomal_hint_' . md5($client_id . '|' . $category);
 	}
 }

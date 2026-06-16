@@ -16,12 +16,10 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Prompts')) {
-
 	/**
 	 * Renders the Prompts gallery tab.
 	 */
-	class SENTINEL_Admin_Tab_Prompts extends SENTINEL_Admin_Tab
+	class Admin_Tab_Prompts extends Admin_Tab
 	{
 
 		/**
@@ -44,9 +42,9 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Prompts')) {
 			$keyword  = isset($_GET['q']) ? sanitize_text_field(wp_unslash((string) $_GET['q'])) : '';
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
-			$catalog    = SENTINEL_Prompt_Gallery::load();
-			$total      = SENTINEL_Prompt_Gallery::total_count();
-			$categories = SENTINEL_Prompt_Gallery::filter(
+			$catalog    = Prompt_Gallery::load();
+			$total      = Prompt_Gallery::total_count();
+			$categories = Prompt_Gallery::filter(
 				'' === $category ? null : $category,
 				'' === $keyword ? null : $keyword
 			);
@@ -90,4 +88,4 @@ if (! class_exists('SentinelMCP\SENTINEL_Admin_Tab_Prompts')) {
 			<?php
 		}
 	}
-}
+

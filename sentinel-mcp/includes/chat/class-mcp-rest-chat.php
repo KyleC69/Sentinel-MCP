@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SentinelMCP;
 
 /**
@@ -20,7 +22,7 @@ defined('ABSPATH') || exit;
 /**
  * REST Chat controller.
  */
-class SENTINEL_REST_Chat
+class REST_Chat
 {
 
 	/**
@@ -234,14 +236,14 @@ class SENTINEL_REST_Chat
 			);
 		}
 
-		$result = SENTINEL_Chat_Engine::process_message($conversation_id, $message, $user_id);
+		$result = Chat_Engine::process_message($conversation_id, $message, $user_id);
 
 		if (! $result['success']) {
 			return new \WP_REST_Response($result, 400);
 		}
 
 		// Include updated conversation data.
-		$conversation = SENTINEL_Chat_DB::get_conversation($conversation_id, $user_id);
+		$conversation = Chat_DB::get_conversation($conversation_id, $user_id);
 
 		return new \WP_REST_Response(
 			array(
@@ -264,11 +266,11 @@ class SENTINEL_REST_Chat
 		$limit   = $request->get_param('limit');
 		$offset  = $request->get_param('offset');
 
-		$conversations = SENTINEL_Chat_DB::list_conversations($user_id, $limit, $offset);
+		$conversations = Chat_DB::list_conversations($user_id, $limit, $offset);
 
 		// Attach last message preview to each conversation.
 		foreach ($conversations as &$conv) {
-			$last = SENTINEL_Chat_DB::get_last_message((int) $conv['id']);
+			$last = Chat_DB::get_last_message((int) $conv['id']);
 			$conv['last_message'] = $last ? mb_substr($last['content'], 0, 100) : '';
 			$conv['last_role']    = $last ? $last['role'] : '';
 		}
@@ -290,10 +292,10 @@ class SENTINEL_REST_Chat
 	public static function handle_create_conversation(\WP_REST_Request $request): \WP_REST_Response
 	{
 		$user_id  = get_current_user_id();
-		$provider = $request->get_param('provider') ?: SENTINEL_Chat_Engine::get_default_provider();
-		$model    = $request->get_param('model') ?: SENTINEL_Chat_Engine::get_default_model($provider);
+		$provider = $request->get_param('provider') ?: Chat_Engine::get_default_provider();
+		$model    = $request->get_param('model') ?: Chat_Engine::get_default_model($provider);
 
-		$conv_id = SENTINEL_Chat_DB::create_conversation($user_id, $provider, $model);
+		$conv_id = Chat_DB::create_conversation($user_id, $provider, $model);
 
 		if (! $conv_id) {
 			return new \WP_REST_Response(
@@ -302,7 +304,7 @@ class SENTINEL_REST_Chat
 			);
 		}
 
-		$conversation = SENTINEL_Chat_DB::get_conversation($conv_id, $user_id);
+		$conversation = Chat_DB::get_conversation($conv_id, $user_id);
 
 		return new \WP_REST_Response(
 			array(
@@ -324,7 +326,7 @@ class SENTINEL_REST_Chat
 		$id      = (int) $request->get_param('id');
 		$user_id = get_current_user_id();
 
-		$conversation = SENTINEL_Chat_DB::get_conversation($id, $user_id);
+		$conversation = Chat_DB::get_conversation($id, $user_id);
 		if (! $conversation) {
 			return new \WP_REST_Response(
 				array('success' => false, 'error' => 'Conversation not found.'),
@@ -332,7 +334,7 @@ class SENTINEL_REST_Chat
 			);
 		}
 
-		$messages = SENTINEL_Chat_DB::get_messages($id, $user_id);
+		$messages = Chat_DB::get_messages($id, $user_id);
 
 		return new \WP_REST_Response(
 			array(
@@ -354,7 +356,7 @@ class SENTINEL_REST_Chat
 		$id      = (int) $request->get_param('id');
 		$user_id = get_current_user_id();
 
-		$deleted = SENTINEL_Chat_DB::delete_conversation($id, $user_id);
+		$deleted = Chat_DB::delete_conversation($id, $user_id);
 
 		if (! $deleted) {
 			return new \WP_REST_Response(
@@ -378,7 +380,7 @@ class SENTINEL_REST_Chat
 		$user_id = get_current_user_id();
 		$title   = $request->get_param('title');
 
-		$updated = SENTINEL_Chat_DB::update_title($id, $user_id, $title);
+		$updated = Chat_DB::update_title($id, $user_id, $title);
 
 		if (! $updated) {
 			return new \WP_REST_Response(
@@ -402,7 +404,7 @@ class SENTINEL_REST_Chat
 		$query   = $request->get_param('q');
 		$limit   = $request->get_param('limit');
 
-		$results = SENTINEL_Chat_DB::search_conversations($user_id, $query, $limit);
+		$results = Chat_DB::search_conversations($user_id, $query, $limit);
 
 		return new \WP_REST_Response(
 			array(
@@ -422,8 +424,8 @@ class SENTINEL_REST_Chat
 		return new \WP_REST_Response(
 			array(
 				'success'   => true,
-				'providers' => SENTINEL_Chat_Engine::get_available_providers(),
-				'default'   => SENTINEL_Chat_Engine::get_default_provider(),
+				'providers' => Chat_Engine::get_available_providers(),
+				'default'   => Chat_Engine::get_default_provider(),
 			)
 		);
 	}
@@ -442,7 +444,7 @@ class SENTINEL_REST_Chat
 		$user_id  = get_current_user_id();
 
 		// Validate provider exists.
-		$providers = SENTINEL_Chat_Engine::PROVIDERS;
+		$providers = Chat_Provider_Registry::get_providers();
 		if (! isset($providers[$provider])) {
 			return new \WP_REST_Response(
 				array('success' => false, 'error' => 'Unknown provider.'),
@@ -450,7 +452,7 @@ class SENTINEL_REST_Chat
 			);
 		}
 
-		$updated = SENTINEL_Chat_DB::update_provider($conv_id, $user_id, $provider, $model);
+		$updated = Chat_DB::update_provider($conv_id, $user_id, $provider, $model);
 
 		if (! $updated) {
 			return new \WP_REST_Response(
