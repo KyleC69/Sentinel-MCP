@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Unit tests for SENTINEL_Chat_Engine connector discovery and provider helpers.
+ * Unit tests for Chat_Engine connector discovery and provider helpers.
  *
  * @package Sentinel-MCP
  */
 
 use PHPUnit\Framework\TestCase;
-use SentinelMCP\SENTINEL_Chat_Engine;
+use SentinelMCP\Chat_Engine;
 
 /**
  * Tests provider discovery, API key resolution, and tool-mode selection.
@@ -25,7 +25,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function get_available_providers_returns_all_providers(): void
     {
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         $this->assertArrayHasKey('anthropic', $providers);
         $this->assertArrayHasKey('openai', $providers);
@@ -37,7 +37,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function get_available_providers_includes_models_and_labels(): void
     {
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         $this->assertEquals('Anthropic Claude', $providers['anthropic']['label']);
         $this->assertArrayHasKey('claude-sonnet-4-6', $providers['anthropic']['models']);
@@ -47,7 +47,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function get_available_providers_marks_has_key_false_when_unconfigured(): void
     {
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         foreach ($providers as $id => $provider) {
             $this->assertFalse($provider['has_key'], "Provider {$id} should not have a key");
@@ -60,7 +60,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     {
         putenv('ANTHROPIC_API_KEY=sk-ant-test123');
 
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         $this->assertTrue($providers['anthropic']['has_key']);
         $this->assertEquals('env_var', $providers['anthropic']['key_source']);
@@ -73,7 +73,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     {
         update_option('connectors_ai_openai_api_key', 'sk-openai-test456');
 
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         $this->assertTrue($providers['openai']['has_key']);
         $this->assertEquals('connectors_api', $providers['openai']['key_source']);
@@ -86,26 +86,26 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     {
         update_option('mcpcomal_chat_default_provider', 'gemini');
 
-        $this->assertEquals('gemini', SENTINEL_Chat_Engine::get_default_provider());
+        $this->assertEquals('gemini', Chat_Engine::get_default_provider());
     }
 
     /** @test */
     public function get_default_provider_falls_back_to_anthropic(): void
     {
-        $this->assertEquals('anthropic', SENTINEL_Chat_Engine::get_default_provider());
+        $this->assertEquals('anthropic', Chat_Engine::get_default_provider());
     }
 
     /** @test */
     public function get_default_model_returns_provider_default(): void
     {
-        $this->assertEquals('gpt-4o', SENTINEL_Chat_Engine::get_default_model('openai'));
-        $this->assertEquals('qwen3.5:4b', SENTINEL_Chat_Engine::get_default_model('ollama'));
+        $this->assertEquals('gpt-4o', Chat_Engine::get_default_model('openai'));
+        $this->assertEquals('qwen3.5:4b', Chat_Engine::get_default_model('ollama'));
     }
 
     /** @test */
     public function get_default_model_returns_fallback_for_unknown_provider(): void
     {
-        $this->assertEquals('claude-sonnet-4-6', SENTINEL_Chat_Engine::get_default_model('nonexistent'));
+        $this->assertEquals('claude-sonnet-4-6', Chat_Engine::get_default_model('nonexistent'));
     }
 
     // ─── Discovery mode tests ──────────────────────────────────────
@@ -113,38 +113,38 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function uses_discovery_mode_returns_true_for_openai(): void
     {
-        $this->assertTrue(SENTINEL_Chat_Engine::uses_discovery_mode('openai'));
+        $this->assertTrue(Chat_Engine::uses_discovery_mode('openai'));
     }
 
     /** @test */
     public function uses_discovery_mode_returns_true_for_gemini(): void
     {
-        $this->assertTrue(SENTINEL_Chat_Engine::uses_discovery_mode('gemini'));
+        $this->assertTrue(Chat_Engine::uses_discovery_mode('gemini'));
     }
 
     /** @test */
     public function uses_discovery_mode_returns_true_for_openrouter(): void
     {
-        $this->assertTrue(SENTINEL_Chat_Engine::uses_discovery_mode('openrouter'));
+        $this->assertTrue(Chat_Engine::uses_discovery_mode('openrouter'));
     }
 
     /** @test */
     public function uses_discovery_mode_returns_false_for_anthropic(): void
     {
-        $this->assertFalse(SENTINEL_Chat_Engine::uses_discovery_mode('anthropic'));
+        $this->assertFalse(Chat_Engine::uses_discovery_mode('anthropic'));
     }
 
     /** @test */
     public function uses_discovery_mode_returns_false_for_ollama(): void
     {
-        $this->assertFalse(SENTINEL_Chat_Engine::uses_discovery_mode('ollama'));
+        $this->assertFalse(Chat_Engine::uses_discovery_mode('ollama'));
     }
 
     /** @test */
     public function uses_discovery_mode_returns_true_for_unknown_provider(): void
     {
         // Unknown providers default to 0 limit = discovery mode.
-        $this->assertTrue(SENTINEL_Chat_Engine::uses_discovery_mode('unknown-provider'));
+        $this->assertTrue(Chat_Engine::uses_discovery_mode('unknown-provider'));
     }
 
     // ─── API key source priority tests ─────────────────────────────
@@ -155,7 +155,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
         putenv('ANTHROPIC_API_KEY=sk-env');
         update_option('connectors_ai_anthropic_api_key', 'sk-option');
 
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         $this->assertTrue($providers['anthropic']['has_key']);
         $this->assertEquals('env_var', $providers['anthropic']['key_source']);
@@ -171,7 +171,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
         }
         update_option('connectors_ai_anthropic_api_key', 'sk-option');
 
-        $providers = SENTINEL_Chat_Engine::get_available_providers();
+        $providers = Chat_Engine::get_available_providers();
 
         $this->assertTrue($providers['anthropic']['has_key']);
         $this->assertEquals('constant', $providers['anthropic']['key_source']);
@@ -180,7 +180,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function has_api_key_returns_false_for_unmapped_provider(): void
     {
-        $this->assertFalse(SENTINEL_Chat_Engine::has_api_key('nonexistent'));
+        $this->assertFalse(Chat_Engine::has_api_key('nonexistent'));
     }
 
     /** @test */
@@ -189,7 +189,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
         global $_wp_options;
         $_wp_options['connectors_ai_google_api_key'] = 'sk-gemini';
 
-        $this->assertTrue(SENTINEL_Chat_Engine::has_api_key('gemini'));
+        $this->assertTrue(Chat_Engine::has_api_key('gemini'));
     }
 
     // ─── WP_CONNECTOR_MAP completeness tests ─────────────────────────
@@ -197,7 +197,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function wp_connector_map_contains_all_providers(): void
     {
-        $map = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $map = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('WP_CONNECTOR_MAP');
 
         $this->assertArrayHasKey('anthropic', $map);
@@ -210,7 +210,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function wp_connector_map_has_required_fields(): void
     {
-        $map = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $map = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('WP_CONNECTOR_MAP');
 
         foreach ($map as $provider => $config) {
@@ -223,7 +223,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function gemini_connector_id_maps_to_google(): void
     {
-        $map = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $map = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('WP_CONNECTOR_MAP');
 
         $this->assertEquals('google', $map['gemini']['connector_id']);
@@ -234,7 +234,7 @@ class ChatEngineConnectorDiscoveryTest extends TestCase
     /** @test */
     public function provider_tool_limits_match_expected_values(): void
     {
-        $limits = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $limits = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('PROVIDER_TOOL_LIMITS');
 
         $this->assertEquals(128, $limits['anthropic']);

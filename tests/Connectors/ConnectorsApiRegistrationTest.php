@@ -7,11 +7,11 @@
  */
 
 use PHPUnit\Framework\TestCase;
-use SentinelMCP\SENTINEL_Chat_Engine;
+use SentinelMCP\Chat_Engine;
 
 /**
  * Tests connector registration via wp_connectors_init and the
- * SENTINEL_Chat_Engine connector mapping.
+ * Chat_Engine connector mapping.
  */
 class ConnectorsApiRegistrationTest extends TestCase
 {
@@ -200,7 +200,7 @@ class ConnectorsApiRegistrationTest extends TestCase
     /** @test */
     public function engine_provider_slugs_map_to_connector_ids(): void
     {
-        $map = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $map = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('WP_CONNECTOR_MAP');
 
         // These are the IDs the Connectors API registers.
@@ -214,7 +214,7 @@ class ConnectorsApiRegistrationTest extends TestCase
     /** @test */
     public function engine_env_var_names_match_connector_auth(): void
     {
-        $map = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $map = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('WP_CONNECTOR_MAP');
 
         $this->assertEquals('ANTHROPIC_API_KEY', $map['anthropic']['env_var']);
@@ -227,7 +227,7 @@ class ConnectorsApiRegistrationTest extends TestCase
     /** @test */
     public function engine_option_names_match_connector_setting_names(): void
     {
-        $map = (new ReflectionClass(SENTINEL_Chat_Engine::class))
+        $map = (new ReflectionClass(Chat_Engine::class))
             ->getConstant('WP_CONNECTOR_MAP');
 
         $this->assertEquals('connectors_ai_anthropic_api_key', $map['anthropic']['option']);

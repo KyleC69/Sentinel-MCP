@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
-         bootstrap="tests/bootstrap.php"
+         bootstrap="bootstrap.php"
          colors="true"
          verbose="true"
          testdox="true"
@@ -9,18 +9,18 @@
          cacheResultFile=".phpunit.result.cache">
     <testsuites>
         <testsuite name="Chat Connector Pipeline">
-            <directory suffix="Test.php">tests/Chat</directory>
+            <directory suffix="Test.php">Chat</directory>
         </testsuite>
         <testsuite name="Connectors API">
-            <directory suffix="Test.php">tests/Connectors</directory>
+            <directory suffix="Test.php">Connectors</directory>
         </testsuite>
         <testsuite name="Manager Classes">
-            <directory suffix="Test.php">tests/Managers</directory>
+            <directory suffix="Test.php">Managers</directory>
         </testsuite>
     </testsuites>
     <coverage processUncoveredFiles="true">
         <include>
-            <directory suffix=".php">sentinel-mcp/includes</directory>
+            <directory suffix=".php">../sentinel-mcp/includes</directory>
         </include>
     </coverage>
 </phpunit>

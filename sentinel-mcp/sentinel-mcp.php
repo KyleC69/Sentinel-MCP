@@ -4,26 +4,29 @@ declare(strict_types=1);
 
 /**
  * Plugin Name: Sentinel-MCP
- * Plugin URI:  https://wordpress.org/plugins/sentinel-mcp/
- * Description: Universal content manager via MCP. Auto-discovers all CPTs, taxonomies and custom fields. Create, edit, search and manage any content from Claude, ChatGPT, Copilot or any MCP client.
- * Version:     2.0.2
- * Author:      Kyle L Crowder
+ * Plugin URI:  https://github.com/kylec69/sentinel-mcp/
+ * Description: Universal content manager via MCP. Provides a local AI chat window for admins to utilize AI to update sites. MCP server can be utiliized to update sites from any * compatible REST client.
+ * Props: Code is adapted from orginal author: **[Get MCP Content Manager Premium](https://plugins.joseconti.com/en/product/sentinel-mcp/)**
+ * Props: I have added additional functionality with modern clients and variations in MCP protcol registration. Many clients vary in their routines as standards evolve, SSE transport has been added and compatibility with VS Code and Visual Studio has been added. Overall architecture and design has been updated and streamlined for todays design practices
+ * Version:     2.0.0
+ * Author:      Kyle L Crowder, Jose Conti
  * Author URI:  https://github.com/KyleC69
  * License:     GPL-2.0-or-later
  * Text Domain: sentinel-mcp
  * Requires at least: 7.0
  * Requires PHP: 8.3
  *
- * NOTE: Changes have been made to vendor HTTP Transport file to add SSE transport
+ * NOTE: Changes have been made to vendor HTTP Transport file to add SSE transport for VS Code compatibility.
  *
  * Requires:
  *  - WordPress Abilities API (wordpress/abilities-api)
  *  - WordPress MCP Adapter  (wordpress/mcp-adapter)
  *
  * @package    SENTINEL
- * @author     Kyle Crowder
+ * @author     Kyle Crowder, Jose Conti
  * @copyright  2026 Kyle L Crowder
  * @link       https://github.com/KyleC69/Sentinel-MCP
+ * @version	   2.0.0
  */
 
 defined('ABSPATH') || exit;
@@ -32,7 +35,7 @@ defined('ABSPATH') || exit;
  * Constants.
  */
 if (! defined('SENTINEL_VERSION')) {
-	define('SENTINEL_VERSION', '2.0.2');
+	define('SENTINEL_VERSION', '2.0.0');
 }
 if (! defined('SENTINEL_PATH')) {
 	define('SENTINEL_PATH', plugin_dir_path(__FILE__));
@@ -47,20 +50,7 @@ if (! defined('SENTINEL_PREFIX')) {
 	define('SENTINEL_PREFIX', 'sentinel');
 }
 
-/**
- * Load translations bundled in /languages/. WordPress.org will also serve
- * Translate.WordPress.org translations on top of these.
- */
-add_action(
-	'init',
-	function () {
-		load_plugin_textdomain(
-			'mcp-sentinel',
-			false,
-			dirname(plugin_basename(__FILE__)) . '/languages/'
-		);
-	}
-);
+
 
 if (! function_exists('mcpcomal_debug_log')) {
 	/**
@@ -96,16 +86,16 @@ require_once SENTINEL_PATH . 'includes/helpers.php';
 /**
  * Load admin tab base and tabs.
  */
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-getstarted.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-status.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-providers.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-connect.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-prompts.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-settings.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-oauth.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-activity.php';
-require_once SENTINEL_PATH . 'includes/admin/class-mcp-admin-tab-info.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Getstarted.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Status.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Providers.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Connect.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Prompts.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Settings.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Oauth.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Activity.php';
+require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Info.php';
 
 require_once SENTINEL_PATH . 'includes/Abilities/Ability.php';
 require_once SENTINEL_PATH . 'includes/Abilities/Registry.php';
@@ -169,13 +159,13 @@ require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_List_Products_Ab
 require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_List_Recent_Orders_Ability.php';
 require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_List_Coupons_Ability.php';
 
-require_once SENTINEL_PATH . 'includes/class-mcp-admin.php';
+require_once SENTINEL_PATH . 'includes/Admin.php';
 require_once SENTINEL_PATH . 'includes/abilities-discovery.php';
 require_once SENTINEL_PATH . 'includes/HTML_To_Blocks_Converter.php';
 require_once SENTINEL_PATH . 'includes/Logging/Logger.php';
 require_once SENTINEL_PATH . 'includes/abilities-universal-crud.php';
 require_once SENTINEL_PATH . 'includes/abilities-gutenberg-reference.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-file-manager.php';
+require_once SENTINEL_PATH . 'includes/File_Manager.php';
 require_once SENTINEL_PATH . 'includes/abilities-recovery.php';
 require_once SENTINEL_PATH . 'includes/abilities-media.php';
 require_once SENTINEL_PATH . 'includes/abilities-options.php';
@@ -196,26 +186,26 @@ require_once SENTINEL_PATH . 'includes/abilities-seo-read.php';
 require_once SENTINEL_PATH . 'includes/abilities-wc-read.php';
 require_once SENTINEL_PATH . 'includes/abilities-premium-features.php';
 
-require_once SENTINEL_PATH . 'includes/class-mcp-activity-log.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-comment-manager.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-config-exporter.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-health-endpoint.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-schema-inspector.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-image-generator.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-media-manager.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-options-manager.php';
-require_once SENTINEL_PATH . 'includes/class-mcp-prompt-gallery.php';
+require_once SENTINEL_PATH . 'includes/Activity_Log.php';
+require_once SENTINEL_PATH . 'includes/Comment_Manager.php';
+require_once SENTINEL_PATH . 'includes/Config_Exporter.php';
+require_once SENTINEL_PATH . 'includes/Health_Endpoint.php';
+require_once SENTINEL_PATH . 'includes/Schema_Inspector.php';
+require_once SENTINEL_PATH . 'includes/Image_Generator.php';
+require_once SENTINEL_PATH . 'includes/Media_Manager.php';
+require_once SENTINEL_PATH . 'includes/Options_Manager.php';
+require_once SENTINEL_PATH . 'includes/Prompt_Gallery.php';
 
 
 
 /**
  * Chat AI.
  */
-require_once SENTINEL_PATH . 'includes/chat/class-mcp-chat-db.php';
-require_once SENTINEL_PATH . 'includes/chat/class-mcp-chat-provider-registry.php';
-require_once SENTINEL_PATH . 'includes/chat/class-mcp-chat-engine.php';
-require_once SENTINEL_PATH . 'includes/chat/class-mcp-admin-chat.php';
-require_once SENTINEL_PATH . 'includes/chat/class-mcp-rest-chat.php';
+require_once SENTINEL_PATH . 'includes/chat/Chat_Db.php';
+require_once SENTINEL_PATH . 'includes/chat/Chat_Provider_Registry.php';
+require_once SENTINEL_PATH . 'includes/chat/Chat_Engine.php';
+require_once SENTINEL_PATH . 'includes/chat/Admin_Chat.php';
+require_once SENTINEL_PATH . 'includes/chat/Rest_Chat.php';
 
 \SentinelMCP\REST_Chat::init();
 \SentinelMCP\Admin_Chat::init();
@@ -223,14 +213,14 @@ require_once SENTINEL_PATH . 'includes/chat/class-mcp-rest-chat.php';
 /**
  * OAuth 2.1 Server.
  */
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-db.php';
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-server.php';
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-authorize.php';
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-token.php';
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-interceptor.php';
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-permissions.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Db.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Server.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Authorize.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Token.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Interceptor.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Permissions.php';
 // New streamlined OAuth manager.
-require_once SENTINEL_PATH . 'includes/oauth/class-mcp-oauth-manager.php';
+require_once SENTINEL_PATH . 'includes/oauth/Oauth_Manager.php';
 
 \SentinelMCP\OAuth_Server::init();
 \SentinelMCP\OAuth_Permissions::init();

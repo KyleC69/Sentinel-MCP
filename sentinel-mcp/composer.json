@@ -3,7 +3,6 @@
     "description": "Sentinel-MCP WordPress plugin — MCP server exposing 40+ abilities for content management, media, users, system info, WooCommerce, SEO, i18n, and more.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
-    "version": "2.0.0",
     "readme": "readme.txt",
     "source": {
         "reference": "",
@@ -20,35 +19,36 @@
         {
             "name": "Kyle L Crowder",
             "email": "kcrowdergoog@gmail.com",
-            "homepage": "https://kylec69.github.io/Sentinel-MCP/",
+            "homepage": "https://kylec69.github.io/Sentinel-MCP",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": ">=8.3",
-        "soukicz/llm": "^0.1",
-        "ramsey/uuid": "^4.7",
+        "php": ">=8.2",
         "guzzlehttp/guzzle": "^7.8",
+        "ramsey/uuid": "^4.7",
+        "soukicz/llm": "^0.1",
         "swaggest/json-schema": "^0.12",
-        "symfony/polyfill-php83": "^1.28"
+        "symfony/polyfill-php83": "^1.28",
+        "wordpress/mcp-adapter": "^0.5.0"
     },
     "autoload": {
         "psr-4": {
-            "SentinelMCP\\": "sentinel-mcp/includes/"
+            "SentinelMCP\\": "includes/"
         },
         "classmap": [
-            "sentinel-mcp/includes/",
-            "sentinel-mcp/includes/admin/",
-            "sentinel-mcp/includes/chat/",
-            "sentinel-mcp/includes/oauth/",
-            "sentinel-mcp/includes/i18n/",
-            "sentinel-mcp/includes/seo/",
-            "sentinel-mcp/includes/Collectors/",
-            "sentinel-mcp/includes/Logging/"
+            "includes/",
+            "includes/admin/",
+            "includes/chat/",
+            "includes/oauth/",
+            "includes/i18n/",
+            "includes/seo/",
+            "includes/Collectors/",
+            "includes/Logging/"
         ]
     },
     "config": {
-        "vendor-dir": "sentinel-mcp/vendor",
+        "vendor-dir": "vendor",
         "optimize-autoloader": true,
         "sort-packages": true
     }

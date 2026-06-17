@@ -35,6 +35,13 @@ if (! function_exists('add_action')) {
     }
 }
 
+if (! function_exists('apply_filters')) {
+    function apply_filters(string $tag, $value, ...$args)
+    {
+        return $value;
+    }
+}
+
 if (! function_exists('do_action')) {
     function do_action(string $tag, ...$args): void
     {
@@ -291,14 +298,58 @@ if (! class_exists('\WordPress\AiClient\AiClient')) {
     {
         public function hasProvider(string $id): bool
         {
-            global $_wp_mock_ai_registry;
-            return isset($_wp_mock_ai_registry[$id]);
+            return true;
         }
 
         public function isProviderConfigured(string $id): bool
         {
-            global $_wp_mock_ai_registry;
-            return ! empty($_wp_mock_ai_registry[$id]['configured']);
+            global $_wp_mock_ai_registry, $_wp_options;
+            // If explicit mock entry exists, use it.
+            if (isset($_wp_mock_ai_registry[$id]['configured'])) {
+                return ! empty($_wp_mock_ai_registry[$id]['configured']);
+            }
+            // Otherwise infer from available credentials in the mock environment.
+            $class_name = $this->getProviderClassName($id);
+            if (! $class_name) {
+                return false;
+            }
+            $provider_id = 'mock';
+            if (str_contains($class_name, '::')) {
+                [$class_name, $provider_id] = explode('::', $class_name, 2);
+            }
+            if (! class_exists($class_name)) {
+                return false;
+            }
+            $provider = new $class_name([], $provider_id);
+            if (! method_exists($provider, 'getAuthentication')) {
+                return false;
+            }
+            $auth = $provider->getAuthentication();
+            if (! is_array($auth) || ($auth['method'] ?? '') !== 'api_key') {
+                return false;
+            }
+            $env_var_name  = $auth['env_var_name'] ?? '';
+            $constant_name = $auth['constant_name'] ?? '';
+            $setting_name  = $auth['setting_name'] ?? '';
+            if ('' !== $env_var_name) {
+                $env_value = getenv($env_var_name);
+                if (false !== $env_value && '' !== $env_value) {
+                    return true;
+                }
+            }
+            if ('' !== $constant_name && defined($constant_name)) {
+                $const_value = constant($constant_name);
+                if (is_string($const_value) && '' !== $const_value) {
+                    return true;
+                }
+            }
+            if ('' !== $setting_name) {
+                $db_value = get_option($setting_name, '');
+                if ('' !== $db_value) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public function getRegisteredProviderIds(): array
@@ -310,21 +361,32 @@ if (! class_exists('\WordPress\AiClient\AiClient')) {
         public function getProviderClassName(string $id): ?string
         {
             global $_wp_mock_ai_registry;
-            return $_wp_mock_ai_registry[$id]['class_name'] ?? null;
+            return $_wp_mock_ai_registry[$id]['class_name'] ?? "AiClient_Mock_Provider::{$id}";
         }
     }
 
     class AiClient_Mock_Provider
     {
         private array $auth;
+        private string $provider_id;
 
-        public function __construct(array $auth = [])
+        public function __construct(array $auth = [], string $provider_id = 'mock')
         {
-            $this->auth = $auth;
+            $this->auth        = $auth;
+            $this->provider_id = $provider_id;
         }
 
         public function getAuthentication(): array
         {
+            if (empty($this->auth)) {
+                $slug = $this->provider_id;
+                return [
+                    'method'        => 'api_key',
+                    'setting_name'  => 'connectors_ai_' . strtolower($slug) . '_api_key',
+                    'env_var_name'  => strtoupper($slug) . '_API_KEY',
+                    'constant_name' => strtoupper($slug) . '_API_KEY',
+                ];
+            }
             return $this->auth;
         }
     }
@@ -339,6 +401,79 @@ if (! class_exists('\WordPress\AiClient\AiClient')) {
 
     class_alias('WP_Mock_AiClient', '\WordPress\AiClient\AiClient');
     class_alias('AiClient_Mock_Provider', '\WordPress\AiClient\MockProvider');
+    class_alias('AiClient_Mock_Provider', '\WordPress\AiClient\AnthropicProvider');
+    class_alias('AiClient_Mock_Provider', '\WordPress\AiClient\OpenAIProvider');
+    class_alias('AiClient_Mock_Provider', '\WordPress\AiClient\GoogleProvider');
+    class_alias('AiClient_Mock_Provider', '\WordPress\AiClient\OpenRouterProvider');
+    class_alias('AiClient_Mock_Provider', '\WordPress\AiClient\OllamaProvider');
+
+    // Seed the mock registry so Chat_Engine can resolve provider authentication.
+    $_wp_mock_ai_registry = [
+        'anthropic'  => ['configured' => false, 'class_name' => 'AiClient_Mock_Provider::anthropic'],
+        'openai'     => ['configured' => false, 'class_name' => 'AiClient_Mock_Provider::openai'],
+        'google'     => ['configured' => false, 'class_name' => 'AiClient_Mock_Provider::google'],
+        'openrouter' => ['configured' => false, 'class_name' => 'AiClient_Mock_Provider::openrouter'],
+        'ollama'     => ['configured' => false, 'class_name' => 'AiClient_Mock_Provider::ollama'],
+    ];
+
+    // Map provider slugs to connector IDs used by Chat_Provider_Registry.
+    $_wp_mock_connector_registry = [
+        'anthropic' => [
+            'id'            => 'anthropic',
+            'name'          => 'Anthropic',
+            'type'          => 'ai_provider',
+            'authentication' => [
+                'method'        => 'api_key',
+                'setting_name'  => 'connectors_ai_anthropic_api_key',
+                'env_var_name'  => 'ANTHROPIC_API_KEY',
+                'constant_name' => 'ANTHROPIC_API_KEY',
+            ],
+        ],
+        'openai' => [
+            'id'            => 'openai',
+            'name'          => 'OpenAI',
+            'type'          => 'ai_provider',
+            'authentication' => [
+                'method'        => 'api_key',
+                'setting_name'  => 'connectors_ai_openai_api_key',
+                'env_var_name'  => 'OPENAI_API_KEY',
+                'constant_name' => 'OPENAI_API_KEY',
+            ],
+        ],
+        'google' => [
+            'id'            => 'google',
+            'name'          => 'Google',
+            'type'          => 'ai_provider',
+            'authentication' => [
+                'method'        => 'api_key',
+                'setting_name'  => 'connectors_ai_google_api_key',
+                'env_var_name'  => 'GOOGLE_API_KEY',
+                'constant_name' => 'GOOGLE_API_KEY',
+            ],
+        ],
+        'openrouter' => [
+            'id'            => 'openrouter',
+            'name'          => 'OpenRouter',
+            'type'          => 'ai_provider',
+            'authentication' => [
+                'method'        => 'api_key',
+                'setting_name'  => 'connectors_ai_openrouter_api_key',
+                'env_var_name'  => 'OPENROUTER_API_KEY',
+                'constant_name' => 'OPENROUTER_API_KEY',
+            ],
+        ],
+        'ollama' => [
+            'id'            => 'ollama',
+            'name'          => 'Ollama',
+            'type'          => 'ai_provider',
+            'authentication' => [
+                'method'        => 'api_key',
+                'setting_name'  => 'connectors_ai_ollama_api_key',
+                'env_var_name'  => 'OLLAMA_API_KEY',
+                'constant_name' => 'OLLAMA_API_KEY',
+            ],
+        ],
+    ];
 }
 
 // ─── Sentinel-MCP local connector helpers ─────────────────────────
@@ -442,6 +577,30 @@ if (! function_exists('mcpcomal_has_ai_credentials')) {
             }
         }
         return false;
+    }
+}
+
+if (! function_exists('wp_is_connector_registered')) {
+    function wp_is_connector_registered(string $connector_id): bool
+    {
+        global $_wp_mock_connector_registry;
+        return isset($_wp_mock_connector_registry[$connector_id]);
+    }
+}
+
+if (! function_exists('wp_get_connector')) {
+    function wp_get_connector(string $connector_id): ?array
+    {
+        global $_wp_mock_connector_registry;
+        return $_wp_mock_connector_registry[$connector_id] ?? null;
+    }
+}
+
+if (! function_exists('wp_get_connectors')) {
+    function wp_get_connectors(): array
+    {
+        global $_wp_mock_connector_registry;
+        return $_wp_mock_connector_registry ?? [];
     }
 }
 
@@ -556,7 +715,9 @@ function reset_wp_state(): void
     global $_wp_actions, $_wp_options, $_wp_transients, $_wp_rest_routes,
         $_wp_current_user_caps, $_wp_current_user_id, $_wp_inline_styles,
         $_wp_abilities, $_wp_connector_registry, $_wp_connector_auth,
-        $_wp_last_insert_id, $_wp_conversation_provider, $_wp_conversation_model;
+        $_wp_last_insert_id, $_wp_conversation_provider, $_wp_conversation_model,
+        $_wp_mock_ai_registry, $_wp_mock_connector_registered, $_wp_mock_connector_registry,
+        $_wp_mock_users, $_wp_mock_users_by_id, $_wp_mock_user_meta, $_wp_last_mock_user_id;
 
     $_wp_actions          = [];
     $_wp_options          = [];
@@ -571,7 +732,13 @@ function reset_wp_state(): void
     $_wp_last_insert_id   = 0;
     $_wp_conversation_provider = null;
     $_wp_conversation_model = null;
+    $_wp_mock_ai_registry = [];
     $_wp_mock_connector_registered = [];
+    $_wp_mock_connector_registry = [];
+    $_wp_mock_users       = [];
+    $_wp_mock_users_by_id = [];
+    $_wp_mock_user_meta   = [];
+    $_wp_last_mock_user_id = 0;
 }
 
 // NOTE: Vendor dependencies require PHP 8.3, but the host has 8.2.
@@ -912,10 +1079,16 @@ if (! function_exists('wp_unslash')) {
 }
 
 // ─── Load plugin files under test ─────────────────────────────────
-require_once __DIR__ . '/../sentinel-mcp/includes/chat/class-mcp-chat-engine.php';
-require_once __DIR__ . '/../sentinel-mcp/includes/chat/class-mcp-rest-chat.php';
-require_once __DIR__ . '/../sentinel-mcp/includes/chat/class-mcp-chat-db.php';
-require_once __DIR__ . '/../sentinel-mcp/includes/class-mcp-connectors.php';
-require_once __DIR__ . '/../sentinel-mcp/includes/class-mcp-file-manager.php';
-require_once __DIR__ . '/../sentinel-mcp/includes/class-mcp-media-manager.php';
-require_once __DIR__ . '/../sentinel-mcp/includes/class-mcp-user-manager.php';
+// helpers.php bails early if ABSPATH is not defined, so define it first.
+if (! defined('ABSPATH')) {
+    define('ABSPATH', dirname(__DIR__) . '/');
+}
+require_once __DIR__ . '/../sentinel-mcp/includes/helpers.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/chat/Chat_Provider_Registry.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/chat/Chat_Engine.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/chat/Rest_Chat.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/chat/Chat_Db.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/Comment_Manager.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/File_Manager.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/Media_Manager.php';
+require_once __DIR__ . '/../sentinel-mcp/includes/User_Manager.php';

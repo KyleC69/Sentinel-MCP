@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Unit tests for SENTINEL_REST_Chat provider endpoints.
+ * Unit tests for REST_Chat provider endpoints.
  *
  * @package Sentinel-MCP
  */
 
 use PHPUnit\Framework\TestCase;
-use SentinelMCP\SENTINEL_REST_Chat;
-use SentinelMCP\SENTINEL_Chat_Engine;
+use SentinelMCP\REST_Chat;
+use SentinelMCP\Chat_Engine;
 
 /**
  * Tests REST chat provider listing, switching, and conversation creation.
@@ -26,7 +26,7 @@ class RestChatProviderEndpointTest extends TestCase
     /** @test */
     public function handle_providers_returns_success(): void
     {
-        $response = SENTINEL_REST_Chat::handle_providers();
+        $response = REST_Chat::handle_providers();
 
         $this->assertInstanceOf(\WP_REST_Response::class, $response);
         $data = $response->get_data();
@@ -39,7 +39,7 @@ class RestChatProviderEndpointTest extends TestCase
     /** @test */
     public function handle_providers_includes_all_providers(): void
     {
-        $response = SENTINEL_REST_Chat::handle_providers();
+        $response = REST_Chat::handle_providers();
         $data     = $response->get_data();
         $providers = $data['providers'];
 
@@ -53,10 +53,10 @@ class RestChatProviderEndpointTest extends TestCase
     /** @test */
     public function handle_providers_default_matches_engine_default(): void
     {
-        $response = SENTINEL_REST_Chat::handle_providers();
+        $response = REST_Chat::handle_providers();
         $data     = $response->get_data();
 
-        $this->assertEquals(SENTINEL_Chat_Engine::get_default_provider(), $data['default']);
+        $this->assertEquals(Chat_Engine::get_default_provider(), $data['default']);
     }
 
     /** @test */
@@ -64,7 +64,7 @@ class RestChatProviderEndpointTest extends TestCase
     {
         update_option('connectors_ai_openrouter_api_key', 'sk-or-test');
 
-        $response  = SENTINEL_REST_Chat::handle_providers();
+        $response  = REST_Chat::handle_providers();
         $providers = $response->get_data()['providers'];
 
         $this->assertTrue($providers['openrouter']['has_key']);
@@ -80,12 +80,12 @@ class RestChatProviderEndpointTest extends TestCase
         $_wp_current_user_id = 42;
 
         $request = $this->create_request([]);
-        $response = SENTINEL_REST_Chat::handle_create_conversation($request);
+        $response = REST_Chat::handle_create_conversation($request);
         $data = $response->get_data();
 
         $this->assertTrue($data['success']);
         $this->assertArrayHasKey('conversation', $data);
-        $this->assertEquals(SENTINEL_Chat_Engine::get_default_provider(), $data['conversation']['provider']);
+        $this->assertEquals(Chat_Engine::get_default_provider(), $data['conversation']['provider']);
     }
 
     /** @test */
@@ -95,7 +95,7 @@ class RestChatProviderEndpointTest extends TestCase
         $_wp_current_user_id = 42;
 
         $request = $this->create_request(['provider' => 'ollama', 'model' => 'qwen3.5:4b']);
-        $response = SENTINEL_REST_Chat::handle_create_conversation($request);
+        $response = REST_Chat::handle_create_conversation($request);
         $data = $response->get_data();
 
         $this->assertTrue($data['success']);
@@ -110,7 +110,7 @@ class RestChatProviderEndpointTest extends TestCase
         $_wp_current_user_id = 42;
 
         $request = $this->create_request(['provider' => 'openai']);
-        $response = SENTINEL_REST_Chat::handle_create_conversation($request);
+        $response = REST_Chat::handle_create_conversation($request);
         $data = $response->get_data();
 
         $this->assertTrue($data['success']);
@@ -128,7 +128,7 @@ class RestChatProviderEndpointTest extends TestCase
 
         // Create a conversation first.
         $createReq = $this->create_request([]);
-        $createRes = SENTINEL_REST_Chat::handle_create_conversation($createReq);
+        $createRes = REST_Chat::handle_create_conversation($createReq);
         $convId    = $createRes->get_data()['conversation']['id'];
 
         $request = $this->create_request([
@@ -136,7 +136,7 @@ class RestChatProviderEndpointTest extends TestCase
             'provider'        => 'unknown-provider',
             'model'           => 'some-model',
         ]);
-        $response = SENTINEL_REST_Chat::handle_switch_provider($request);
+        $response = REST_Chat::handle_switch_provider($request);
         $data = $response->get_data();
 
         $this->assertFalse($data['success']);
@@ -150,7 +150,7 @@ class RestChatProviderEndpointTest extends TestCase
         $_wp_current_user_id = 42;
 
         $createReq = $this->create_request(['provider' => 'anthropic']);
-        $createRes = SENTINEL_REST_Chat::handle_create_conversation($createReq);
+        $createRes = REST_Chat::handle_create_conversation($createReq);
         $convId    = $createRes->get_data()['conversation']['id'];
 
         $request = $this->create_request([
@@ -158,14 +158,14 @@ class RestChatProviderEndpointTest extends TestCase
             'provider'        => 'gemini',
             'model'           => 'gemini-2.5-pro',
         ]);
-        $response = SENTINEL_REST_Chat::handle_switch_provider($request);
+        $response = REST_Chat::handle_switch_provider($request);
         $data = $response->get_data();
 
         $this->assertTrue($data['success']);
 
         // Verify via GET.
         $getReq  = $this->create_request(['id' => $convId]);
-        $getRes  = SENTINEL_REST_Chat::handle_get_conversation($getReq);
+        $getRes  = REST_Chat::handle_get_conversation($getReq);
         $conv    = $getRes->get_data()['conversation'];
 
         $this->assertEquals('gemini', $conv['provider']);
@@ -178,7 +178,7 @@ class RestChatProviderEndpointTest extends TestCase
     public function handle_get_conversation_returns_404_for_missing(): void
     {
         $request  = $this->create_request(['id' => 99999]);
-        $response = SENTINEL_REST_Chat::handle_get_conversation($request);
+        $response = REST_Chat::handle_get_conversation($request);
 
         $this->assertEquals(404, $response->get_status());
         $this->assertFalse($response->get_data()['success']);
@@ -192,7 +192,7 @@ class RestChatProviderEndpointTest extends TestCase
         global $_wp_current_user_caps;
         $_wp_current_user_caps = ['manage_options' => true];
 
-        $this->assertTrue(SENTINEL_REST_Chat::check_permissions());
+        $this->assertTrue(REST_Chat::check_permissions());
     }
 
     /** @test */
@@ -201,7 +201,7 @@ class RestChatProviderEndpointTest extends TestCase
         global $_wp_current_user_caps;
         $_wp_current_user_caps = ['manage_options' => false];
 
-        $this->assertFalse(SENTINEL_REST_Chat::check_permissions());
+        $this->assertFalse(REST_Chat::check_permissions());
     }
 
     // ─── Helper ──────────────────────────────────────────────────────

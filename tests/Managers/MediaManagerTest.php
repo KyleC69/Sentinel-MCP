@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Unit tests for SENTINEL_Media_Manager.
+ * Unit tests for Media_Manager.
  *
  * @package Sentinel-MCP
  */
 
 use PHPUnit\Framework\TestCase;
-use SentinelMCP\SENTINEL_Media_Manager;
+use SentinelMCP\Media_Manager;
 
 /**
  * Tests MIME type validation and constants.
@@ -25,7 +25,7 @@ class MediaManagerTest extends TestCase
     /** @test */
     public function allowed_mime_prefixes_include_image_video_audio(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_Media_Manager::class);
+        $reflection = new \ReflectionClass(Media_Manager::class);
         $prop       = $reflection->getProperty('ALLOWED_MIME_PREFIXES');
         $prop->setAccessible(true);
         $prefixes = $prop->getValue();
@@ -39,7 +39,7 @@ class MediaManagerTest extends TestCase
     /** @test */
     public function allowed_mime_prefixes_include_office_types(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_Media_Manager::class);
+        $reflection = new \ReflectionClass(Media_Manager::class);
         $prop       = $reflection->getProperty('ALLOWED_MIME_PREFIXES');
         $prop->setAccessible(true);
         $prefixes = $prop->getValue();
@@ -54,7 +54,7 @@ class MediaManagerTest extends TestCase
     /** @test */
     public function is_allowed_mime_accepts_image_jpeg(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_Media_Manager::class);
+        $reflection = new \ReflectionClass(Media_Manager::class);
         $method     = $reflection->getMethod('is_allowed_mime');
         $method->setAccessible(true);
 
@@ -64,7 +64,7 @@ class MediaManagerTest extends TestCase
     /** @test */
     public function is_allowed_mime_rejects_executable(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_Media_Manager::class);
+        $reflection = new \ReflectionClass(Media_Manager::class);
         $method     = $reflection->getMethod('is_allowed_mime');
         $method->setAccessible(true);
 
@@ -74,7 +74,7 @@ class MediaManagerTest extends TestCase
     /** @test */
     public function is_allowed_mime_accepts_pdf(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_Media_Manager::class);
+        $reflection = new \ReflectionClass(Media_Manager::class);
         $method     = $reflection->getMethod('is_allowed_mime');
         $method->setAccessible(true);
 
@@ -84,7 +84,7 @@ class MediaManagerTest extends TestCase
     /** @test */
     public function is_allowed_mime_accepts_csv(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_Media_Manager::class);
+        $reflection = new \ReflectionClass(Media_Manager::class);
         $method     = $reflection->getMethod('is_allowed_mime');
         $method->setAccessible(true);
 

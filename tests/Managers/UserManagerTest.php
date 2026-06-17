@@ -1,13 +1,13 @@
 <?php
 
 /**
- * Unit tests for SENTINEL_User_Manager.
+ * Unit tests for User_Manager.
  *
  * @package Sentinel-MCP
  */
 
 use PHPUnit\Framework\TestCase;
-use SentinelMCP\SENTINEL_User_Manager;
+use SentinelMCP\User_Manager;
 
 /**
  * Tests user CRUD validation, role guards, and meta filtering.
@@ -25,7 +25,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function sensitive_meta_keys_include_session_tokens(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_User_Manager::class);
+        $reflection = new \ReflectionClass(User_Manager::class);
         $prop       = $reflection->getProperty('SENSITIVE_META_KEYS');
         $prop->setAccessible(true);
         $keys = $prop->getValue();
@@ -37,7 +37,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function sensitive_meta_prefixes_include_transients(): void
     {
-        $reflection = new \ReflectionClass(SENTINEL_User_Manager::class);
+        $reflection = new \ReflectionClass(User_Manager::class);
         $prop       = $reflection->getProperty('SENSITIVE_META_PREFIXES');
         $prop->setAccessible(true);
         $prefixes = $prop->getValue();
@@ -51,7 +51,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function list_users_returns_success_with_defaults(): void
     {
-        $result = SENTINEL_User_Manager::list_users([]);
+        $result = User_Manager::list_users([]);
         $this->assertTrue($result['success']);
         $this->assertIsArray($result['users']);
         $this->assertEquals(1, $result['page']);
@@ -60,7 +60,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function list_users_respects_per_page_cap(): void
     {
-        $result = SENTINEL_User_Manager::list_users(['per_page' => 200]);
+        $result = User_Manager::list_users(['per_page' => 200]);
         // The cap is 100, but we can't easily assert query args in this mock.
         // At minimum we assert the call succeeds.
         $this->assertTrue($result['success']);
@@ -71,7 +71,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function read_user_requires_user_id(): void
     {
-        $result = SENTINEL_User_Manager::read_user([]);
+        $result = User_Manager::read_user([]);
         $this->assertFalse($result['success']);
         $this->assertEquals('user_id is required.', $result['message']);
     }
@@ -79,7 +79,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function read_user_returns_not_found_for_invalid_id(): void
     {
-        $result = SENTINEL_User_Manager::read_user(['user_id' => 99999]);
+        $result = User_Manager::read_user(['user_id' => 99999]);
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('not found', $result['message']);
     }
@@ -89,7 +89,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function create_user_requires_username(): void
     {
-        $result = SENTINEL_User_Manager::create_user(['email' => 'test@example.com']);
+        $result = User_Manager::create_user(['email' => 'test@example.com']);
         $this->assertFalse($result['success']);
         $this->assertEquals('Username is required.', $result['message']);
     }
@@ -97,7 +97,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function create_user_requires_email(): void
     {
-        $result = SENTINEL_User_Manager::create_user(['username' => 'testuser']);
+        $result = User_Manager::create_user(['username' => 'testuser']);
         $this->assertFalse($result['success']);
         $this->assertEquals('A valid email is required.', $result['message']);
     }
@@ -105,7 +105,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function create_user_rejects_invalid_email(): void
     {
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'testuser',
             'email'    => 'not-an-email',
         ]);
@@ -119,7 +119,7 @@ class UserManagerTest extends TestCase
         global $_wp_mock_users;
         $_wp_mock_users = ['existing' => ['id' => 1, 'email' => 'a@b.com']];
 
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'existing',
             'email'    => 'new@example.com',
         ]);
@@ -133,7 +133,7 @@ class UserManagerTest extends TestCase
         global $_wp_mock_users;
         $_wp_mock_users = ['existing' => ['id' => 1, 'email' => 'dup@example.com']];
 
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'newuser',
             'email'    => 'dup@example.com',
         ]);
@@ -144,7 +144,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function create_user_generates_password_when_not_provided(): void
     {
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'autopass',
             'email'    => 'autopass@example.com',
         ]);
@@ -155,7 +155,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function create_user_uses_provided_password(): void
     {
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'manualpass',
             'email'    => 'manual@example.com',
             'password' => 'secret123',
@@ -167,7 +167,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function create_user_defaults_to_subscriber_role(): void
     {
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'defaultrole',
             'email'    => 'role@example.com',
         ]);
@@ -181,7 +181,7 @@ class UserManagerTest extends TestCase
         global $_wp_current_user_caps;
         $_wp_current_user_caps = ['manage_options' => false];
 
-        $result = SENTINEL_User_Manager::create_user([
+        $result = User_Manager::create_user([
             'username' => 'hacker',
             'email'    => 'hacker@example.com',
             'role'     => 'administrator',
@@ -195,7 +195,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function update_user_requires_user_id(): void
     {
-        $result = SENTINEL_User_Manager::update_user([]);
+        $result = User_Manager::update_user([]);
         $this->assertFalse($result['success']);
         $this->assertEquals('user_id is required.', $result['message']);
     }
@@ -203,7 +203,7 @@ class UserManagerTest extends TestCase
     /** @test */
     public function update_user_returns_not_found_for_invalid_id(): void
     {
-        $result = SENTINEL_User_Manager::update_user(['user_id' => 99999]);
+        $result = User_Manager::update_user(['user_id' => 99999]);
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('not found', $result['message']);
     }
@@ -219,7 +219,7 @@ class UserManagerTest extends TestCase
             'roles'    => ['editor'],
         ];
 
-        $result = SENTINEL_User_Manager::update_user([
+        $result = User_Manager::update_user([
             'user_id' => 5,
             'role'    => 'subscriber',
         ]);
@@ -238,7 +238,7 @@ class UserManagerTest extends TestCase
             'roles'    => ['editor'],
         ];
 
-        $result = SENTINEL_User_Manager::update_user([
+        $result = User_Manager::update_user([
             'user_id' => 7,
             'role'    => 'administrator',
         ]);
@@ -256,7 +256,7 @@ class UserManagerTest extends TestCase
             'roles'    => ['subscriber'],
         ];
 
-        $result = SENTINEL_User_Manager::update_user(['user_id' => 3]);
+        $result = User_Manager::update_user(['user_id' => 3]);
         $this->assertFalse($result['success']);
         $this->assertEquals('No fields to update.', $result['message']);
     }
@@ -272,7 +272,7 @@ class UserManagerTest extends TestCase
             'roles'      => ['subscriber'],
         ];
 
-        $result = SENTINEL_User_Manager::update_user([
+        $result = User_Manager::update_user([
             'user_id' => 4,
             'email'   => 'new@example.com',
         ]);
@@ -297,7 +297,7 @@ class UserManagerTest extends TestCase
             'custom_key'     => ['value'],
         ];
 
-        $result = SENTINEL_User_Manager::read_user(['user_id' => 10]);
+        $result = User_Manager::read_user(['user_id' => 10]);
         $this->assertTrue($result['success']);
         $this->assertArrayHasKey('meta', $result);
         $this->assertArrayHasKey('nickname', $result['meta']);
@@ -321,7 +321,7 @@ class UserManagerTest extends TestCase
             'visible_key'           => ['shown'],
         ];
 
-        $result = SENTINEL_User_Manager::read_user(['user_id' => 11]);
+        $result = User_Manager::read_user(['user_id' => 11]);
         $this->assertTrue($result['success']);
         $this->assertArrayNotHasKey('_transient_foo', $result['meta']);
         $this->assertArrayNotHasKey('_site_transient_bar', $result['meta']);

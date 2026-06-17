@@ -101,6 +101,9 @@ When you notice any of the following in existing code, **explicitly flag it to t
 - **New REST endpoints** must include a test for the `permission_callback` and happy path
 - **Run `php -l`** on modified files before considering work complete
 - **Prefer testable code**: Avoid global state; use dependency injection or static factory methods that can be mocked
+- php is located in c:\php
+- phpunit extension in install and in composer
+
 
 ## Experimental API Awareness
 
