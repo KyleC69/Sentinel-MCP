@@ -37,5 +37,5 @@ jobs:
       - name: Upload ZIP to GitHub Packages
         uses: actions/upload-artifact@v4
         with:
-          name: plugin-${{ env.VERSION }}
-          path: dist/plugin-${{ env.VERSION }}.zip
+          name: Sentinel-MCP plugin-${{ env.VERSION }}
+          path: dist/sentinel-mcp-${{ env.VERSION }}.zip
