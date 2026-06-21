@@ -159,7 +159,7 @@ List every installed plugin and activate or deactivate them.
 
 ### Trust, Observability & Rate Limiting
 
-- Activity Log with 30-day retention and paginated admin viewer
+- Activity Audit trail with 30-day retention and paginated admin viewer
 - Hourly and daily rate limits per `client_id`
 - MCP annotations on every ability
 - Public `/wp-json/sentinel/v1/health` endpoint
@@ -170,11 +170,12 @@ List every installed plugin and activate or deactivate them.
 - Connect tab with config exporter for 6+ AI clients
 - Prompts gallery (30+ curated prompts)
 - "Detected on this site" badges in Status
-- Spanish translation bundled
+- Status of AI connectors pkgd separately shown in admin
+- Debug logging separate from php
 
 ---
 
-## AI Mode (Built-In Chat)
+## AI Mode (Built-In Chat) - MCP server free no-hassle AI interface for site maintenance
 
 When running WordPress 7.0+, Sentinel-MCP includes a **fullscreen AI chat** directly in the WordPress admin. Talk to your site’s AI assistant without leaving the dashboard. Supports multiple providers via the WordPress Connectors API:
 
@@ -183,6 +184,7 @@ When running WordPress 7.0+, Sentinel-MCP includes a **fullscreen AI chat** dire
 - Google Gemini
 - OpenRouter
 - **Ollama Cloud** (local or hosted)
+- Providers supplied as WP plugins many options available
 
 ---
 
