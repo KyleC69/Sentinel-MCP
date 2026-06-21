@@ -20,12 +20,12 @@ jobs:
       - name: Generate ZIP file
         run: |
           mkdir -p dist
-          zip -r "dist/sentinel-mcp-${VERSION}.zip" sentinel-mcp docs
+          zip -r "dist/sentinel-mcp-${VERSION}.zip" sentinel-mcp
 
       - name: Create tag
         run: git tag "v${VERSION}" && git push origin "v${VERSION}"
 
-        - name: Create GitHub Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.VERSION }}
