@@ -1,18 +1,19 @@
 <?php
+
 /**
  * MCP HTTP Transport for WordPress (MCP 2025-11-25 baseline)
  *
  * This transport implements the MCP HTTP transport surface used by this plugin.
  * It can work both with and without the mcp-wordpress-remote proxy.
  *
- * Note: SSE (GET streaming) is not yet implemented; GET currently returns 405.
+ *
  * SSE TRANSPORT HAS BEEN ADDED TO THIS VENDOR FILE BY A THIRD PARTY: KYLE L CROWDER
  * @author: 	KYLE L. CROWDER KCROWDERGOOG@GMAIL.COM
  *
  * @package McpAdapter
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace WP\MCP\Transport;
 
@@ -22,14 +23,9 @@ use WP\MCP\Transport\Infrastructure\HttpRequestHandler;
 use WP\MCP\Transport\Infrastructure\McpTransportContext;
 use WP\MCP\Transport\Infrastructure\McpTransportHelperTrait;
 
-/**
- * MCP HTTP Transport - Unified transport for both proxy and direct clients
- *
- * Implements the MCP 2025-11-25 HTTP transport shape used by this adapter (POST + sessions).
- *
- * Note: SSE (GET streaming) is not yet implemented; GET currently returns 405.
- */
-class HttpTransport implements McpRestTransportInterface {
+
+class HttpTransport implements McpRestTransportInterface
+{
 	use McpTransportHelperTrait;
 
 	/**
@@ -44,15 +40,17 @@ class HttpTransport implements McpRestTransportInterface {
 	 *
 	 * @param \WP\MCP\Transport\Infrastructure\McpTransportContext $transport_context The transport context.
 	 */
-	public function __construct( McpTransportContext $transport_context ) {
-		$this->request_handler = new HttpRequestHandler( $transport_context );
-		add_action( 'rest_api_init', array( $this, 'register_routes' ), 16 );
+	public function __construct(McpTransportContext $transport_context)
+	{
+		$this->request_handler = new HttpRequestHandler($transport_context);
+		add_action('rest_api_init', array($this, 'register_routes'), 16);
 	}
 
 	/**
 	 * Register MCP HTTP routes
 	 */
-	public function register_routes(): void {
+	public function register_routes(): void
+	{
 		// Get server info from request handler's transport context
 		$server = $this->request_handler->get_transport_context()->mcp_server;
 
@@ -62,9 +60,9 @@ class HttpTransport implements McpRestTransportInterface {
 			$server->get_server_route_namespace(),
 			$server->get_server_route(),
 			array(
-				'methods'             => array( 'POST', 'GET', 'DELETE' ),
-				'callback'            => array( $this, 'handle_request' ),
-				'permission_callback' => array( $this, 'check_permission' ),
+				'methods'             => array('POST', 'GET', 'DELETE'),
+				'callback'            => array($this, 'handle_request'),
+				'permission_callback' => array($this, 'check_permission'),
 			)
 		);
 	}
@@ -76,18 +74,19 @@ class HttpTransport implements McpRestTransportInterface {
 	 *
 	 * @return bool True if the user has permission, false otherwise.
 	 */
-	public function check_permission( \WP_REST_Request $request ) {
-		$context = new HttpRequestContext( $request );
+	public function check_permission(\WP_REST_Request $request)
+	{
+		$context = new HttpRequestContext($request);
 
 		// Check permission using callback or default
 		$transport_context = $this->request_handler->get_transport_context();
 
-		if ( null !== $transport_context->transport_permission_callback ) {
+		if (null !== $transport_context->transport_permission_callback) {
 			try {
-				$result = call_user_func( $transport_context->transport_permission_callback, $context->request );
+				$result = call_user_func($transport_context->transport_permission_callback, $context->request);
 
 				// Handle WP_Error returns
-				if ( ! is_wp_error( $result ) ) {
+				if (! is_wp_error($result)) {
 					// Cast to bool to match return type while preserving truthy/falsy semantics.
 					return (bool) $result;
 				}
@@ -95,13 +94,13 @@ class HttpTransport implements McpRestTransportInterface {
 				// Log the error and deny access (fail-closed)
 				$this->request_handler->get_transport_context()->error_handler->log(
 					'Permission callback returned WP_Error: ' . $result->get_error_message(),
-					array( 'HttpTransport::check_permission' )
+					array('HttpTransport::check_permission')
 				);
 
 				return false;
-			} catch ( \Throwable $e ) {
+			} catch (\Throwable $e) {
 				// Log the error and deny access (fail-closed)
-				$this->request_handler->get_transport_context()->error_handler->log( 'Error in transport permission callback: ' . $e->getMessage(), array( 'HttpTransport::check_permission' ) );
+				$this->request_handler->get_transport_context()->error_handler->log('Error in transport permission callback: ' . $e->getMessage(), array('HttpTransport::check_permission'));
 
 				return false;
 			}
@@ -118,20 +117,20 @@ class HttpTransport implements McpRestTransportInterface {
 		 * @param string                                        $capability The required capability. Default 'read'.
 		 * @param \WP\MCP\Transport\Infrastructure\HttpRequestContext $context    The HTTP request context.
 		 */
-		$user_capability = apply_filters( 'mcp_adapter_default_transport_permission_user_capability', 'read', $context );
+		$user_capability = apply_filters('mcp_adapter_default_transport_permission_user_capability', 'read', $context);
 
 		// Validate that the filtered capability is a non-empty string
-		if ( ! is_string( $user_capability ) || empty( $user_capability ) ) {
+		if (! is_string($user_capability) || empty($user_capability)) {
 			$user_capability = 'read';
 		}
 
-		$user_has_capability = current_user_can( $user_capability ); // phpcs:ignore WordPress.WP.Capabilities.Undetermined -- Capability is filtered and defaults to 'read'
+		$user_has_capability = current_user_can($user_capability); // phpcs:ignore WordPress.WP.Capabilities.Undetermined -- Capability is filtered and defaults to 'read'
 
-		if ( ! $user_has_capability ) {
+		if (! $user_has_capability) {
 			$user_id = get_current_user_id();
 			$this->request_handler->get_transport_context()->error_handler->log(
-				sprintf( 'Permission denied for MCP API access. User ID %d does not have capability "%s"', $user_id, $user_capability ),
-				array( 'HttpTransport::check_permission' )
+				sprintf('Permission denied for MCP API access. User ID %d does not have capability "%s"', $user_id, $user_capability),
+				array('HttpTransport::check_permission')
 			);
 		}
 

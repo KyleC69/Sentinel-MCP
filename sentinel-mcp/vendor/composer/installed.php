@@ -1,4 +1,4 @@
-<?php\nreturn array(
+<?php return array(
     'root' => array(
         'name' => 'joseconti/mcp-sentinel',
         'pretty_version' => 'dev-main',

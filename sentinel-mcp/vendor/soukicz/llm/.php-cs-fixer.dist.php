@@ -1,4 +1,6 @@
-<?php\n$finder = PhpCsFixer\Finder::create()
+<?php
+
+$finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
     ->exclude(['vendor', 'node_modules'])
     ->name('*.php');

@@ -1,4 +1,6 @@
-<?php\nif (!function_exists('getallheaders')) {
+<?php
+
+if (!function_exists('getallheaders')) {
 
     /**
      * Get all HTTP header key/values as an associative array for the current request.

@@ -1,0 +1,85 @@
+{
+    "name": "kylec69/sentinel-mcp",
+    "description": "Sentinel-MCP WordPress plugin — MCP server exposing 40+ abilities for content management, media, users, system info, WooCommerce, SEO, i18n, and more.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "readme": "readme.txt",
+    "source": {
+        "reference": "",
+        "type": "git",
+        "url": "https://github.com/kylec69/sentinel-mcp"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/KyleC69"
+        }
+    ],
+    "authors": [
+        {
+            "name": "Kyle L Crowder",
+            "email": "kcrowdergoog@gmail.com",
+            "homepage": "https://kylec69.github.io/Sentinel-MCP",
+            "role": "Developer"
+        },
+        {
+            "name":"Jose Conti",
+            "homepage": "https://plugins.joseconti.com/en/product/sentinel-mcp/",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "guzzlehttp/guzzle": "^7.8",
+        "ramsey/uuid": "^4.7",
+        "soukicz/llm": "^0.1",
+        "swaggest/json-schema": "^0.12",
+        "symfony/polyfill-php83": "^1.28",
+        "wordpress/mcp-adapter": "^0.5.0"
+    },
+    "autoload": {
+        "files": [
+            "includes/helpers.php",
+            "includes/abilities-discovery.php",
+            "includes/abilities-discovery-extended.php",
+            "includes/abilities-universal-crud.php",
+            "includes/abilities-gutenberg-reference.php",
+            "includes/abilities-recovery.php",
+            "includes/abilities-media.php",
+            "includes/abilities-options.php",
+            "includes/abilities-comments.php",
+            "includes/abilities-users.php",
+            "includes/abilities-taxonomy.php",
+            "includes/abilities-theme-mods.php",
+            "includes/abilities-system-info.php",
+            "includes/abilities-system-extended.php",
+            "includes/abilities-i18n-read.php",
+            "includes/abilities-image-generation.php",
+            "includes/abilities-menus-widgets-read.php",
+            "includes/abilities-fse-read.php",
+            "includes/abilities-content-shortcuts.php",
+            "includes/abilities-stats.php",
+            "includes/abilities-seo-read.php",
+            "includes/abilities-wc-read.php",
+            "includes/abilities-premium-features.php"
+        ],
+        "psr-4": {
+            "SentinelMCP\\": "includes/"
+        },
+        "classmap": [
+            "includes/",
+            "includes/admin/",
+            "includes/chat/",
+            "includes/oauth/",
+            "includes/i18n/",
+            "includes/seo/",
+            "includes/Collectors/",
+            "includes/Logging/"
+        ]
+    },
+    "config": {
+        "vendor-dir": "vendor",
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

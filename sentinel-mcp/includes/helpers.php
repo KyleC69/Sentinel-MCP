@@ -1,13 +1,15 @@
 <?php
+
 /**
- * Helper functions for the AI plugin.
+ * Helper functions for AI Providers Information
  *
- * @package WordPress\AI
+ * @package Sentinel-MCP
+ *
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
-namespace WordPress\AI;
+namespace SentinelMCP;
 
 use Throwable;
 use WordPress\AI\Services\AI_Service;
@@ -22,7 +24,7 @@ use WordPress\AiClient\AiClient;
  * our composer autoloader and that will then load this file,
  * causing the script to exit and not function properly.
  */
-if ( ! defined( 'ABSPATH' ) ) {
+if (! defined('ABSPATH')) {
 	return;
 }
 
@@ -34,7 +36,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $content The content to normalize.
  * @return string The normalized content.
  */
-function normalize_content( string $content ): string {
+function normalize_content(string $content): string
+{
 	/**
 	 * Hook to filter content before cleaning it.
 	 *
@@ -44,22 +47,22 @@ function normalize_content( string $content ): string {
 	 *
 	 * @return string The filtered Post content.
 	 */
-	$content = (string) apply_filters( 'wpai_pre_normalize_content', $content );
+	$content = (string) apply_filters('wpai_pre_normalize_content', $content);
 
 	// Strip HTML entities.
-	$content = preg_replace( '/&#?[a-z0-9]{2,8};/i', '', $content ) ?? $content;
+	$content = preg_replace('/&#?[a-z0-9]{2,8};/i', '', $content) ?? $content;
 
 	// Replace HTML linebreaks with newlines.
-	$content = preg_replace( '#<br\s?/?>#', "\n\n", $content ) ?? $content;
+	$content = preg_replace('#<br\s?/?>#', "\n\n", $content) ?? $content;
 
 	// Remove linebreaks but replace with spaces to avoid sentences running together.
-	$content = str_replace( array( "\r", "\n" ), ' ', (string) $content );
+	$content = str_replace(array("\r", "\n"), ' ', (string) $content);
 
 	// Strip all HTML tags.
-	$content = wp_strip_all_tags( (string) $content );
+	$content = wp_strip_all_tags((string) $content);
 
 	// Remove unrendered shortcode tags.
-	$content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $content ) ?? $content;
+	$content = preg_replace('#\[.+\](.+)\[/.+\]#', '$1', $content) ?? $content;
 
 	/**
 	 * Filters the normalized content to allow for additional cleanup.
@@ -70,9 +73,9 @@ function normalize_content( string $content ): string {
 	 *
 	 * @return string The filtered normalized content.
 	 */
-	$content = (string) apply_filters( 'wpai_normalize_content', (string) $content );
+	$content = (string) apply_filters('wpai_normalize_content', (string) $content);
 
-	return trim( $content );
+	return trim($content);
 }
 
 /**
@@ -85,9 +88,10 @@ function normalize_content( string $content ): string {
  * @param string $text The text to count words in.
  * @return int The number of words.
  */
-function count_words( string $text ): int {
-	$text = trim( $text );
-	if ( '' === $text ) {
+function count_words(string $text): int
+{
+	$text = trim($text);
+	if ('' === $text) {
 		return 0;
 	}
 
@@ -96,11 +100,11 @@ function count_words( string $text ): int {
 	 * character is counted individually.
 	 */
 	$cjk_pattern = '/([\x{2E80}-\x{9FFF}\x{F900}-\x{FAFF}\x{FE30}-\x{FE4F}\x{20000}-\x{2FA1F}\x{3040}-\x{309F}\x{30A0}-\x{30FF}])/u';
-	$text        = preg_replace( $cjk_pattern, ' $1 ', $text ) ?? $text;
-	$text        = trim( preg_replace( '/\s+/u', ' ', $text ) ?? $text );
-	$words       = preg_split( '/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY );
+	$text        = preg_replace($cjk_pattern, ' $1 ', $text) ?? $text;
+	$text        = trim(preg_replace('/\s+/u', ' ', $text) ?? $text);
+	$words       = preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY);
 
-	return is_array( $words ) ? count( $words ) : 0;
+	return is_array($words) ? count($words) : 0;
 }
 
 /**
@@ -111,48 +115,49 @@ function count_words( string $text ): int {
  * @param int $post_id The ID of the post to get the context for.
  * @return array<string, string> The context for the given post ID.
  */
-function get_post_context( int $post_id ): array {
+function get_post_context(int $post_id): array
+{
 	$context = array();
 
 	// Get the post details using the get-post-details ability.
-	$details_ability = wp_get_ability( 'ai/get-post-details' );
-	if ( $details_ability ) {
-		$details = $details_ability->execute( array( 'post_id' => $post_id ) );
+	$details_ability = wp_get_ability('ai/get-post-details');
+	if ($details_ability) {
+		$details = $details_ability->execute(array('post_id' => $post_id));
 
-		if ( is_array( $details ) ) {
-			$context = array_merge( $context, $details );
+		if (is_array($details)) {
+			$context = array_merge($context, $details);
 
-			if ( isset( $context['content'] ) ) {
+			if (isset($context['content'])) {
 				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
-				$context['content'] = normalize_content( (string) apply_filters( 'the_content', $context['content'] ) );
+				$context['content'] = normalize_content((string) apply_filters('the_content', $context['content']));
 			}
 
-			if ( isset( $context['type'] ) ) {
+			if (isset($context['type'])) {
 				$context['content_type'] = $context['type'];
-				unset( $context['type'] );
+				unset($context['type']);
 			}
 
 			// Remove any empty context values.
-			$context = array_filter( $context );
+			$context = array_filter($context);
 		}
 	}
 
 	// Get the post terms using the get-terms ability.
-	$terms_ability = wp_get_ability( 'ai/get-post-terms' );
-	if ( $terms_ability ) {
-		$terms = $terms_ability->execute( array( 'post_id' => $post_id ) );
+	$terms_ability = wp_get_ability('ai/get-post-terms');
+	if ($terms_ability) {
+		$terms = $terms_ability->execute(array('post_id' => $post_id));
 
-		if ( $terms && ! is_wp_error( $terms ) ) {
+		if ($terms && ! is_wp_error($terms)) {
 			$grouped_terms = array();
 
-			foreach ( $terms as $term ) {
-				$grouped_terms[ $term->taxonomy ][] = $term->name;
+			foreach ($terms as $term) {
+				$grouped_terms[$term->taxonomy][] = $term->name;
 			}
 
 			$context = array_merge(
 				$context,
 				array_map(
-					static fn( array $term_names ): string => implode( ', ', $term_names ),
+					static fn(array $term_names): string => implode(', ', $term_names),
 					$grouped_terms
 				)
 			);
@@ -169,7 +174,8 @@ function get_post_context( int $post_id ): array {
  *
  * @return array<int, array{string, string}> The preferred models for text generation.
  */
-function get_preferred_models_for_text_generation(): array {
+function get_preferred_models_for_text_generation(): array
+{
 	$preferred_models = array(
 		array(
 			'anthropic',
@@ -201,7 +207,7 @@ function get_preferred_models_for_text_generation(): array {
 	 * @param array<int, array{string, string}> $preferred_models The preferred models for text generation.
 	 * @return array<int, array{string, string}> The filtered preferred models.
 	 */
-	return (array) apply_filters( 'wpai_preferred_text_models', $preferred_models );
+	return (array) apply_filters('wpai_preferred_text_models', $preferred_models);
 }
 
 /**
@@ -236,7 +242,8 @@ function get_preferred_models_for_text_generation(): array {
  *
  * @return \WordPress\AI\Services\AI_Service The AI Service instance.
  */
-function get_ai_service(): AI_Service {
+function get_ai_service(): AI_Service
+{
 	return AI_Service::get_instance();
 }
 
@@ -247,7 +254,8 @@ function get_ai_service(): AI_Service {
  *
  * @return array<int, array{string, string}> The preferred image models.
  */
-function get_preferred_image_models(): array {
+function get_preferred_image_models(): array
+{
 	$preferred_models = array(
 		array(
 			'google',
@@ -283,7 +291,7 @@ function get_preferred_image_models(): array {
 	 * @param array<int, array{string, string}> $preferred_models The preferred image models.
 	 * @return array<int, array{string, string}> The filtered preferred image models.
 	 */
-	return (array) apply_filters( 'wpai_preferred_image_models', $preferred_models );
+	return (array) apply_filters('wpai_preferred_image_models', $preferred_models);
 }
 
 /**
@@ -293,7 +301,8 @@ function get_preferred_image_models(): array {
  *
  * @return array<int, array{string, string}> The preferred vision models.
  */
-function get_preferred_vision_models(): array {
+function get_preferred_vision_models(): array
+{
 	$preferred_models = array(
 		array(
 			'anthropic',
@@ -325,7 +334,7 @@ function get_preferred_vision_models(): array {
 	 * @param array<int, array{string, string}> $preferred_models The preferred vision models.
 	 * @return array<int, array{string, string}> The filtered preferred vision models.
 	 */
-	return (array) apply_filters( 'wpai_preferred_vision_models', $preferred_models );
+	return (array) apply_filters('wpai_preferred_vision_models', $preferred_models);
 }
 
 /**
@@ -336,11 +345,12 @@ function get_preferred_vision_models(): array {
  * @param string $feature_id The feature ID (e.g. 'excerpt-generation').
  * @return array{provider: string, model: string} The saved provider and model, or empty strings if unset.
  */
-function get_feature_developer_model_config( string $feature_id ): array {
-	$option = get_option( "wpai_feature_{$feature_id}_field_developer", array() );
+function get_feature_developer_model_config(string $feature_id): array
+{
+	$option = get_option("wpai_feature_{$feature_id}_field_developer", array());
 	return array(
-		'provider' => is_array( $option ) ? ( $option['provider'] ?? '' ) : '',
-		'model'    => is_array( $option ) ? ( $option['model'] ?? '' ) : '',
+		'provider' => is_array($option) ? ($option['provider'] ?? '') : '',
+		'model'    => is_array($option) ? ($option['model'] ?? '') : '',
 	);
 }
 
@@ -352,8 +362,9 @@ function get_feature_developer_model_config( string $feature_id ): array {
  * @param string|null $category Optional. Guideline category to retrieve.
  * @return array<string, string>|null Keyed array of guidelines, or null when unavailable.
  */
-function get_guidelines( ?string $category = null ): ?array {
-	return Guidelines::get_instance()->get_guidelines( $category );
+function get_guidelines(?string $category = null): ?array
+{
+	return Guidelines::get_instance()->get_guidelines($category);
 }
 
 /**
@@ -365,8 +376,9 @@ function get_guidelines( ?string $category = null ): ?array {
  * @param string|null  $block_name Optional block name for block-specific guidelines.
  * @return string Formatted guidelines XML string, or empty string.
  */
-function format_guidelines_for_prompt( array $categories, ?string $block_name = null ): string {
-	return Guidelines::get_instance()->format_for_prompt( $categories, $block_name );
+function format_guidelines_for_prompt(array $categories, ?string $block_name = null): string
+{
+	return Guidelines::get_instance()->format_for_prompt($categories, $block_name);
 }
 
 /**
@@ -377,9 +389,10 @@ function format_guidelines_for_prompt( array $categories, ?string $block_name = 
  * @param string $connector_id The connector ID.
  * @return bool True if the connector is configured, false otherwise.
  */
-function is_connector_configured( string $connector_id ): bool {
+function is_connector_configured(string $connector_id): bool
+{
 	$registry = AiClient::defaultRegistry();
-	return $registry->hasProvider( $connector_id ) && $registry->isProviderConfigured( $connector_id );
+	return $registry->hasProvider($connector_id) && $registry->isProviderConfigured($connector_id);
 }
 
 /**
@@ -393,23 +406,24 @@ function is_connector_configured( string $connector_id ): bool {
  * @param string $connector_id The connector ID.
  * @return bool True if connector authentication is present, false otherwise.
  */
-function has_connector_authentication( string $connector_id ): bool {
-	if ( ! wp_is_connector_registered( $connector_id ) ) {
+function has_connector_authentication(string $connector_id): bool
+{
+	if (! wp_is_connector_registered($connector_id)) {
 		return false;
 	}
 
-	$connector = wp_get_connector( $connector_id );
-	if ( ! is_array( $connector ) ) {
+	$connector = wp_get_connector($connector_id);
+	if (! is_array($connector)) {
 		return false;
 	}
 
 	$auth = $connector['authentication'] ?? null;
-	if ( ! is_array( $auth ) || ( $auth['method'] ?? '' ) !== 'api_key' ) {
+	if (! is_array($auth) || ($auth['method'] ?? '') !== 'api_key') {
 		return false;
 	}
 
 	$setting_name = $auth['setting_name'] ?? '';
-	if ( ! is_string( $setting_name ) || '' === $setting_name ) {
+	if (! is_string($setting_name) || '' === $setting_name) {
 		return false;
 	}
 
@@ -432,23 +446,24 @@ function has_connector_authentication( string $connector_id ): bool {
  * @param string $constant_name Optional PHP constant name.
  * @return string The key source: 'env', 'constant', 'database', or 'none'.
  */
-function get_connector_api_key_source( string $setting_name, string $env_var_name = '', string $constant_name = '' ): string {
-	if ( '' !== $env_var_name ) {
-		$env_value = getenv( $env_var_name );
-		if ( false !== $env_value && '' !== $env_value ) {
+function get_connector_api_key_source(string $setting_name, string $env_var_name = '', string $constant_name = ''): string
+{
+	if ('' !== $env_var_name) {
+		$env_value = getenv($env_var_name);
+		if (false !== $env_value && '' !== $env_value) {
 			return 'env';
 		}
 	}
 
-	if ( '' !== $constant_name && defined( $constant_name ) ) {
-		$const_value = constant( $constant_name );
-		if ( is_string( $const_value ) && '' !== $const_value ) {
+	if ('' !== $constant_name && defined($constant_name)) {
+		$const_value = constant($constant_name);
+		if (is_string($const_value) && '' !== $const_value) {
 			return 'constant';
 		}
 	}
 
-	$db_value = get_option( $setting_name, '' );
-	if ( '' !== $db_value ) {
+	$db_value = get_option($setting_name, '');
+	if ('' !== $db_value) {
 		return 'database';
 	}
 
@@ -462,17 +477,18 @@ function get_connector_api_key_source( string $setting_name, string $env_var_nam
  *
  * @return bool True if we have AI credentials, false otherwise.
  */
-function has_ai_credentials(): bool {
+function has_ai_credentials(): bool
+{
 	$connectors      = get_ai_connectors();
 	$has_credentials = false;
 
-	foreach ( $connectors as $connector_id => $connector_data ) {
+	foreach ($connectors as $connector_id => $connector_data) {
 		$auth = $connector_data['authentication'];
-		if ( 'api_key' !== $auth['method'] ) {
+		if ('api_key' !== $auth['method']) {
 			continue;
 		}
 
-		if ( ! has_connector_authentication( $connector_id ) ) {
+		if (! has_connector_authentication($connector_id)) {
 			continue;
 		}
 
@@ -491,7 +507,7 @@ function has_ai_credentials(): bool {
 	 * @param bool  $has_credentials Whether AI credentials are available.
 	 * @param array $connectors      The registered connectors.
 	 */
-	return (bool) apply_filters( 'wpai_has_ai_credentials', $has_credentials, $connectors );
+	return (bool) apply_filters('wpai_has_ai_credentials', $has_credentials, $connectors);
 }
 
 /**
@@ -501,10 +517,11 @@ function has_ai_credentials(): bool {
  *
  * @return array{hasProvider: bool, connectorsUrl: string} Provider availability data.
  */
-function get_provider_availability_data(): array {
+function get_provider_availability_data(): array
+{
 	return array(
 		'hasProvider'   => has_ai_credentials(),
-		'connectorsUrl' => admin_url( 'options-connectors.php' ),
+		'connectorsUrl' => admin_url('options-connectors.php'),
 	);
 }
 
@@ -515,9 +532,10 @@ function get_provider_availability_data(): array {
  *
  * @return bool True if we have valid AI credentials, false otherwise.
  */
-function has_valid_ai_credentials(): bool {
+function has_valid_ai_credentials(): bool
+{
 	// If we have no AI credentials, return false.
-	if ( ! has_ai_credentials() ) {
+	if (! has_ai_credentials()) {
 		return false;
 	}
 
@@ -531,15 +549,15 @@ function has_valid_ai_credentials(): bool {
 	 * @param bool|null $has_valid_credentials Whether valid credentials are available. Return null to use default check.
 	 * @return bool|null True if valid credentials are available, false otherwise, or null to use default check.
 	 */
-	$valid = apply_filters( 'wpai_pre_has_valid_credentials_check', null );
-	if ( null !== $valid ) {
+	$valid = apply_filters('wpai_pre_has_valid_credentials_check', null);
+	if (null !== $valid) {
 		return (bool) $valid;
 	}
 
 	// See if we have credentials that give us access to generate text.
 	try {
-		return wp_ai_client_prompt( 'Test' )->is_supported_for_text_generation();
-	} catch ( Throwable $t ) {
+		return wp_ai_client_prompt('Test')->is_supported_for_text_generation();
+	} catch (Throwable $t) {
 		return false;
 	}
 }
@@ -552,23 +570,24 @@ function has_valid_ai_credentials(): bool {
  * @param bool $active_only Whether to only return active connectors.
  * @return array<string, array<string, mixed>> The AI connectors.
  */
-function get_ai_connectors( bool $active_only = true ): array {
+function get_ai_connectors(bool $active_only = true): array
+{
 	$connectors = array();
 
-	foreach ( (array) wp_get_connectors() as $connector_id => $data ) {
-		if ( ! is_string( $connector_id ) || ! is_array( $data ) ) {
+	foreach ((array) wp_get_connectors() as $connector_id => $data) {
+		if (! is_string($connector_id) || ! is_array($data)) {
 			continue;
 		}
 
-		if ( ( $data['type'] ?? '' ) !== 'ai_provider' ) {
+		if (($data['type'] ?? '') !== 'ai_provider') {
 			continue;
 		}
 
-		if ( $active_only && ! is_connector_plugin_active( $data ) ) {
+		if ($active_only && ! is_connector_plugin_active($data)) {
 			continue;
 		}
 
-		$connectors[ $connector_id ] = $data;
+		$connectors[$connector_id] = $data;
 	}
 
 	return $connectors;
@@ -584,32 +603,101 @@ function get_ai_connectors( bool $active_only = true ): array {
  * @param array<string, mixed> $connector_data Connector metadata.
  * @return bool True if the connector plugin is active or unknown, false if known inactive.
  */
-function is_connector_plugin_active( array $connector_data ): bool {
-	if ( empty( $connector_data['plugin'] ) || ! is_array( $connector_data['plugin'] ) ) {
+function is_connector_plugin_active(array $connector_data): bool
+{
+	if (empty($connector_data['plugin']) || ! is_array($connector_data['plugin'])) {
 		return true;
 	}
 
 	$plugin_file = '';
 
-	if ( ! empty( $connector_data['plugin']['file'] ) && is_string( $connector_data['plugin']['file'] ) ) {
+	if (! empty($connector_data['plugin']['file']) && is_string($connector_data['plugin']['file'])) {
 		$plugin_file = $connector_data['plugin']['file'];
-	} elseif ( ! empty( $connector_data['plugin']['plugin_file'] ) && is_string( $connector_data['plugin']['plugin_file'] ) ) {
+	} elseif (! empty($connector_data['plugin']['plugin_file']) && is_string($connector_data['plugin']['plugin_file'])) {
 		$plugin_file = $connector_data['plugin']['plugin_file'];
-	} elseif ( ! empty( $connector_data['plugin']['pluginFile'] ) && is_string( $connector_data['plugin']['pluginFile'] ) ) {
+	} elseif (! empty($connector_data['plugin']['pluginFile']) && is_string($connector_data['plugin']['pluginFile'])) {
 		$plugin_file = $connector_data['plugin']['pluginFile'];
 	}
 
-	if ( '' === $plugin_file ) {
+	if ('' === $plugin_file) {
 		return true;
 	}
 
-	if ( ! function_exists( 'is_plugin_active' ) ) {
+	if (! function_exists('is_plugin_active')) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
 
-	if ( is_plugin_active( $plugin_file ) ) {
+	if (is_plugin_active($plugin_file)) {
 		return true;
 	}
 
-	return is_multisite() && function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( $plugin_file );
+	return is_multisite() && function_exists('is_plugin_active_for_network') && is_plugin_active_for_network($plugin_file);
+}
+
+/**
+ * Build default MCP ability meta block with optional overrides.
+ *
+ * Centralises the duplicated `meta.mcp.annotations` structure used by
+ * every ability registration.  Accepts an optional map of annotation
+ * overrides so read-only, destructive, idempotent and open-world hints
+ * can be customised per ability without repeating the full tree.
+ *
+ * @since 2.0.3
+ *
+ * @param array<string,mixed> $overrides Optional. Key-value pairs to merge into the annotations.
+ * @return array<string,array<string,mixed>> The standard MCP meta block.
+ */
+function SENTINEL_ability_meta(array $overrides = []): array
+{
+	$defaults = [
+		'readOnlyHint'    => true,
+		'destructiveHint' => false,
+		'idempotentHint'  => true,
+		'openWorldHint'   => false,
+	];
+
+	return [
+		'mcp' => [
+			'public'      => true,
+			'annotations' => array_merge($defaults, $overrides),
+		],
+	];
+}
+
+/**
+ * Build a standard ability permission callback for a given capability.
+ *
+ * Eliminates the duplicated inline closure `function () { return current_user_can('...'); }`
+ * scattered across every ability file.
+ *
+ * @since 2.0.3
+ *
+ * @param string $capability WordPress capability slug (e.g. 'manage_options', 'upload_files').
+ * @return callable Closure that returns the result of current_user_can().
+ */
+function SENTINEL_ability_permission(string $capability): callable
+{
+	return static function () use ($capability): bool {
+		return current_user_can($capability);
+	};
+}
+
+/**
+ * Redact an email address for privacy.
+ *
+ * Converts jose@example.com → j***@example.com.
+ * Returns empty string if input is empty or has no @.
+ *
+ * @since 2.0.3
+ *
+ * @param string $email Raw email address.
+ * @return string Redacted email.
+ */
+function SENTINEL_redact_email(string $email): string
+{
+	if ('' === $email || false === strpos($email, '@')) {
+		return '';
+	}
+	list($local, $domain) = explode('@', $email, 2);
+	return ('' !== $local ? mb_substr($local, 0, 1) . '***' : '***') . '@' . $domain;
 }
