@@ -47,6 +47,13 @@ class OAuth_Authorize
 
 		// Only the authorization code flow is supported.
 		if ('code' !== $params['response_type']) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'      => 'unsupported_response_type',
+					'oauth_response_type' => $params['response_type'],
+					'oauth_client_id'  => $params['client_id'],
+				)
+			);
 			return new \WP_Error(
 				'unsupported_response_type',
 				'Only response_type=code is supported.',
@@ -54,9 +61,30 @@ class OAuth_Authorize
 			);
 		}
 
+		// client_id is required for the authorize endpoint.
+		if (empty($params['client_id'])) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'     => 'missing_client_id',
+					'oauth_params'    => $params,
+				)
+			);
+			return new \WP_Error(
+				'invalid_request',
+				'Missing required parameter: client_id.',
+				array('status' => 400)
+			);
+		}
+
 		// In production, client_id must be a real registered client ID.
 		$client = OAuth_DB::get_client_by_id($params['client_id']);
 		if (! $client) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'     => 'unknown_client_id',
+					'oauth_client_id' => $params['client_id'],
+				)
+			);
 			return new \WP_Error(
 				'invalid_client',
 				'Unknown client_id.',
@@ -142,6 +170,12 @@ class OAuth_Authorize
 		// In production, only look up by client_id (no name fallback).
 		$client = OAuth_DB::get_client_by_id($client_id_param);
 		if (! $client) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'     => 'post_unknown_client_id',
+					'oauth_client_id' => $client_id_param,
+				)
+			);
 			return new \WP_Error(
 				'invalid_client',
 				'Invalid client.',

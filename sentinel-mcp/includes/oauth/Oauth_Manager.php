@@ -86,6 +86,26 @@ class OAuth_Manager
         }
 
         if (! is_string($client_id) || '' === trim($client_id)) {
+            // If no explicit client_id was supplied and the option is empty,
+            // fall back to the most recently registered OAuth client so the
+            // auth flow can proceed after a fresh DCR.
+            if (null === $client_id) {
+                $clients = OAuth_DB::get_all_clients();
+                if (! empty($clients)) {
+                    $latest_client = reset($clients);
+                    if (! empty($latest_client['client_id'])) {
+                        update_option('sentinel_oauth_client_id', $latest_client['client_id'], false);
+                        return $latest_client['client_id'];
+                    }
+                }
+            }
+
+            sentinel_debug_log(
+                array(
+                    'oauth_error'     => 'manager_missing_client_id',
+                    'oauth_supplied'  => $client_id,
+                )
+            );
             return new \WP_Error('missing_client_id', 'client_id is required.', array('status' => 400));
         }
 
@@ -96,10 +116,30 @@ class OAuth_Manager
 
         $client_by_name = OAuth_DB::get_client_by_name($client_id);
         if ($client_by_name) {
-            update_option('sentinel_oauth_client_id', $client_by_name['client_id']);
+            update_option('sentinel_oauth_client_id', $client_by_name['client_id'], false);
             return $client_by_name['client_id'];
         }
 
+        // The supplied value is neither a valid client_id nor a client_name.
+        // If this was an implicit lookup (no explicit argument), try the most
+        // recently registered client as a recovery path.
+        if (null === $client_id) {
+            $clients = OAuth_DB::get_all_clients();
+            if (! empty($clients)) {
+                $latest_client = reset($clients);
+                if (! empty($latest_client['client_id'])) {
+                    update_option('sentinel_oauth_client_id', $latest_client['client_id'], false);
+                    return $latest_client['client_id'];
+                }
+            }
+        }
+
+        sentinel_debug_log(
+            array(
+                'oauth_error'     => 'manager_invalid_client_id',
+                'oauth_client_id' => $client_id,
+            )
+        );
         return new \WP_Error('invalid_client_id', 'Provided client_id does not correspond to a registered OAuth client.', array('status' => 400));
     }
 

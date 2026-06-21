@@ -60,6 +60,14 @@ class OAuth_Token
 		$code_verifier = sanitize_text_field($request->get_param('code_verifier') ?? '');
 
 		if (empty($code) || empty($client_id) || empty($code_verifier)) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'      => 'token_missing_params',
+					'oauth_has_code'   => ! empty($code),
+					'oauth_has_client' => ! empty($client_id),
+					'oauth_has_verifier' => ! empty($code_verifier),
+				)
+			);
 			return self::oauth_error('invalid_request', 'Missing required parameters: code, client_id, code_verifier.');
 		}
 
@@ -91,16 +99,37 @@ class OAuth_Token
 
 		// 5. Verify client_id matches (timing-safe comparison).
 		if (! hash_equals($resolved_code_client_id, $resolved_request_client_id)) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'              => 'token_client_mismatch',
+					'oauth_code_client_id'     => $resolved_code_client_id,
+					'oauth_request_client_id'  => $resolved_request_client_id,
+				)
+			);
 			return self::oauth_error('invalid_grant', $grant_error);
 		}
 
 		// 6. Verify redirect_uri matches (timing-safe comparison).
 		if (! hash_equals($code_row['redirect_uri'], $redirect_uri)) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'            => 'token_redirect_mismatch',
+					'oauth_code_redirect_uri' => $code_row['redirect_uri'],
+					'oauth_request_redirect' => $redirect_uri,
+				)
+			);
 			return self::oauth_error('invalid_grant', $grant_error);
 		}
 
 		// 7. PKCE verification (already timing-safe via hash_equals internally).
 		if (! self::verify_pkce($code_verifier, $code_row['code_challenge'], $code_row['code_challenge_method'])) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'                => 'token_pkce_failed',
+					'oauth_client_id'            => $client_id,
+					'oauth_code_challenge_method' => $code_row['code_challenge_method'],
+				)
+			);
 			return self::oauth_error('invalid_grant', $grant_error);
 		}
 
@@ -141,6 +170,13 @@ class OAuth_Token
 		$client_id     = sanitize_text_field($request->get_param('client_id') ?? '');
 
 		if (empty($refresh_token) || empty($client_id)) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'      => 'refresh_missing_params',
+					'oauth_has_refresh' => ! empty($refresh_token),
+					'oauth_has_client' => ! empty($client_id),
+				)
+			);
 			return self::oauth_error('invalid_request', 'Missing required parameters: refresh_token, client_id.');
 		}
 
@@ -148,11 +184,24 @@ class OAuth_Token
 		$token_row    = OAuth_DB::get_token_by_refresh_hash($refresh_hash);
 
 		if (! $token_row) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'     => 'refresh_token_not_found',
+					'oauth_client_id' => $client_id,
+				)
+			);
 			return self::oauth_error('invalid_grant', 'The provided refresh token is invalid, expired, or revoked.');
 		}
 
 		// Timing-safe comparison to prevent side-channel attacks.
 		if (! hash_equals($token_row['client_id'], $client_id)) {
+			sentinel_debug_log(
+				array(
+					'oauth_error'            => 'refresh_client_mismatch',
+					'oauth_token_client_id'  => $token_row['client_id'],
+					'oauth_request_client_id' => $client_id,
+				)
+			);
 			return self::oauth_error('invalid_grant', 'The provided refresh token is invalid, expired, or revoked.');
 		}
 

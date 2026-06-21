@@ -361,6 +361,14 @@ class OAuth_Server
 			);
 		}
 
+		// Keep the stored client_id in sync with the most recent successful DCR
+		// so downstream OAuth flows (callback, refresh, MCP adapter) use a valid
+		// registered client instead of a stale or legacy option value.
+		$stored_client_id = get_option('sentinel_oauth_client_id');
+		if (empty($stored_client_id) || ! OAuth_DB::get_client_by_id($stored_client_id)) {
+			update_option('sentinel_oauth_client_id', $client['client_id'], false);
+		}
+
 		$response_data = array(
 			'client_id'                  => $client['client_id'],
 			'client_name'                => $client['client_name'],

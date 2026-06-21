@@ -117,11 +117,7 @@ class Logger
             require_once ABSPATH . 'wp-admin/includes/file.php';
         }
 
-        $creds = request_filesystem_credentials('', '', false, false, null);
-        if (false === $creds || ! WP_Filesystem($creds)) {
-            error_log('Sentinel-MCP Logger: failed to obtain filesystem credentials for ' . $file);
-            return false;
-        }
+ 
 
         global $wp_filesystem;
         if (! is_object($wp_filesystem) || is_wp_error($wp_filesystem) || ! method_exists($wp_filesystem, 'put_contents')) {

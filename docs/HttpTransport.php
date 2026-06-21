@@ -6,7 +6,7 @@
  * This transport implements the MCP HTTP transport surface used by this plugin.
  * It can work both with and without the mcp-wordpress-remote proxy.
  *
- * Note: SSE (GET streaming) is not yet implemented; GET currently returns 405.
+ * 
  * SSE TRANSPORT HAS BEEN ADDED TO THIS VENDOR FILE BY A THIRD PARTY: KYLE L CROWDER
  * @author: 	KYLE L. CROWDER KCROWDERGOOG@GMAIL.COM
  *
