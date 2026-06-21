@@ -52,14 +52,14 @@ if (! defined('SENTINEL_PREFIX')) {
 
 
 
-if (! function_exists('mcpcomal_debug_log')) {
+if (! function_exists('sentinel_debug_log')) {
 	/**
 	 * Debug logging helper.
 	 *
 	 * @param mixed $message Message to log.
 	 * @return void
 	 */
-	function mcpcomal_debug_log($message): void
+	function sentinel_debug_log($message): void
 	{
 		if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
 			if (is_array($message) || is_object($message)) {
@@ -79,149 +79,32 @@ if (file_exists(SENTINEL_PATH . 'vendor/autoload.php')) {
 }
 
 /**
- * Load core classes.
+ * Load plugin classes and procedural ability registrations.
+ *
+ * Composer autoload (PSR-4 + classmap + files) handles all class discovery and
+ * executes the procedural ability registration files at plugin bootstrap.
+ * No manual require_once chain is needed.
  */
-require_once SENTINEL_PATH . 'includes/helpers.php';
 
 /**
- * Load admin tab base and tabs.
+ * WordPress MCP Adapter.
+ *
+ * The adapter is a Composer dependency. Loading its main plugin class registers
+ * the default MCP server REST route at /wp-json/mcp/mcp-adapter-default-server.
  */
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Getstarted.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Status.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Providers.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Connect.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Prompts.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Settings.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Oauth.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Activity.php';
-require_once SENTINEL_PATH . 'includes/admin/Admin_Tab_Info.php';
-
-require_once SENTINEL_PATH . 'includes/Abilities/Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Registry.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery/Site_Schema_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery/Inspect_Post_Type_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery/List_Terms_Ability.php';
-
-require_once SENTINEL_PATH . 'includes/Abilities/Content/Create_Content_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Content/Read_Content_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Content/Update_Content_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Content/Search_Content_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Content/Delete_Content_Ability.php';
-
-require_once SENTINEL_PATH . 'includes/Abilities/Comments/List_Comments_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Comments/Manage_Comment_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery_Extended/List_Post_Types_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery_Extended/List_Taxonomies_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery_Extended/List_Post_Statuses_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery_Extended/List_Shortcodes_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Discovery_Extended/Get_Permalink_Structure_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/FSE/List_Blocks_Registered_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/FSE/List_Block_Patterns_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/FSE/List_FSE_Templates_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Gutenberg/Gutenberg_Reference_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/I18n/Get_Post_In_Language_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/I18n/List_Languages_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/I18n/List_String_Translations_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/I18n/List_Translations_For_Post_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Images/Generate_Image_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Images/Set_Featured_From_Prompt_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Media/List_Media_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Media/Upload_Media_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Media/Set_Featured_Image_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Media/Delete_Media_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Menus_Widgets/List_Nav_Menus_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Menus_Widgets/List_Widgets_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Menus_Widgets/List_Sidebars_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Options/Get_Option_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Options/List_Options_By_Prefix_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Options/List_Registered_Settings_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Premium/List_Premium_Features_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Recovery/Clear_Recovery_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Recovery/Site_Health_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Recovery/Toggle_Plugin_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Recovery/List_Plugins_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/SEO/Read_SEO_Meta_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Stats/Get_Site_Stats_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Stats/Get_Media_Stats_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/System/List_Cron_Events_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/System/List_User_Roles_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/System_Info/System_Info_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Taxonomy/Create_Term_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Taxonomy/Update_Term_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Taxonomy/Delete_Term_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Theme/Get_Theme_Mod_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Users/List_Users_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Users/Read_User_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/Users/List_User_Meta_Keys_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_Get_Store_Info_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_List_Products_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_List_Recent_Orders_Ability.php';
-require_once SENTINEL_PATH . 'includes/Abilities/WooCommerce/WC_List_Coupons_Ability.php';
-
-require_once SENTINEL_PATH . 'includes/Admin.php';
-require_once SENTINEL_PATH . 'includes/abilities-discovery.php';
-require_once SENTINEL_PATH . 'includes/HTML_To_Blocks_Converter.php';
-require_once SENTINEL_PATH . 'includes/Logging/Logger.php';
-require_once SENTINEL_PATH . 'includes/abilities-universal-crud.php';
-require_once SENTINEL_PATH . 'includes/abilities-gutenberg-reference.php';
-require_once SENTINEL_PATH . 'includes/File_Manager.php';
-require_once SENTINEL_PATH . 'includes/abilities-recovery.php';
-require_once SENTINEL_PATH . 'includes/abilities-media.php';
-require_once SENTINEL_PATH . 'includes/abilities-options.php';
-require_once SENTINEL_PATH . 'includes/abilities-comments.php';
-require_once SENTINEL_PATH . 'includes/abilities-users.php';
-require_once SENTINEL_PATH . 'includes/abilities-taxonomy.php';
-require_once SENTINEL_PATH . 'includes/abilities-theme-mods.php';
-require_once SENTINEL_PATH . 'includes/abilities-system-info.php';
-require_once SENTINEL_PATH . 'includes/abilities-system-extended.php';
-require_once SENTINEL_PATH . 'includes/abilities-discovery-extended.php';
-require_once SENTINEL_PATH . 'includes/abilities-i18n-read.php';
-require_once SENTINEL_PATH . 'includes/abilities-image-generation.php';
-require_once SENTINEL_PATH . 'includes/abilities-menus-widgets-read.php';
-require_once SENTINEL_PATH . 'includes/abilities-fse-read.php';
-require_once SENTINEL_PATH . 'includes/abilities-content-shortcuts.php';
-require_once SENTINEL_PATH . 'includes/abilities-stats.php';
-require_once SENTINEL_PATH . 'includes/abilities-seo-read.php';
-require_once SENTINEL_PATH . 'includes/abilities-wc-read.php';
-require_once SENTINEL_PATH . 'includes/abilities-premium-features.php';
-
-require_once SENTINEL_PATH . 'includes/Activity_Log.php';
-require_once SENTINEL_PATH . 'includes/Comment_Manager.php';
-require_once SENTINEL_PATH . 'includes/Config_Exporter.php';
-require_once SENTINEL_PATH . 'includes/Health_Endpoint.php';
-require_once SENTINEL_PATH . 'includes/Schema_Inspector.php';
-require_once SENTINEL_PATH . 'includes/Image_Generator.php';
-require_once SENTINEL_PATH . 'includes/Media_Manager.php';
-require_once SENTINEL_PATH . 'includes/Options_Manager.php';
-require_once SENTINEL_PATH . 'includes/Prompt_Gallery.php';
-
-
+if (class_exists('\WP\MCP\Plugin')) {
+	\WP\MCP\Plugin::instance();
+}
 
 /**
  * Chat AI.
  */
-require_once SENTINEL_PATH . 'includes/chat/Chat_Db.php';
-require_once SENTINEL_PATH . 'includes/chat/Chat_Provider_Registry.php';
-require_once SENTINEL_PATH . 'includes/chat/Chat_Engine.php';
-require_once SENTINEL_PATH . 'includes/chat/Admin_Chat.php';
-require_once SENTINEL_PATH . 'includes/chat/Rest_Chat.php';
-
 \SentinelMCP\REST_Chat::init();
 \SentinelMCP\Admin_Chat::init();
 
 /**
  * OAuth 2.1 Server.
  */
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Db.php';
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Server.php';
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Authorize.php';
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Token.php';
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Interceptor.php';
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Permissions.php';
-// New streamlined OAuth manager.
-require_once SENTINEL_PATH . 'includes/oauth/Oauth_Manager.php';
-
 \SentinelMCP\OAuth_Server::init();
 \SentinelMCP\OAuth_Permissions::init();
 \SentinelMCP\Activity_Log::init();
@@ -245,7 +128,7 @@ register_activation_hook(
 					)
 				),
 				esc_html__('Plugin activation error', 'mcp-sentinel'),
-				array('back_link' => true)
+				['back_link' => true]
 			);
 		}
 
@@ -266,16 +149,16 @@ register_activation_hook(
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		$ts = wp_next_scheduled('mcpcomal_activity_log_purge');
+		$ts = wp_next_scheduled('sentinel_activity_log_purge');
 		if ($ts) {
-			wp_unschedule_event($ts, 'mcpcomal_activity_log_purge');
+			wp_unschedule_event($ts, 'sentinel_activity_log_purge');
 		}
 	}
 );
 
-add_action('plugins_loaded', array('SentinelMCP\OAuth_DB', 'maybe_upgrade'));
-add_action('plugins_loaded', array('SentinelMCP\Chat_DB', 'maybe_upgrade'));
-add_action('plugins_loaded', array('SentinelMCP\Activity_Log', 'maybe_upgrade'));
+add_action('plugins_loaded', ['SentinelMCP\OAuth_DB', 'maybe_upgrade']);
+add_action('plugins_loaded', ['SentinelMCP\Chat_DB', 'maybe_upgrade']);
+add_action('plugins_loaded', ['SentinelMCP\Activity_Log', 'maybe_upgrade']);
 
 /**
  * Admin.

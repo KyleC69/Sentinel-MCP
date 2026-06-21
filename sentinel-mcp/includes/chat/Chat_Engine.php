@@ -66,7 +66,7 @@ class Chat_Engine
 	 */
 	public static function get_default_provider(): string
 	{
-		return get_option('mcpcomal_chat_default_provider', 'anthropic');
+		return get_option('SENTINEL_chat_default_provider', 'anthropic');
 	}
 
 	/**
@@ -276,9 +276,9 @@ class Chat_Engine
 		}
 
 		// 3. Rate limiting.
-		$usage_key = 'mcpcomal_chat_usage_' . $user_id . '_' . gmdate('Y-m-d');
+		$usage_key = 'SENTINEL_chat_usage_' . $user_id . '_' . gmdate('Y-m-d');
 		$daily_count = (int) get_transient($usage_key);
-		$daily_limit = (int) get_option('mcpcomal_chat_daily_limit', 100);
+		$daily_limit = (int) get_option('SENTINEL_chat_daily_limit', 100);
 
 		if ($daily_count >= $daily_limit) {
 			return array(

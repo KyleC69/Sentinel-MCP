@@ -123,7 +123,7 @@ defined('ABSPATH') || exit;
 		protected function redirect_with_notice(string $tab, string $type, string $message): void
 		{
 			set_transient(
-				'mcpcomal_admin_notice_' . get_current_user_id(),
+				'SENTINEL_admin_notice_' . get_current_user_id(),
 				[
 					'type'    => $type,
 					'message' => $message,

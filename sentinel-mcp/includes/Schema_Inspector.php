@@ -146,7 +146,7 @@ class Schema_Inspector
 		$registered = get_registered_meta_keys('post', $post_type);
 		foreach ($registered as $key => $schema) {
 			// Ignore internal WP fields.
-			if (str_starts_with($key, '_') && ! str_starts_with($key, '_mcpcomal_')) {
+			if (str_starts_with($key, '_') && ! str_starts_with($key, '_SENTINEL_')) {
 				continue;
 			}
 			$fields[$key] = array(

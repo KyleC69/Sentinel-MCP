@@ -20,63 +20,62 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
+/**
+ * Locator for the active i18n adapter.
+ */
+abstract class I18n_Adapter
+{
+
 	/**
-	 * Locator for the active i18n adapter.
+	 * Resolve the active adapter class name. Returns empty string if none.
 	 */
-	abstract class I18n_Adapter
+	public static function active(): string
 	{
-
-		/**
-		 * Resolve the active adapter class name. Returns empty string if none.
-		 */
-		public static function active(): string
-		{
-			if (I18n_Polylang::is_active()) {
-				return 'I18n_Polylang';
-			}
-			if (I18n_WPML::is_active()) {
-				return 'I18n_WPML';
-			}
-			if (I18n_TranslatePress::is_active()) {
-				return 'I18n_TranslatePress';
-			}
-			return '';
+		if (I18n_Polylang::is_active()) {
+			return 'I18n_Polylang';
 		}
-
-		/**
-		 * Whether this adapter's underlying plugin is active.
-		 */
-		abstract public static function is_active(): bool;
-
-		/**
-		 * Slug identifying the underlying plugin (polylang|wpml|translatepress).
-		 */
-		abstract public static function slug(): string;
-
-		/**
-		 * List languages available on the site.
-		 *
-		 * @return array<int,array<string,mixed>>
-		 */
-		abstract public static function list_languages(): array;
-
-		/**
-		 * List translations of a post (one entry per language).
-		 *
-		 * @param int $post_id Post ID.
-		 * @return array<int,array<string,mixed>>
-		 */
-		abstract public static function list_translations_for_post(int $post_id): array;
-
-		/**
-		 * Resolve the post ID in another language.
-		 */
-		abstract public static function get_post_in_language(int $post_id, string $language): ?int;
-
-		/**
-		 * List string translations (theme/plugin strings translated). Optional;
-		 * adapters that don't support this return an empty array.
-		 */
-		abstract public static function list_string_translations(int $page = 1, int $per_page = 50): array;
+		if (I18n_WPML::is_active()) {
+			return 'I18n_WPML';
+		}
+		if (I18n_TranslatePress::is_active()) {
+			return 'I18n_TranslatePress';
+		}
+		return '';
 	}
+
+	/**
+	 * Whether this adapter's underlying plugin is active.
+	 */
+	abstract public static function is_active(): bool;
+
+	/**
+	 * Slug identifying the underlying plugin (polylang|wpml|translatepress).
+	 */
+	abstract public static function slug(): string;
+
+	/**
+	 * List languages available on the site.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	abstract public static function list_languages(): array;
+
+	/**
+	 * List translations of a post (one entry per language).
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array<int,array<string,mixed>>
+	 */
+	abstract public static function list_translations_for_post(int $post_id): array;
+
+	/**
+	 * Resolve the post ID in another language.
+	 */
+	abstract public static function get_post_in_language(int $post_id, string $language): ?int;
+
+	/**
+	 * List string translations (theme/plugin strings translated). Optional;
+	 * adapters that don't support this return an empty array.
+	 */
+	abstract public static function list_string_translations(int $page = 1, int $per_page = 50): array;
 }

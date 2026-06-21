@@ -32,10 +32,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-comments',
-			array(
+			[
 				'label'       => __('Comment Management', 'mcp-sentinel'),
 				'description' => __('List, search, moderate, and reply to comments across all post types.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

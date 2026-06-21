@@ -95,6 +95,6 @@ class Premium_Hints
 	 */
 	protected static function key(string $client_id, string $category): string
 	{
-		return 'mcpcomal_hint_' . md5($client_id . '|' . $category);
+		return 'SENTINEL_hint_' . md5($client_id . '|' . $category);
 	}
 }

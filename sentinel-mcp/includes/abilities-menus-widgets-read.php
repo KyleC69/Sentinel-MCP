@@ -29,10 +29,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-menus-widgets',
-			array(
+			[
 				'label'       => __('Menus, widgets and sidebars (read-only)', 'mcp-sentinel'),
 				'description' => __('Read-only access to classic navigation menus, widget instances and registered sidebars.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

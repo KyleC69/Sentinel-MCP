@@ -30,10 +30,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-fse',
-			array(
+			[
 				'label'       => __('Full Site Editing (read-only)', 'mcp-sentinel'),
 				'description' => __('Read-only inspection of block patterns and FSE templates. Editing is Premium.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

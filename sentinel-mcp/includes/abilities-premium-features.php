@@ -34,10 +34,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-premium-info',
-			array(
+			[
 				'label'       => __('Premium Information', 'mcp-sentinel'),
 				'description' => __('Read-only catalog of capabilities available in the Premium edition. Used only when the user asks what else can be done.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

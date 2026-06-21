@@ -115,8 +115,8 @@ defined('ABSPATH') || exit;
 										?>
 										<a class="button button-small" href="<?php echo esc_url($perm_url); ?>"><?php esc_html_e('Permissions', 'mcp-sentinel'); ?></a>
 										<form method="post" style="display:inline;">
-											<?php wp_nonce_field('mcpcomal_revoke_client_' . $oc['client_id']); ?>
-											<input type="hidden" name="mcpcomal_revoke_client" value="<?php echo esc_attr($oc['client_id']); ?>" />
+											<?php wp_nonce_field('SENTINEL_revoke_client_' . $oc['client_id']); ?>
+											<input type="hidden" name="SENTINEL_revoke_client" value="<?php echo esc_attr($oc['client_id']); ?>" />
 											<button type="submit" class="button button-small" onclick="return confirm('Revoke this client and all its tokens?');">Revoke</button>
 										</form>
 									</td>
@@ -153,8 +153,8 @@ defined('ABSPATH') || exit;
 									<td><?php echo esc_html($tk['access_expires_at']); ?></td>
 									<td>
 										<form method="post" style="display:inline;">
-											<?php wp_nonce_field('mcpcomal_revoke_token_' . $tk['id']); ?>
-											<input type="hidden" name="mcpcomal_revoke_token" value="<?php echo esc_attr($tk['id']); ?>" />
+											<?php wp_nonce_field('SENTINEL_revoke_token_' . $tk['id']); ?>
+											<input type="hidden" name="SENTINEL_revoke_token" value="<?php echo esc_attr($tk['id']); ?>" />
 											<button type="submit" class="button button-small" onclick="return confirm('Revoke this token?');">Revoke</button>
 										</form>
 									</td>
@@ -178,25 +178,25 @@ defined('ABSPATH') || exit;
 		public function handle_post(): bool
 		{
 			// Revoke OAuth client.
-			if (isset($_POST['mcpcomal_revoke_client'])) {
-				$client_id = sanitize_text_field(wp_unslash($_POST['mcpcomal_revoke_client']));
-				check_admin_referer('mcpcomal_revoke_client_' . $client_id);
+			if (isset($_POST['SENTINEL_revoke_client'])) {
+				$client_id = sanitize_text_field(wp_unslash($_POST['SENTINEL_revoke_client']));
+				check_admin_referer('SENTINEL_revoke_client_' . $client_id);
 				OAuth_DB::revoke_all_for_client($client_id);
 				OAuth_DB::delete_client($client_id);
 				$this->redirect_with_notice('oauth', 'success', 'OAuth client revoked successfully.');
 			}
 
 			// Save per-client allowed_abilities allowlist.
-			if (isset($_POST['mcpcomal_save_permissions'])) {
-				$client_id = sanitize_text_field(wp_unslash((string) $_POST['mcpcomal_save_permissions']));
-				check_admin_referer('mcpcomal_save_permissions_' . $client_id);
+			if (isset($_POST['SENTINEL_save_permissions'])) {
+				$client_id = sanitize_text_field(wp_unslash((string) $_POST['SENTINEL_save_permissions']));
+				check_admin_referer('SENTINEL_save_permissions_' . $client_id);
 
-				$mode = isset($_POST['mcpcomal_perm_mode']) ? sanitize_key((string) $_POST['mcpcomal_perm_mode']) : 'all';
+				$mode = isset($_POST['SENTINEL_perm_mode']) ? sanitize_key((string) $_POST['SENTINEL_perm_mode']) : 'all';
 				if ('all' === $mode) {
 					OAuth_Permissions::set_allowed_abilities($client_id, null);
 				} else {
-					$selected = isset($_POST['mcpcomal_perm_abilities']) && is_array($_POST['mcpcomal_perm_abilities'])
-						? array_map('sanitize_text_field', wp_unslash((array) $_POST['mcpcomal_perm_abilities']))
+					$selected = isset($_POST['SENTINEL_perm_abilities']) && is_array($_POST['SENTINEL_perm_abilities'])
+						? array_map('sanitize_text_field', wp_unslash((array) $_POST['SENTINEL_perm_abilities']))
 						: [];
 					OAuth_Permissions::set_allowed_abilities($client_id, $selected);
 				}
@@ -205,18 +205,18 @@ defined('ABSPATH') || exit;
 			}
 
 			// Revoke individual token.
-			if (isset($_POST['mcpcomal_revoke_token'])) {
-				$token_id = (int) $_POST['mcpcomal_revoke_token'];
-				check_admin_referer('mcpcomal_revoke_token_' . $token_id);
+			if (isset($_POST['SENTINEL_revoke_token'])) {
+				$token_id = (int) $_POST['SENTINEL_revoke_token'];
+				check_admin_referer('SENTINEL_revoke_token_' . $token_id);
 				OAuth_DB::revoke_token_by_id($token_id);
 				$this->redirect_with_notice('oauth', 'success', 'Token revoked successfully.');
 			}
 
 			// Create Application Password for current user.
-			if (isset($_POST['mcpcomal_create_app_password'])) {
-				check_admin_referer('mcpcomal_create_app_password');
-				$app_name = isset($_POST['mcpcomal_app_password_name'])
-					? sanitize_text_field(wp_unslash($_POST['mcpcomal_app_password_name']))
+			if (isset($_POST['SENTINEL_create_app_password'])) {
+				check_admin_referer('SENTINEL_create_app_password');
+				$app_name = isset($_POST['SENTINEL_app_password_name'])
+					? sanitize_text_field(wp_unslash($_POST['SENTINEL_app_password_name']))
 					: '';
 				if (empty($app_name)) {
 					$this->redirect_with_notice('oauth', 'error', 'Application name is required.');
@@ -231,7 +231,7 @@ defined('ABSPATH') || exit;
 				}
 				// $result[0] = unhashed password (only available now, never again).
 				set_transient(
-					'mcpcomal_new_app_password_' . $user_id,
+					'SENTINEL_new_app_password_' . $user_id,
 					[
 						'password' => $result[0],
 						'name'     => $app_name,
@@ -242,9 +242,9 @@ defined('ABSPATH') || exit;
 			}
 
 			// Revoke Application Password for current user.
-			if (isset($_POST['mcpcomal_revoke_app_password'])) {
-				$uuid = sanitize_text_field(wp_unslash($_POST['mcpcomal_revoke_app_password']));
-				check_admin_referer('mcpcomal_revoke_app_password_' . $uuid);
+			if (isset($_POST['SENTINEL_revoke_app_password'])) {
+				$uuid = sanitize_text_field(wp_unslash($_POST['SENTINEL_revoke_app_password']));
+				check_admin_referer('SENTINEL_revoke_app_password_' . $uuid);
 				$user_id = get_current_user_id();
 				$deleted = WP_Application_Passwords::delete_application_password($user_id, $uuid);
 				if (is_wp_error($deleted)) {
@@ -279,7 +279,7 @@ defined('ABSPATH') || exit;
 
 			$app_passwords = WP_Application_Passwords::get_user_application_passwords($user_id);
 
-			$transient_key = 'mcpcomal_new_app_password_' . $user_id;
+			$transient_key = 'SENTINEL_new_app_password_' . $user_id;
 			$new_password  = get_transient($transient_key);
 			if ($new_password) {
 				delete_transient($transient_key);
@@ -350,8 +350,8 @@ defined('ABSPATH') || exit;
 									<td><?php echo ! empty($ap['last_ip']) ? esc_html($ap['last_ip']) : '&mdash;'; ?></td>
 									<td>
 										<form method="post" style="display:inline;">
-											<?php wp_nonce_field('mcpcomal_revoke_app_password_' . $ap['uuid']); ?>
-											<input type="hidden" name="mcpcomal_revoke_app_password" value="<?php echo esc_attr($ap['uuid']); ?>" />
+											<?php wp_nonce_field('SENTINEL_revoke_app_password_' . $ap['uuid']); ?>
+											<input type="hidden" name="SENTINEL_revoke_app_password" value="<?php echo esc_attr($ap['uuid']); ?>" />
 											<button type="submit" class="button button-small" onclick="return confirm('Revoke this Application Password?');">Revoke</button>
 										</form>
 									</td>
@@ -363,12 +363,12 @@ defined('ABSPATH') || exit;
 
 				<h3 style="margin-top:20px;">Create new Application Password</h3>
 				<form method="post" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-					<?php wp_nonce_field('mcpcomal_create_app_password'); ?>
-					<label for="mcpcomal_app_password_name" class="screen-reader-text">Application name</label>
-					<input type="text" id="mcpcomal_app_password_name" name="mcpcomal_app_password_name"
+					<?php wp_nonce_field('SENTINEL_create_app_password'); ?>
+					<label for="SENTINEL_app_password_name" class="screen-reader-text">Application name</label>
+					<input type="text" id="SENTINEL_app_password_name" name="SENTINEL_app_password_name"
 						placeholder="e.g. Claude Code, Cursor, ChatGPT"
 						style="min-width:280px;" required />
-					<button type="submit" name="mcpcomal_create_app_password" value="1" class="button button-primary">Create Application Password</button>
+					<button type="submit" name="SENTINEL_create_app_password" value="1" class="button button-primary">Create Application Password</button>
 				</form>
 				<p class="description" style="margin-top:8px;">The password will be shown only once after creation. You will get a ready-to-use connection URL.</p>
 			</div>
@@ -399,7 +399,7 @@ defined('ABSPATH') || exit;
 			$current   = OAuth_Permissions::get_allowed_abilities($client_id);
 			$mode      = (null === $current) ? 'all' : 'restricted';
 			$selected  = is_array($current) ? $current : [];
-			$abilities = $this->get_mcpcomal_abilities_grouped();
+			$abilities = $this->get_SENTINEL_abilities_grouped();
 			?>
 			<div class="card" style="max-width:900px;margin-bottom:20px;padding:15px;">
 				<p><a href="<?php echo esc_url($back_url); ?>">&laquo; <?php esc_html_e('Back to OAuth clients', 'mcp-sentinel'); ?></a></p>
@@ -415,19 +415,19 @@ defined('ABSPATH') || exit;
 				<p><?php esc_html_e('Restrict which abilities this OAuth client can call. By default a client may call every ability the WordPress user has capability for. Restricting here adds an extra allowlist on top of WordPress capabilities.', 'mcp-sentinel'); ?></p>
 
 				<form method="post">
-					<?php wp_nonce_field('mcpcomal_save_permissions_' . $client_id); ?>
-					<input type="hidden" name="mcpcomal_save_permissions" value="<?php echo esc_attr($client_id); ?>" />
+					<?php wp_nonce_field('SENTINEL_save_permissions_' . $client_id); ?>
+					<input type="hidden" name="SENTINEL_save_permissions" value="<?php echo esc_attr($client_id); ?>" />
 
 					<p>
 						<label>
-							<input type="radio" name="mcpcomal_perm_mode" value="all" <?php checked($mode, 'all'); ?> />
+							<input type="radio" name="SENTINEL_perm_mode" value="all" <?php checked($mode, 'all'); ?> />
 							<strong><?php esc_html_e('All abilities', 'mcp-sentinel'); ?></strong>
 							<span style="color:#50575e;">&mdash; <?php esc_html_e('No allowlist (default).', 'mcp-sentinel'); ?></span>
 						</label>
 					</p>
 					<p>
 						<label>
-							<input type="radio" name="mcpcomal_perm_mode" value="restricted" <?php checked($mode, 'restricted'); ?> />
+							<input type="radio" name="SENTINEL_perm_mode" value="restricted" <?php checked($mode, 'restricted'); ?> />
 							<strong><?php esc_html_e('Restricted to selected abilities', 'mcp-sentinel'); ?></strong>
 						</label>
 					</p>
@@ -445,7 +445,7 @@ defined('ABSPATH') || exit;
 									<div style="padding:6px 0 12px 18px;">
 										<?php foreach ($group_slugs as $slug => $label) : ?>
 											<label style="display:block;margin:2px 0;">
-												<input type="checkbox" name="mcpcomal_perm_abilities[]" value="<?php echo esc_attr($slug); ?>" <?php checked(in_array($slug, $selected, true)); ?> />
+												<input type="checkbox" name="SENTINEL_perm_abilities[]" value="<?php echo esc_attr($slug); ?>" <?php checked(in_array($slug, $selected, true)); ?> />
 												<code style="font-size:12px;"><?php echo esc_html($slug); ?></code>
 												<?php if ($label) : ?>
 													<span style="color:#50575e;">&mdash; <?php echo esc_html($label); ?></span>
@@ -472,7 +472,7 @@ defined('ABSPATH') || exit;
 		 *
 		 * @return array<string, array<string,string>>
 		 */
-		private function get_mcpcomal_abilities_grouped(): array
+		private function get_SENTINEL_abilities_grouped(): array
 		{
 			if (! function_exists('wp_get_abilities')) {
 				return [];

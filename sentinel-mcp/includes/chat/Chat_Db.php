@@ -26,7 +26,7 @@ class Chat_DB
 {
 
 	const DB_VERSION     = '1.0.0';
-	const OPT_DB_VERSION = 'mcpcomal_chat_db_version';
+	const OPT_DB_VERSION = 'SENTINEL_chat_db_version';
 
 	/**
 	 * Whether the tables existence has been verified in this request.
@@ -43,7 +43,7 @@ class Chat_DB
 	public static function conversations_table(): string
 	{
 		global $wpdb;
-		return $wpdb->prefix . 'mcpcomal_chat_conversations';
+		return $wpdb->prefix . 'SENTINEL_chat_conversations';
 	}
 
 	/**
@@ -54,7 +54,7 @@ class Chat_DB
 	public static function messages_table(): string
 	{
 		global $wpdb;
-		return $wpdb->prefix . 'mcpcomal_chat_messages';
+		return $wpdb->prefix . 'SENTINEL_chat_messages';
 	}
 
 	/**
@@ -155,8 +155,8 @@ class Chat_DB
 	{
 		global $wpdb;
 
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_chat_messages");
-		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}mcpcomal_chat_conversations");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}SENTINEL_chat_messages");
+		$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}SENTINEL_chat_conversations");
 
 		delete_option(self::OPT_DB_VERSION);
 	}
@@ -552,7 +552,7 @@ class Chat_DB
 		// Delete messages.
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}mcpcomal_chat_messages WHERE conversation_id IN ({$placeholders})",
+				"DELETE FROM {$wpdb->prefix}SENTINEL_chat_messages WHERE conversation_id IN ({$placeholders})",
 				...$old_ids
 			)
 		);
@@ -560,7 +560,7 @@ class Chat_DB
 		// Delete conversations.
 		$deleted = $wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}mcpcomal_chat_conversations WHERE id IN ({$placeholders})",
+				"DELETE FROM {$wpdb->prefix}SENTINEL_chat_conversations WHERE id IN ({$placeholders})",
 				...$old_ids
 			)
 		);

@@ -41,13 +41,13 @@ defined('ABSPATH') || exit;
  * If the content already contains Gutenberg block delimiters it is
  * sanitised with filter_block_content() which preserves the block
  * structure.  Otherwise it goes through wp_kses_post() and is then
- * auto-converted to block markup via mcpcomal_content_to_blocks().
+ * auto-converted to block markup via SENTINEL_content_to_blocks().
  *
  * @param string $raw       Raw content from MCP input.
  * @param string $post_type Post type slug.
  * @return string Sanitised content ready for wp_insert_post / wp_update_post.
  */
-function mcpcomal_sanitize_content(string $raw, string $post_type = 'post'): string
+function SENTINEL_sanitize_content(string $raw, string $post_type = 'post'): string
 {
 	$raw = trim($raw);
 	if (empty($raw)) {
@@ -73,10 +73,10 @@ add_action(
 		if (function_exists('wp_has_ability_category') && ! wp_has_ability_category('sentinel-content')) {
 			wp_register_ability_category(
 				'sentinel-content',
-				array(
+				[
 					'label'       => __('Content Management', 'mcp-sentinel'),
 					'description' => __('Create, read, update, delete, and search content across all post types.', 'mcp-sentinel'),
-				)
+				]
 			);
 		}
 	}
@@ -95,30 +95,30 @@ Registry::init();
  * @param array $input Input data for creating the post.
  * @return array Result with success status and post data.
  */
-function mcpcomal_universal_create(array $input): array
+function SENTINEL_universal_create(array $input): array
 {
 
 	$post_type   = sanitize_text_field($input['post_type'] ?? 'post');
 	$title       = sanitize_text_field($input['title']);
 	$raw_content = $input['content'] ?? '';
-	$content     = mcpcomal_sanitize_content($raw_content, $post_type);
+	$content     = SENTINEL_sanitize_content($raw_content, $post_type);
 	$excerpt     = sanitize_text_field($input['excerpt'] ?? '');
 	$status      = sanitize_text_field($input['post_status'] ?? 'draft');
 	$parent      = (int) ($input['post_parent'] ?? 0);
 	$menu_order  = (int) ($input['menu_order'] ?? 0);
 	$slug        = sanitize_title($input['slug'] ?? '');
-	$taxonomies  = $input['taxonomies'] ?? array();
-	$meta        = $input['meta'] ?? array();
+	$taxonomies  = $input['taxonomies'] ?? [];
+	$meta        = $input['meta'] ?? [];
 
 	// Verify the post type exists.
 	if (! post_type_exists($post_type)) {
-		return array(
+		return [
 			'success' => false,
 			'message' => sprintf('Post type "%s" does not exist. Use "sentinel/site-schema" to see available types.', $post_type),
-		);
+		];
 	}
 
-	$post_data = array(
+	$post_data = [
 		'post_title'   => $title,
 		'post_content' => $content,
 		'post_excerpt' => $excerpt,
@@ -127,7 +127,7 @@ function mcpcomal_universal_create(array $input): array
 		'post_author'  => get_current_user_id(),
 		'post_parent'  => $parent,
 		'menu_order'   => $menu_order,
-	);
+	];
 
 	if ($slug) {
 		$post_data['post_name'] = $slug;
@@ -135,7 +135,7 @@ function mcpcomal_universal_create(array $input): array
 
 	// Assign categories if post type is 'post' and category is in taxonomies.
 	if ('post' === $post_type && ! empty($taxonomies['category'])) {
-		$cat_ids = array();
+		$cat_ids = [];
 		foreach ((array) $taxonomies['category'] as $cat_slug) {
 			$cat = get_category_by_slug(sanitize_text_field($cat_slug));
 			if ($cat) {
@@ -150,10 +150,10 @@ function mcpcomal_universal_create(array $input): array
 	$post_id = wp_insert_post($post_data, true);
 
 	if (is_wp_error($post_id)) {
-		return array(
+		return [
 			'success' => false,
 			'message' => $post_id->get_error_message(),
-		);
+		];
 	}
 
 	// Assign taxonomies.
@@ -165,7 +165,7 @@ function mcpcomal_universal_create(array $input): array
 			if (! taxonomy_exists($tax_slug)) {
 				continue;
 			}
-			$terms = is_array($term_slugs) ? $term_slugs : array($term_slugs);
+			$terms = is_array($term_slugs) ? $term_slugs : [$term_slugs];
 			$terms = array_map('sanitize_text_field', $terms);
 			wp_set_object_terms($post_id, $terms, $tax_slug);
 		}
@@ -192,7 +192,7 @@ function mcpcomal_universal_create(array $input): array
 	$pt_object = get_post_type_object($post_type);
 	$label     = $pt_object ? $pt_object->labels->singular_name : $post_type;
 
-	$result = array(
+	$result = [
 		'success'   => true,
 		'post_id'   => $post_id,
 		'post_url'  => get_permalink($post_id),
@@ -205,7 +205,7 @@ function mcpcomal_universal_create(array $input): array
 			$status,
 			$post_id
 		),
-	);
+	];
 
 	// Warn if content was lost during sanitisation.
 	if (! empty($raw_content) && empty($content)) {
@@ -223,20 +223,20 @@ function mcpcomal_universal_create(array $input): array
  * @param array $input Input data for updating the post.
  * @return array Result with success status and updated post data.
  */
-function mcpcomal_universal_update(array $input): array
+function SENTINEL_universal_update(array $input): array
 {
 
 	$post_id = (int) ($input['post_id'] ?? $input['id'] ?? 0);
 	$post    = get_post($post_id);
 
 	if (! $post) {
-		return array(
+		return [
 			'success' => false,
 			'message' => 'Post not found.',
-		);
+		];
 	}
 
-	$update = array('ID' => $post_id);
+	$update = ['ID' => $post_id];
 
 	if (isset($input['title'])) {
 		$update['post_title'] = sanitize_text_field($input['title']);
@@ -244,7 +244,7 @@ function mcpcomal_universal_update(array $input): array
 	$raw_update_content = null;
 	if (isset($input['content'])) {
 		$raw_update_content     = $input['content'];
-		$update['post_content'] = mcpcomal_sanitize_content($raw_update_content, $post->post_type);
+		$update['post_content'] = SENTINEL_sanitize_content($raw_update_content, $post->post_type);
 	}
 	if (isset($input['excerpt'])) {
 		$update['post_excerpt'] = sanitize_text_field($input['excerpt']);
@@ -259,10 +259,10 @@ function mcpcomal_universal_update(array $input): array
 	$result = wp_update_post($update, true);
 
 	if (is_wp_error($result)) {
-		return array(
+		return [
 			'success' => false,
 			'message' => $result->get_error_message(),
-		);
+		];
 	}
 
 	// Update taxonomies.
@@ -271,7 +271,7 @@ function mcpcomal_universal_update(array $input): array
 			if (! taxonomy_exists($tax_slug)) {
 				continue;
 			}
-			$terms = is_array($term_slugs) ? $term_slugs : array($term_slugs);
+			$terms = is_array($term_slugs) ? $term_slugs : [$term_slugs];
 			$terms = array_map('sanitize_text_field', $terms);
 			wp_set_object_terms($post_id, $terms, $tax_slug);
 		}
@@ -292,12 +292,12 @@ function mcpcomal_universal_update(array $input): array
 		}
 	}
 
-	$result = array(
+	$result = [
 		'success'  => true,
 		'post_id'  => $post_id,
 		'post_url' => get_permalink($post_id),
 		'message'  => sprintf('"%s" updated successfully.', get_the_title($post_id)),
-	);
+	];
 
 	// Warn if content was lost during sanitisation.
 	if (

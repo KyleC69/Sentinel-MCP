@@ -647,7 +647,7 @@ function is_connector_plugin_active(array $connector_data): bool
  * @param array<string,mixed> $overrides Optional. Key-value pairs to merge into the annotations.
  * @return array<string,array<string,mixed>> The standard MCP meta block.
  */
-function mcpcomal_ability_meta(array $overrides = []): array
+function SENTINEL_ability_meta(array $overrides = []): array
 {
 	$defaults = [
 		'readOnlyHint'    => true,
@@ -675,7 +675,7 @@ function mcpcomal_ability_meta(array $overrides = []): array
  * @param string $capability WordPress capability slug (e.g. 'manage_options', 'upload_files').
  * @return callable Closure that returns the result of current_user_can().
  */
-function mcpcomal_ability_permission(string $capability): callable
+function SENTINEL_ability_permission(string $capability): callable
 {
 	return static function () use ($capability): bool {
 		return current_user_can($capability);
@@ -693,7 +693,7 @@ function mcpcomal_ability_permission(string $capability): callable
  * @param string $email Raw email address.
  * @return string Redacted email.
  */
-function mcpcomal_redact_email(string $email): string
+function SENTINEL_redact_email(string $email): string
 {
 	if ('' === $email || false === strpos($email, '@')) {
 		return '';

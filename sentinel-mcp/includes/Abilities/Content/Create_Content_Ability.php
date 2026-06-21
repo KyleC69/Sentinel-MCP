@@ -125,16 +125,16 @@ class Create_Content_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('publish_posts');
+        return \SentinelMCP\SENTINEL_ability_permission('publish_posts');
     }
 
     public static function execute(array $input = array()): array
     {
-        return \SentinelMCP\mcpcomal_universal_create($input);
+        return \SentinelMCP\SENTINEL_universal_create($input);
     }
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta(array('readOnlyHint' => false, 'idempotentHint' => false));
+        return \SentinelMCP\SENTINEL_ability_meta(array('readOnlyHint' => false, 'idempotentHint' => false));
     }
 }

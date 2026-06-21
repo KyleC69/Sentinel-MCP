@@ -34,10 +34,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-recovery',
-			array(
+			[
 				'label'       => __('Recovery and Maintenance', 'mcp-sentinel'),
 				'description' => __('Site diagnostics, plugin management, and recovery tools.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

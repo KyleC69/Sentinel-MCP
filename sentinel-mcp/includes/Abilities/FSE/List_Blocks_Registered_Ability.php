@@ -55,7 +55,7 @@ class List_Blocks_Registered_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('edit_posts');
+        return \SentinelMCP\SENTINEL_ability_permission('edit_posts');
     }
 
     public static function execute(array $input = array()): array
@@ -98,6 +98,6 @@ class List_Blocks_Registered_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }

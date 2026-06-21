@@ -28,10 +28,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-seo',
-			array(
+			[
 				'label'       => __('SEO (read-only)', 'mcp-sentinel'),
 				'description' => __('Read SEO meta from any active SEO plugin (Yoast, Rank Math, AIOSEO, The SEO Framework, SureRank, SEOPress, Slim SEO, Squirrly). Bulk write SEO is Premium.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

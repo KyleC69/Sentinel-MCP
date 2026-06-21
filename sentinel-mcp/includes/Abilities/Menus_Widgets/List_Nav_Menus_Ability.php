@@ -60,7 +60,7 @@ class List_Nav_Menus_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('edit_theme_options');
+        return \SentinelMCP\SENTINEL_ability_permission('edit_theme_options');
     }
 
     public static function execute(array $input = array()): array
@@ -118,6 +118,6 @@ class List_Nav_Menus_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SentinelMCP;
 
 /**
- * Structured file logger for Sentinel-MCP debug output.
+ * Structured file logger for Sentinel-MCP **DEBUG** output.
  *
  * Writes to a protected log file under wp-content/uploads/sentinel-logs/
  * instead of the server error_log.  Log files are rotated daily and
@@ -33,6 +33,13 @@ class Logger
     private static ?bool $enabled = null;
 
     /**
+     * Tracks whether old logs have been purged in the current request.
+     *
+     * @var bool
+     */
+    private static bool $purged = false;
+
+    /**
      * Write a debug message to the protected log file.
      *
      * @param string $message Log message.
@@ -41,7 +48,7 @@ class Logger
     public static function debug(string $message): void
     {
         if (null === self::$enabled) {
-            self::$enabled = (bool) get_option('mcpcomal_debug_logging', false);
+            self::$enabled = (bool) get_option('sentinel_debug_logging', false);
         }
 
         if (! self::$enabled) {
@@ -52,14 +59,12 @@ class Logger
         $file = $dir . '/sentinel-' . gmdate('Y-m-d') . '.log';
 
         if (! is_dir($dir)) {
-            wp_mkdir_p($dir);
+            if (false === wp_mkdir_p($dir)) {
+                error_log('Sentinel-MCP Logger: failed to create log directory ' . $dir);
+                return;
+            }
             // Protect directory from web access.
-            if (! file_exists($dir . '/.htaccess')) {
-                file_put_contents($dir . '/.htaccess', "Order deny,allow\nDeny from all\n");
-            }
-            if (! file_exists($dir . '/index.php')) {
-                file_put_contents($dir . '/index.php', "<?php // Silence is golden.\n");
-            }
+            self::write_protection_files($dir);
         }
 
         $line = sprintf(
@@ -68,9 +73,14 @@ class Logger
             str_replace(array("\r", "\n"), ' ', $message)
         );
 
-        file_put_contents($file, $line, FILE_APPEND | LOCK_EX);
+        if (! self::put_contents($file, $line)) {
+            return;
+        }
 
-        self::purge_old_logs($dir);
+        if (! self::$purged) {
+            self::$purged = true;
+            self::purge_old_logs($dir);
+        }
     }
 
     /**
@@ -85,6 +95,76 @@ class Logger
     }
 
     /**
+     * Write contents to a file.
+     *
+     * Uses native file_put_contents() first. If direct writes are not
+     * possible (e.g. restrictive permissions), falls back to the WordPress
+     * filesystem API after requesting credentials.
+     *
+     * @param string $file Absolute file path.
+     * @param string $line Line to append.
+     * @return bool True on success, false on failure.
+     */
+    private static function put_contents(string $file, string $line): bool
+    {
+        // Primary path: direct file append. Works on most standard hosts.
+        if (false !== file_put_contents($file, $line, FILE_APPEND | LOCK_EX)) {
+            return true;
+        }
+
+        // Fallback: WordPress filesystem API for hosts requiring credentials.
+        if (! function_exists('WP_Filesystem')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+
+        $creds = request_filesystem_credentials('', '', false, false, null);
+        if (false === $creds || ! WP_Filesystem($creds)) {
+            error_log('Sentinel-MCP Logger: failed to obtain filesystem credentials for ' . $file);
+            return false;
+        }
+
+        global $wp_filesystem;
+        if (! is_object($wp_filesystem) || is_wp_error($wp_filesystem) || ! method_exists($wp_filesystem, 'put_contents')) {
+            error_log('Sentinel-MCP Logger: WP_Filesystem unavailable for ' . $file);
+            return false;
+        }
+
+        $existing = '';
+        if ($wp_filesystem->is_file($file)) {
+            $existing = $wp_filesystem->get_contents($file);
+            if (false === $existing) {
+                $existing = '';
+            }
+        }
+
+        if (false === $wp_filesystem->put_contents($file, $existing . $line, FS_CHMOD_FILE)) {
+            error_log('Sentinel-MCP Logger: WP_Filesystem failed to write ' . $file);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Write .htaccess and index.php protection files.
+     *
+     * @param string $dir Log directory.
+     * @return void
+     */
+    private static function write_protection_files(string $dir): void
+    {
+        $htaccess = $dir . '/.htaccess';
+        $index    = $dir . '/index.php';
+
+        if (! file_exists($htaccess)) {
+            self::put_contents($htaccess, "Order deny,allow\nDeny from all\n");
+        }
+        if (! file_exists($index)) {
+            self::put_contents($index, "<?php // Silence is golden.\n");
+        }
+    }
+
+    /**
      * Remove log files older than RETENTION_DAYS.
      *
      * @param string $dir Log directory.
@@ -94,9 +174,23 @@ class Logger
     {
         $cutoff = time() - (self::RETENTION_DAYS * DAY_IN_SECONDS);
 
-        foreach (glob($dir . '/sentinel-*.log') as $path) {
-            if (is_file($path) && filemtime($path) < $cutoff) {
-                unlink($path);
+        $files = glob($dir . '/sentinel-*.log');
+        if (! is_array($files)) {
+            return;
+        }
+
+        foreach ($files as $path) {
+            if (! is_file($path)) {
+                continue;
+            }
+
+            $mtime = filemtime($path);
+            if (false === $mtime) {
+                continue;
+            }
+
+            if ($mtime < $cutoff) {
+                @unlink($path);
             }
         }
     }

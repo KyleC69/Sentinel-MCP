@@ -121,7 +121,7 @@ class OAuth_Server
 	/**
 	 * Register all OAuth REST API routes.
 	 *
-	 * All OAuth 2.1 protocol endpoints use __return_true as permission_callback
+	 * All OAuth 2.1 protocol endpoints use a dedicated public permission callback
 	 * because they MUST be publicly accessible per the OAuth 2.1 specification.
 	 * Each endpoint implements its own security controls:
 	 *
@@ -374,9 +374,6 @@ class OAuth_Server
 			$response_data['client_secret'] = $client['client_secret'];
 		}
 
-		// Persist the generated client_id for use in authorization flows.
-		update_option('sentinel_oauth_client_id', $client['client_id']);
-
 		return new \WP_REST_Response($response_data, 201);
 	}
 
@@ -449,7 +446,7 @@ class OAuth_Server
 				}
 
 				// Prevent caching of token responses (RFC 6749 Section 5.1).
-				if ('/sentinel-auth/token' === $route || '/sentinel-auth/revoke' === $route) {
+				if ('/sentinel-auth/v1/token' === $route || '/sentinel-auth/v1/revoke' === $route) {
 					header('Cache-Control: no-store');
 					header('Pragma: no-cache');
 				}

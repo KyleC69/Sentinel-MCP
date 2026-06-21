@@ -77,7 +77,7 @@ class WC_List_Recent_Orders_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('manage_woocommerce');
+        return \SentinelMCP\SENTINEL_ability_permission('manage_woocommerce');
     }
 
     public static function execute(array $input = array()): array
@@ -121,8 +121,8 @@ class WC_List_Recent_Orders_Ability implements Ability
                 'total'             => (string) $order->get_total(),
                 'date_created'      => $order->get_date_created() ? $order->get_date_created()->date('c') : '',
                 'items_count'       => (int) $order->get_item_count(),
-                'customer_initials' => \SentinelMCP\mcpcomal_wc_redact_name($full_name),
-                'email_redacted'    => \SentinelMCP\mcpcomal_redact_email((string) $order->get_billing_email()),
+                'customer_initials' => \SentinelMCP\SENTINEL_wc_redact_name($full_name),
+                'email_redacted'    => \SentinelMCP\SENTINEL_redact_email((string) $order->get_billing_email()),
                 'payment_method'    => (string) $order->get_payment_method(),
             );
         }
@@ -140,6 +140,6 @@ class WC_List_Recent_Orders_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }

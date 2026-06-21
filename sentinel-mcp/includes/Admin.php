@@ -42,7 +42,7 @@ class Admin
 		add_action('admin_init', [$this, 'register_settings']);
 		add_action('admin_init', [$this, 'handle_post_actions']);
 
-		mcpcomal_debug_log('Admin instantiated');
+		sentinel_debug_log('Admin instantiated');
 
 		$this->register_tabs();
 	}
@@ -68,13 +68,13 @@ class Admin
 
 		foreach ($tab_classes as $class) {
 			if (! class_exists($class)) {
-				mcpcomal_debug_log('Admin::register_tabs — class not found: ' . $class);
+				sentinel_debug_log('Admin::register_tabs — class not found: ' . $class);
 				continue;
 			}
 			/** @var Admin_Tab $instance */
 			$instance = new $class();
 			$this->tabs[$instance->get_slug()] = $instance;
-			mcpcomal_debug_log('Admin::register_tabs — registered tab: ' . $instance->get_slug());
+			sentinel_debug_log('Admin::register_tabs — registered tab: ' . $instance->get_slug());
 		}
 	}
 
@@ -85,7 +85,7 @@ class Admin
 	 */
 	public function add_menu(): void
 	{
-		mcpcomal_debug_log('Admin::add_menu called');
+		sentinel_debug_log('Admin::add_menu called');
 
 		add_options_page(
 			'Sentinel-MCP',
@@ -202,7 +202,7 @@ class Admin
 
 			<?php
 			// Flash messages from POST redirects.
-			$flash_key = 'mcpcomal_admin_notice_' . get_current_user_id();
+			$flash_key = 'SENTINEL_admin_notice_' . get_current_user_id();
 			$flash     = get_transient($flash_key);
 			if ($flash) {
 				delete_transient($flash_key);

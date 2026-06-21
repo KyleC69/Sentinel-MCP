@@ -40,6 +40,9 @@ class OAuth_Interceptor
 	 */
 	public static function init(): void
 	{
+		// Priority 5 runs before WordPress core application-password/cookie
+		// checks (priority 10) and before the MCP adapter registers its route
+		// (priority 16), so the OAuth 2.1 Bearer challenge is returned first.
 		add_filter('rest_authentication_errors', array(__CLASS__, 'authenticate'), 5);
 	}
 
@@ -66,6 +69,11 @@ class OAuth_Interceptor
 	/**
 	 * Authenticate MCP requests via Bearer token.
 	 *
+	 * Basic Auth / Application Passwords are handled by WordPress core at
+	 * priority 10. This filter runs at priority 15 and acts as an OAuth 2.1
+	 * Bearer-token fallback for MCP requests that did not authenticate via
+	 * core mechanisms.
+	 *
 	 * @param \WP_Error|null|true $result Existing authentication result.
 	 * @return \WP_Error|null|true
 	 */
@@ -75,6 +83,7 @@ class OAuth_Interceptor
 		if (null !== $result) {
 			return $result;
 		}
+
 
 		$request_uri = isset($_SERVER['REQUEST_URI'])
 			? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI']))
@@ -92,15 +101,18 @@ class OAuth_Interceptor
 
 		$auth_header = self::get_authorization_header();
 
-		// No Authorization header — check if user is already authenticated
-		// via other mechanisms (Application Passwords, cookie auth, etc.).
+		// ***  NEW  ****
+		// Core auth succeeded (Basic Auth, Application Passwords, cookie).
+		// Leave the current user as-is and do not interfere.
 		if (empty($auth_header)) {
 			if (is_user_logged_in()) {
-				// User authenticated via another method (e.g., Application Passwords).
 				OAuth_Server::send_cors_headers();
 				return $result;
 			}
 
+
+			// No Bearer token present. Preserve any existing core error so that
+			// Basic Auth clients receive the correct 401 from WordPress.
 			OAuth_Server::send_cors_headers();
 			header(
 				sprintf(
@@ -115,8 +127,12 @@ class OAuth_Interceptor
 			);
 		}
 
-		// Must be Bearer scheme.
-		if (0 !== strpos($auth_header, 'Bearer ')) {
+		// Must be Bearer scheme (RFC 6750 scheme is case-insensitive).
+		if (0 !== stripos($auth_header, 'Bearer ')) {
+			if (is_wp_error($result)) {
+				return $result;
+			}
+
 			return new \WP_Error(
 				'rest_invalid_auth',
 				'Authorization header must use Bearer scheme.',
@@ -124,8 +140,17 @@ class OAuth_Interceptor
 			);
 		}
 
-		$token      = substr($auth_header, 7);
+		$token      = trim(substr($auth_header, 7));
 		$token_hash = OAuth_DB::hash_token($token);
+
+		sentinel_debug_log(
+			array(
+				'oauth_auth_header_raw' => $auth_header,
+				'oauth_token_length'    => strlen($token),
+				'oauth_token_hash'      => $token_hash,
+			)
+		);
+
 		$token_row  = OAuth_DB::get_token_by_access_hash($token_hash);
 
 		if (! $token_row) {
@@ -143,6 +168,14 @@ class OAuth_Interceptor
 		// has been validated above via OAuth_DB. This does NOT create
 		// or log in users -- it maps a validated token to its owner.
 		wp_set_current_user((int) $token_row['user_id']);
+
+		sentinel_debug_log(
+			array(
+				'oauth_token_user_id'       => (int) $token_row['user_id'],
+				'oauth_current_user_id'     => get_current_user_id(),
+				'oauth_current_user_can_read' => current_user_can('read'),
+			)
+		);
 
 		self::$current = array(
 			'client_id' => isset($token_row['client_id']) ? (string) $token_row['client_id'] : '',
@@ -166,27 +199,33 @@ class OAuth_Interceptor
 	 */
 	private static function get_authorization_header(): string
 	{
+		$header = '';
+
 		if (! empty($_SERVER['HTTP_AUTHORIZATION'])) {
-			return sanitize_text_field(wp_unslash($_SERVER['HTTP_AUTHORIZATION']));
-		}
-
-		// Apache mod_rewrite may strip the header into this variable.
-		if (! empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-			return sanitize_text_field(wp_unslash($_SERVER['REDIRECT_HTTP_AUTHORIZATION']));
-		}
-
-		// Apache mod_cgi fallback.
-		if (function_exists('apache_request_headers')) {
+			$header = (string) wp_unslash($_SERVER['HTTP_AUTHORIZATION']);
+		} elseif (! empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+			$header = (string) wp_unslash($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+		} elseif (function_exists('apache_request_headers')) {
 			$headers = apache_request_headers();
 			if (is_array($headers)) {
 				foreach ($headers as $key => $value) {
-					if ('authorization' === strtolower($key)) {
-						return sanitize_text_field($value);
+					if ('authorization' === strtolower((string) $key)) {
+						$header = (string) $value;
+						break;
 					}
 				}
 			}
 		}
 
-		return '';
+		// Preserve the opaque credential bytes. Only strip harmless whitespace;
+		// do not use sanitize_text_field(), which can corrupt base64/hex tokens.
+		$header = trim($header, " \t\n\r\0\x0B");
+
+		// Reject anything that does not look like a Bearer header.
+		if ('' !== $header && 0 !== stripos($header, 'Bearer ')) {
+			return '';
+		}
+
+		return $header;
 	}
 }

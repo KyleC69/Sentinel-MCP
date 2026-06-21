@@ -27,10 +27,10 @@ add_action(
 	function () {
 		\wp_register_ability_category(
 			'sentinel-system',
-			array(
+			[
 				'label'       => \__('System Information', 'mcp-sentinel'),
 				'description' => \__('Server, PHP, database, and WordPress environment diagnostics.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

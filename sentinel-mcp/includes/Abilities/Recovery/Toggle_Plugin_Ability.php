@@ -68,7 +68,7 @@ class Toggle_Plugin_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('manage_options');
+        return \SentinelMCP\SENTINEL_ability_permission('manage_options');
     }
 
     public static function execute(array $input = array()): array
@@ -78,6 +78,6 @@ class Toggle_Plugin_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta(array('readOnlyHint' => false, 'destructiveHint' => true, 'idempotentHint' => false));
+        return \SentinelMCP\SENTINEL_ability_meta(array('readOnlyHint' => false, 'destructiveHint' => true, 'idempotentHint' => false));
     }
 }

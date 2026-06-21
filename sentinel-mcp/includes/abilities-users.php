@@ -33,10 +33,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-users',
-			array(
+			[
 				'label'       => __('User Management', 'mcp-sentinel'),
 				'description' => __('List and read WordPress users.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

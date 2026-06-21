@@ -14,10 +14,10 @@ namespace SentinelMCP;
  * person generation are all reserved for the Premium edition.
  *
  * Settings:
- *   option `mcpcomal_gemini_api_key`  — API key (autoload off).
- *   option `mcpcomal_gemini_model`    — model id, default "gemini-2.0-flash-exp".
- *   filter `mcpcomal_gemini_api_key`  — runtime override.
- *   filter `mcpcomal_gemini_model`    — runtime override.
+ *   option `SENTINEL_gemini_api_key`  — API key (autoload off).
+ *   option `SENTINEL_gemini_model`    — model id, default "gemini-2.0-flash-exp".
+ *   filter `SENTINEL_gemini_api_key`  — runtime override.
+ *   filter `SENTINEL_gemini_model`    — runtime override.
  *
  * @package    SENTINEL
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
@@ -42,8 +42,8 @@ class Image_Generator
 	 */
 	public static function api_key(): string
 	{
-		$key = (string) get_option('mcpcomal_gemini_api_key', '');
-		$key = (string) apply_filters('mcpcomal_gemini_api_key', $key);
+		$key = (string) get_option('SENTINEL_gemini_api_key', '');
+		$key = (string) apply_filters('SENTINEL_gemini_api_key', $key);
 		return trim($key);
 	}
 
@@ -52,8 +52,8 @@ class Image_Generator
 	 */
 	public static function model(): string
 	{
-		$model = (string) get_option('mcpcomal_gemini_model', self::DEFAULT_MODEL);
-		$model = (string) apply_filters('mcpcomal_gemini_model', $model);
+		$model = (string) get_option('SENTINEL_gemini_model', self::DEFAULT_MODEL);
+		$model = (string) apply_filters('SENTINEL_gemini_model', $model);
 		return '' !== $model ? $model : self::DEFAULT_MODEL;
 	}
 
@@ -170,14 +170,14 @@ class Image_Generator
 		$raw  = (string) wp_remote_retrieve_body($response);
 		if ($code < 200 || $code >= 300) {
 			return new \WP_Error(
-				'mcpcomal_gemini_http_error',
+				'SENTINEL_gemini_http_error',
 				sprintf('Gemini API returned HTTP %d: %s', $code, mb_substr($raw, 0, 300))
 			);
 		}
 
 		$decoded = json_decode($raw, true);
 		if (! is_array($decoded)) {
-			return new \WP_Error('mcpcomal_gemini_invalid_json', 'Gemini API response is not valid JSON.');
+			return new \WP_Error('SENTINEL_gemini_invalid_json', 'Gemini API response is not valid JSON.');
 		}
 
 		$candidates = $decoded['candidates'] ?? array();
@@ -187,7 +187,7 @@ class Image_Generator
 				if (isset($part['inlineData']['data']) && isset($part['inlineData']['mimeType'])) {
 					$bytes = base64_decode((string) $part['inlineData']['data'], true); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 					if (false === $bytes) {
-						return new \WP_Error('mcpcomal_gemini_invalid_b64', 'Gemini returned an inlineData part that is not valid base64.');
+						return new \WP_Error('SENTINEL_gemini_invalid_b64', 'Gemini returned an inlineData part that is not valid base64.');
 					}
 					return array(
 						'bytes' => $bytes,
@@ -197,7 +197,7 @@ class Image_Generator
 			}
 		}
 
-		return new \WP_Error('mcpcomal_gemini_no_image', 'Gemini did not return an inline image.');
+		return new \WP_Error('SENTINEL_gemini_no_image', 'Gemini did not return an inline image.');
 	}
 
 	/**
@@ -225,7 +225,7 @@ class Image_Generator
 		$slug   = 'gemini-' . wp_generate_password(8, false, false) . '.' . $ext;
 		$upload = wp_upload_bits($slug, null, $bytes);
 		if (! empty($upload['error'])) {
-			return new \WP_Error('mcpcomal_upload_failed', (string) $upload['error']);
+			return new \WP_Error('SENTINEL_upload_failed', (string) $upload['error']);
 		}
 
 		$file_path = (string) $upload['file'];
@@ -251,7 +251,7 @@ class Image_Generator
 		$metadata = wp_generate_attachment_metadata($attach_id, $file_path);
 		wp_update_attachment_metadata($attach_id, $metadata);
 
-		update_post_meta($attach_id, '_mcpcomal_gemini_prompt', $prompt);
+		update_post_meta($attach_id, '_SENTINEL_gemini_prompt', $prompt);
 		update_post_meta($attach_id, '_wp_attachment_image_alt', sanitize_text_field(wp_trim_words($prompt, 20, '')));
 
 		return array(

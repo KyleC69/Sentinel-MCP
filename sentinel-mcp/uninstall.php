@@ -21,12 +21,12 @@ defined('WP_UNINSTALL_PLUGIN') || exit;
 
 /*
  * Do not delete shared data if the Premium version is still installed.
- * Both Lite and Premium share the same DB prefix (mcpcomal_), so removing
+ * Both Lite and Premium share the same DB prefix (SENTINEL_), so removing
  * tables/options here would break Premium.
  */
-$mcpcomal_premium_installed = file_exists(WP_PLUGIN_DIR . '/sentinel-mcp/sentinel-mcp.php');
+$SENTINEL_premium_installed = file_exists(WP_PLUGIN_DIR . '/sentinel-mcp/sentinel-mcp.php');
 
-if ($mcpcomal_premium_installed) {
+if ($SENTINEL_premium_installed) {
 	return;
 }
 
@@ -42,17 +42,17 @@ $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}sentinel_oauth_clients");
 delete_option('sentinel_oauth_db_version');
 
 // Plugin settings.
-delete_option('mcpcomal_debug_logging');
+delete_option('sentinel_debug_logging');
 
 // Backups directory (stored in uploads/sentinel-backups).
-$mcpcomal_upload_dir = wp_upload_dir();
-$mcpcomal_backup_dir = $mcpcomal_upload_dir['basedir'] . '/sentinel-backups';
-if (is_dir($mcpcomal_backup_dir)) {
+$SENTINEL_upload_dir = wp_upload_dir();
+$SENTINEL_backup_dir = $SENTINEL_upload_dir['basedir'] . '/sentinel-backups';
+if (is_dir($SENTINEL_backup_dir)) {
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	WP_Filesystem();
 	global $wp_filesystem;
 
 	if ($wp_filesystem) {
-		$wp_filesystem->delete($mcpcomal_backup_dir, true);
+		$wp_filesystem->delete($SENTINEL_backup_dir, true);
 	}
 }

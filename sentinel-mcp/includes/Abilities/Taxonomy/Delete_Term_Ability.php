@@ -74,7 +74,7 @@ class Delete_Term_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('manage_categories');
+        return \SentinelMCP\SENTINEL_ability_permission('manage_categories');
     }
 
     public static function execute(array $input = array()): array
@@ -122,6 +122,6 @@ class Delete_Term_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta(array('readOnlyHint' => false, 'destructiveHint' => true));
+        return \SentinelMCP\SENTINEL_ability_meta(array('readOnlyHint' => false, 'destructiveHint' => true));
     }
 }

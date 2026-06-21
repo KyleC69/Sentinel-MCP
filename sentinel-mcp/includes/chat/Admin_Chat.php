@@ -152,13 +152,13 @@ class Admin_Chat
 		// Enqueue chat app.
 		wp_enqueue_style(
 			'sentinel-chat',
-			SENTINEL_URL . 'assets/css/mcpcomal-chat.css',
+			SENTINEL_URL . 'assets/css/SENTINEL-chat.css',
 			array(),
 			SENTINEL_VERSION
 		);
 		wp_enqueue_script(
 			'sentinel-chat',
-			SENTINEL_URL . 'assets/js/mcpcomal-chat.js',
+			SENTINEL_URL . 'assets/js/SENTINEL-chat.js',
 			array('sentinel-marked', 'sentinel-dompurify', 'sentinel-highlight'),
 			SENTINEL_VERSION,
 			true
@@ -180,7 +180,7 @@ class Admin_Chat
 
 		wp_localize_script(
 			'sentinel-chat',
-			'mcpcomalChat',
+			'SENTINELChat',
 			array(
 				'restUrl'         => esc_url_raw(rest_url('sentinel/v1/chat/')),
 				'nonce'           => wp_create_nonce('wp_rest'),

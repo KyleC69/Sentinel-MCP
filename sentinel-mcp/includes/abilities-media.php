@@ -35,10 +35,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-media',
-			array(
+			[
 				'label'       => __('Media Library', 'mcp-sentinel'),
 				'description' => __('Upload, list, manage, and assign media files in the WordPress media library.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

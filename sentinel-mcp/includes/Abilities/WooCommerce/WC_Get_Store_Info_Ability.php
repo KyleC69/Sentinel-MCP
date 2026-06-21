@@ -84,6 +84,6 @@ class WC_Get_Store_Info_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }

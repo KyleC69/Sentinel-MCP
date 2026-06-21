@@ -77,7 +77,7 @@ class Generate_Image_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('upload_files');
+        return \SentinelMCP\SENTINEL_ability_permission('upload_files');
     }
 
     public static function execute(array $input = array()): array
@@ -104,6 +104,6 @@ class Generate_Image_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta(array('readOnlyHint' => false, 'idempotentHint' => false, 'openWorldHint' => true));
+        return \SentinelMCP\SENTINEL_ability_meta(array('readOnlyHint' => false, 'idempotentHint' => false, 'openWorldHint' => true));
     }
 }

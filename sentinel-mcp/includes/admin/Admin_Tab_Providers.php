@@ -20,6 +20,8 @@ defined('ABSPATH') || exit;
 
 /**
  * Renders the Providers tab: lists available AI connectors and their status.
+ *
+ * @since 2.0
  */
 class Admin_Tab_Providers extends Admin_Tab
 {
@@ -41,85 +43,39 @@ class Admin_Tab_Providers extends Admin_Tab
 	{
 		$has_ai_client = class_exists('\WordPress\AiClient\AiClient');
 
+	add_action('admin_notices', function () use ($has_ai_client) {
+		if (! empty($has_ai_client)) {
+			return;
+		}
+
+		echo '<div class="notice notice-error"><p>Required component AIClient is missing.</p></div>';
+	});
+
+	$connectors            = $this->get_ai_connectors();
+
 ?>
 		<div class="card" style="max-width:900px;margin-bottom:20px;padding:15px;">
 			<h2 style="margin-top:0;"><?php esc_html_e('AI Providers', 'mcp-sentinel'); ?></h2>
 			<p><?php esc_html_e('These are the AI provider connectors registered in your WordPress site. Sentinel-MCP uses them to discover API keys and provider metadata.', 'mcp-sentinel'); ?></p>
 
-			<?php if (! $has_ai_client) : ?>
-				<div class="notice notice-warning inline">
-					<p>
-						<?php
-						esc_html_e(
-							'The WordPress AI Client is not available. '
-								. 'Provider discovery and API key management are disabled.',
-							'mcp-sentinel'
-						);
-						?>
-					</p>
-				</div>
-			<?php else : ?>
-				<?php
-				$registry     = AiClient::defaultRegistry();
-				$provider_ids = $registry->getRegisteredProviderIds();
-
-				// Also include connectors registered via the WordPress Connectors API.
-				if (function_exists('wp_get_connectors')) {
-					foreach (array_keys((array) wp_get_connectors()) as $connector_id) {
-						if (! in_array($connector_id, $provider_ids, true)) {
-							$provider_ids[] = $connector_id;
-						}
-					}
-				}
-				?>
-				<table class="widefat striped" style="max-width:100%;">
-					<thead>
-						<tr>
-							<th><?php esc_html_e('Provider', 'mcp-sentinel'); ?></th>
-							<th><?php esc_html_e('ID', 'mcp-sentinel'); ?></th>
-							<th><?php esc_html_e('Authentication', 'mcp-sentinel'); ?></th>
-							<th><?php esc_html_e('API Key Status', 'mcp-sentinel'); ?></th>
-							<th><?php esc_html_e('Source', 'mcp-sentinel'); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ($provider_ids as $id) : ?>
-							<?php
-							$status = $this->get_connector_status($id);
-							?>
-							<tr>
-								<td>
-									<strong><?php echo esc_html($id); ?></strong>
-								</td>
-								<td><code><?php echo esc_html($id); ?></code></td>
-								<td><?php echo esc_html($status['method'] ?? '—'); ?></td>
-								<td>
-									<?php if ($status['configured']) : ?>
-										<span style="color:#00a32a;font-weight:bold;">&#10003; <?php esc_html_e('Configured', 'mcp-sentinel'); ?></span>
-									<?php else : ?>
-										<span style="color:#b32d2e;font-weight:bold;">&#10060; <?php esc_html_e('Not configured', 'mcp-sentinel'); ?></span>
-									<?php endif; ?>
-								</td>
-								<td>
-									<?php if ($status['configured']) : ?>
-										<code style="font-size:12px;"><?php echo esc_html($status['source']); ?></code>
-										<?php if (! empty($status['source_detail'])) : ?>
-											<br><span style="color:#50575e;font-size:12px;"><?php echo esc_html($status['source_detail']); ?></span>
-										<?php endif; ?>
-									<?php else : ?>
-										<?php if (! empty($status['source_detail'])) : ?>
-											<span style="color:#50575e;font-size:12px;"><?php echo wp_kses_post($status['source_detail']); ?></span>
-										<?php else : ?>
-											<span style="color:#50575e;font-size:13px;">—</span>
-										<?php endif; ?>
-									<?php endif; ?>
-								</td>
-							</tr>
-						<?php endforeach; ?>
-
-					</tbody>
-				</table>
-			<?php endif; ?>
+			<div class="ai-dashboard-status__column">
+				<h4 class="ai-dashboard-status__section-title"><?php esc_html_e('Connectors', 'ai'); ?></h4>
+				<ul class="ai-dashboard-status__list">
+					<?php foreach ($connectors as $connector) : ?>
+						<li class="ai-dashboard-status__list-item">
+							<?php if ($connector['configured']) : ?>
+								<span class="dashicons dashicons-yes-alt ai-dashboard-status__icon--success"></span>
+							<?php else : ?>
+								<span class="dashicons dashicons-no ai-dashboard-status__icon--error"></span>
+							<?php endif; ?>
+							<?php echo esc_html($connector['name']); ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<a class="ai-dashboard-status__column-link" href="<?php echo esc_url(admin_url('options-connectors.php')); ?>">
+					<?php esc_html_e('Manage Connectors', 'ai'); ?>
+				</a>
+			</div>
 		</div>
 
 		<div class="card" style="max-width:900px;margin-bottom:20px;padding:15px;">
@@ -134,6 +90,51 @@ class Admin_Tab_Providers extends Admin_Tab
 		</div>
 <?php
 	}
+
+
+	/**
+	 * Returns AI provider connectors with their configuration status.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @return list<array{name: string, configured: bool}> Connector info.
+	 */
+	private function get_ai_connectors(): array
+	{
+		$connectors = array();
+
+		foreach (get_ai_connectors() as $slug => $connector_data) {
+			$auth       = $connector_data['authentication'];
+			$configured = 'api_key' === $auth['method']
+				&& is_connector_configured($slug);
+
+			/**
+			 * Filters whether an AI connector is configured.
+			 *
+			 * Allows third-party plugins to declare credential availability for
+			 * connectors that do not rely on API key settings.
+			 *
+			 * The dynamic portion of the hook name, `$slug`, refers to the connector slug.
+			 * For example, if the connector slug is 'openai', the hook name
+			 * will be 'wpai_is_openai_connector_configured'.
+			 *
+			 * @since 0.9.0
+			 *
+			 * @param bool $configured Whether the connector is configured.
+			 * @param array<string, mixed> $connector_data The connector data.
+			 */
+			$configured = (bool) apply_filters("wpai_is_{$slug}_connector_configured", $configured, $connector_data);
+
+			$connectors[] = array(
+				'name'       => $connector_data['name'] ?? $slug,
+				'configured' => $configured,
+			);
+		}
+
+		return $connectors;
+	}
+
+
 
 	/**
 	 * Determine the configuration status of a connector.

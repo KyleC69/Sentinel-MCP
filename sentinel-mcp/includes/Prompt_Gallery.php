@@ -9,7 +9,7 @@ namespace SentinelMCP;
  *
  * Loads curated prompts from data/prompts.json so site owners can copy ready-made
  * prompts into their AI client. The catalog is data-driven and can be extended
- * via the `mcpcomal_prompts_catalog` filter.
+ * via the `SENTINEL_prompts_catalog` filter.
  *
  * @package    SENTINEL
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
@@ -57,7 +57,7 @@ class Prompt_Gallery
 			return self::$cache;
 		}
 
-		self::$cache = apply_filters('mcpcomal_prompts_catalog', $decoded);
+		self::$cache = apply_filters('SENTINEL_prompts_catalog', $decoded);
 		return self::$cache;
 	}
 

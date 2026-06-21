@@ -12,6 +12,7 @@ return array(
     'Swaggest\\JsonSchema\\' => array($vendorDir . '/swaggest/json-schema/src'),
     'Swaggest\\JsonDiff\\' => array($vendorDir . '/swaggest/json-diff/src'),
     'Soukicz\\Llm\\' => array($vendorDir . '/soukicz/llm/src'),
+    'SentinelMCP\\' => array($baseDir . '/includes'),
     'Ramsey\\Uuid\\' => array($vendorDir . '/ramsey/uuid/src'),
     'Ramsey\\Collection\\' => array($vendorDir . '/ramsey/collection/src'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),

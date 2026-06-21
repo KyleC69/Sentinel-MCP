@@ -85,7 +85,7 @@ class Manage_Comment_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('moderate_comments');
+        return \SentinelMCP\SENTINEL_ability_permission('moderate_comments');
     }
 
     public static function execute(array $input = array()): array
@@ -96,6 +96,6 @@ class Manage_Comment_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta(array('readOnlyHint' => false, 'destructiveHint' => true));
+        return \SentinelMCP\SENTINEL_ability_meta(array('readOnlyHint' => false, 'destructiveHint' => true));
     }
 }

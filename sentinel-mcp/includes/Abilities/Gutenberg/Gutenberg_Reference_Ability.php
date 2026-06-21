@@ -64,16 +64,16 @@ class Gutenberg_Reference_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('edit_posts');
+        return \SentinelMCP\SENTINEL_ability_permission('edit_posts');
     }
 
     public static function execute(array $input = array()): array
     {
-        return \SentinelMCP\mcpcomal_gutenberg_reference_execute($input);
+        return \SentinelMCP\SENTINEL_gutenberg_reference_execute($input);
     }
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }

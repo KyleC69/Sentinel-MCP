@@ -32,10 +32,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-images',
-			array(
+			[
 				'label'       => __('AI Image Generation', 'mcp-sentinel'),
 				'description' => __('Generate images via Google Gemini and save them to the Media Library. Multiple aspect ratios, sizes and image editing are Premium.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

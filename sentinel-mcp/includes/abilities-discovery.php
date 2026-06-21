@@ -37,18 +37,18 @@ add_action(
 
 		wp_register_ability_category(
 			'sentinel-discovery',
-			array(
+			[
 				'label'       => __('Content Discovery', 'mcp-sentinel'),
 				'description' => __('Explore site structure: post types, taxonomies, custom fields, and terms.', 'mcp-sentinel'),
-			)
+			]
 		);
 
 		wp_register_ability_category(
 			'sentinel-content',
-			array(
+			[
 				'label'       => __('Content Management', 'mcp-sentinel'),
 				'description' => __('Create, read, update, delete, and search content across all post types.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

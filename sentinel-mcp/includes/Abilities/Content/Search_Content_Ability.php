@@ -127,7 +127,7 @@ class Search_Content_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('read');
+        return \SentinelMCP\SENTINEL_ability_permission('read');
     }
 
     public static function execute(array $input = array()): array
@@ -226,6 +226,6 @@ class Search_Content_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }

@@ -12,7 +12,7 @@ namespace SentinelMCP;
  *   1. Allowlist: each OAuth client may have a JSON list of allowed ability slugs.
  *      NULL/empty list means "all abilities".
  *   2. Rate limit: hourly and daily counters per client_id, stored in transients.
- *      Limits configurable via constants and the `mcpcomal_rate_limit_*` filters.
+ *      Limits configurable via constants and the `SENTINEL_rate_limit_*` filters.
  *
  * @package    SENTINEL
  * @author     Kyle L Crowder <kcrowdergoog@gmail.com>
@@ -23,11 +23,11 @@ namespace SentinelMCP;
 
 defined('ABSPATH') || exit;
 
-if (! defined('MCPCOMAL_RATE_LIMIT_PER_HOUR')) {
-	define('MCPCOMAL_RATE_LIMIT_PER_HOUR', 1000);
+if (! defined('SENTINEL_RATE_LIMIT_PER_HOUR')) {
+	define('SENTINEL_RATE_LIMIT_PER_HOUR', 1000);
 }
-if (! defined('MCPCOMAL_RATE_LIMIT_PER_DAY')) {
-	define('MCPCOMAL_RATE_LIMIT_PER_DAY', 10000);
+if (! defined('SENTINEL_RATE_LIMIT_PER_DAY')) {
+	define('SENTINEL_RATE_LIMIT_PER_DAY', 10000);
 }
 
 /**
@@ -67,11 +67,11 @@ class OAuth_Permissions
 
 		// 1. Allowlist.
 		if (! self::is_allowed($client_id, (string) $tool_name)) {
-			if (class_exists('MCPCOMAL_Activity_Log')) {
-				MCPCOMAL_Activity_Log::record((string) $tool_name, 'denied', 0, 'allowlist');
+			if (class_exists('SENTINEL_Activity_Log')) {
+				SENTINEL_Activity_Log::record((string) $tool_name, 'denied', 0, 'allowlist');
 			}
 			return new \WP_Error(
-				'mcpcomal_ability_not_allowed',
+				'SENTINEL_ability_not_allowed',
 				sprintf(
 					/* translators: %s: ability slug */
 					__('This OAuth client is not authorized to call ability "%s".', 'mcp-sentinel'),
@@ -84,8 +84,8 @@ class OAuth_Permissions
 		// 2. Rate limit.
 		$rate = self::check_rate($client_id);
 		if (! $rate['ok']) {
-			if (class_exists('MCPCOMAL_Activity_Log')) {
-				MCPCOMAL_Activity_Log::record((string) $tool_name, 'rate_limited', 0, $rate['scope']);
+			if (class_exists('SENTINEL_Activity_Log')) {
+				SENTINEL_Activity_Log::record((string) $tool_name, 'rate_limited', 0, $rate['scope']);
 			}
 			return new \WP_Error(
 				'rate_limit_exceeded',
@@ -149,7 +149,7 @@ class OAuth_Permissions
 			: wp_json_encode(array_values(array_unique(array_map('strval', $abilities))));
 
 		$result = $wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$wpdb->prefix . 'mcpcomal_oauth_clients',
+			$wpdb->prefix . 'SENTINEL_oauth_clients',
 			array('allowed_abilities' => $value),
 			array('client_id' => $client_id),
 			array('%s'),
@@ -167,11 +167,11 @@ class OAuth_Permissions
 	 */
 	public static function check_rate(string $client_id): array
 	{
-		$per_hour = (int) apply_filters('mcpcomal_rate_limit_per_hour', MCPCOMAL_RATE_LIMIT_PER_HOUR, $client_id);
-		$per_day  = (int) apply_filters('mcpcomal_rate_limit_per_day', MCPCOMAL_RATE_LIMIT_PER_DAY, $client_id);
+		$per_hour = (int) apply_filters('SENTINEL_rate_limit_per_hour', SENTINEL_RATE_LIMIT_PER_HOUR, $client_id);
+		$per_day  = (int) apply_filters('SENTINEL_rate_limit_per_day', SENTINEL_RATE_LIMIT_PER_DAY, $client_id);
 
-		$key_h = 'mcpcomal_rl_h_' . md5($client_id);
-		$key_d = 'mcpcomal_rl_d_' . md5($client_id);
+		$key_h = 'SENTINEL_rl_h_' . md5($client_id);
+		$key_d = 'SENTINEL_rl_d_' . md5($client_id);
 
 		$count_h = (int) get_transient($key_h);
 		$count_d = (int) get_transient($key_d);

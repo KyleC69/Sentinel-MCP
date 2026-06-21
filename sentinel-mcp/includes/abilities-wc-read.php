@@ -27,20 +27,20 @@ use SentinelMCP\Abilities\WooCommerce\WC_List_Coupons_Ability;
 
 defined('ABSPATH') || exit;
 
-if (! function_exists('mcpcomal_wc_redact_name')) {
+if (! function_exists('SENTINEL_wc_redact_name')) {
 	/**
 	 * Redact a person name to initials: "Kyle L Crowder" → "J. C.".
 	 *
 	 * @param string $name Full name.
 	 * @return string
 	 */
-	function mcpcomal_wc_redact_name(string $name): string
+	function SENTINEL_wc_redact_name(string $name): string
 	{
 		$parts = preg_split('/\s+/', trim($name));
 		if (! is_array($parts)) {
 			return '';
 		}
-		$initials = array();
+		$initials = [];
 		foreach ($parts as $part) {
 			if ('' === $part) {
 				continue;
@@ -59,10 +59,10 @@ add_action(
 		}
 		wp_register_ability_category(
 			'sentinel-wc-read',
-			array(
+			[
 				'label'       => __('WooCommerce (read-only)', 'mcp-sentinel'),
 				'description' => __('Read-only access to WooCommerce store info, products, recent orders and coupons. Editing WooCommerce data is Premium.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

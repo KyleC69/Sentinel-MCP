@@ -28,10 +28,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-stats',
-			array(
+			[
 				'label'       => __('Site stats and counts', 'mcp-sentinel'),
 				'description' => __('Lightweight counts: posts per CPT and status, comments, users per role, media usage.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );
@@ -40,7 +40,7 @@ Registry::register(new Get_Site_Stats_Ability());
 Registry::register(new Get_Media_Stats_Ability());
 Registry::init();
 
-if (! function_exists('mcpcomal_stats_dir_size')) {
+if (! function_exists('SENTINEL_stats_dir_size')) {
 	/**
 	 * Recursively compute the size of a directory.
 	 *
@@ -49,7 +49,7 @@ if (! function_exists('mcpcomal_stats_dir_size')) {
 	 * @param string $dir Absolute path.
 	 * @return int Size in bytes.
 	 */
-	function mcpcomal_stats_dir_size(string $dir): int
+	function SENTINEL_stats_dir_size(string $dir): int
 	{
 		$total = 0;
 

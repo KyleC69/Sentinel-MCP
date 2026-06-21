@@ -30,10 +30,10 @@ add_action(
 	function () {
 		wp_register_ability_category(
 			'sentinel-i18n',
-			array(
+			[
 				'label'       => __('Multilingual (read-only)', 'mcp-sentinel'),
 				'description' => __('Read languages, post translations and string translations from Polylang, WPML or TranslatePress. Writing translations is Premium.', 'mcp-sentinel'),
-			)
+			]
 		);
 	}
 );

@@ -51,10 +51,10 @@ class Activity_Log
 		add_filter('mcp_adapter_pre_tool_call', array(__CLASS__, 'on_pre_call'), 50, 4);
 		add_filter('mcp_adapter_tool_call_result', array(__CLASS__, 'on_call_result'), 50, 5);
 
-		add_action('mcpcomal_activity_log_purge', array(__CLASS__, 'purge'));
+		add_action('sentinel_activity_log_purge', array(__CLASS__, 'purge'));
 
-		if (! wp_next_scheduled('mcpcomal_activity_log_purge')) {
-			wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', 'mcpcomal_activity_log_purge');
+		if (! wp_next_scheduled('sentinel_activity_log_purge')) {
+			wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', 'sentinel_activity_log_purge');
 		}
 	}
 
@@ -64,7 +64,7 @@ class Activity_Log
 	public static function table_name(): string
 	{
 		global $wpdb;
-		return $wpdb->prefix . 'mcpcomal_activity_log';
+		return $wpdb->prefix . 'SENTINEL_activity_log';
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Activity_Log
 			) {$charset};";
 
 		dbDelta($sql);
-		update_option('mcpcomal_activity_log_schema', self::SCHEMA_VERSION, false);
+		update_option('SENTINEL_activity_log_schema', self::SCHEMA_VERSION, false);
 	}
 
 	/**
@@ -103,7 +103,7 @@ class Activity_Log
 	 */
 	public static function maybe_upgrade(): void
 	{
-		if (get_option('mcpcomal_activity_log_schema') !== self::SCHEMA_VERSION) {
+		if (get_option('SENTINEL_activity_log_schema') !== self::SCHEMA_VERSION) {
 			self::create_table();
 		}
 	}

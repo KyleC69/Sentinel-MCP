@@ -67,7 +67,7 @@ class WC_List_Coupons_Ability implements Ability
 
     public static function permission_callback(): callable
     {
-        return \SentinelMCP\mcpcomal_ability_permission('manage_woocommerce');
+        return \SentinelMCP\SENTINEL_ability_permission('manage_woocommerce');
     }
 
     public static function execute(array $input = array()): array
@@ -114,6 +114,6 @@ class WC_List_Coupons_Ability implements Ability
 
     public static function meta(): array
     {
-        return \SentinelMCP\mcpcomal_ability_meta();
+        return \SentinelMCP\SENTINEL_ability_meta();
     }
 }
